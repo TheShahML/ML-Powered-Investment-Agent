@@ -1,0 +1,11 @@
+# Risk management configuration
+risk:
+  max_position_weight: 0.12 # 12%
+  max_notional_per_order: 1000.0 # Safety cap
+  min_trade_notional: 2.0 # Avoid dust
+  max_total_drawdown: 0.20 # Stop trading if portfolio drops 20%
+  stop_loss_pct: null # No discretionary stop loss as per requirement
+  always_invested_threshold: 0.95 # Keep >=95% invested
+
+
+

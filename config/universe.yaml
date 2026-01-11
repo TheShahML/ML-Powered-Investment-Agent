@@ -1,0 +1,10 @@
+# Universe configuration
+universe:
+  min_market_cap: 10000000000 # $10B
+  min_avg_dollar_volume: 50000000 # $50M
+  min_price: 5.0
+  exclude_otc: true
+  target_size: 500
+
+
+
