@@ -59,7 +59,7 @@ def get_benchmark_prices(api) -> dict:
     benchmarks = {'spy': 0, 'qqq': 0, 'vti': 0}
     for symbol in ['SPY', 'QQQ', 'VTI']:
         try:
-            quote = api.get_latest_trade(symbol)
+            quote = api.get_latest_trade(symbol, feed='iex')  # Use IEX feed (free tier)
             benchmarks[symbol.lower()] = float(quote.price)
         except Exception as e:
             logger.warning(f"Could not fetch {symbol} price: {e}")

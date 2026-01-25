@@ -118,7 +118,8 @@ class DataService:
                     tradeapi.rest.TimeFrame.Day,
                     start_date,
                     end_date,
-                    adjustment='all'
+                    adjustment='all',
+                    feed='iex'  # Use IEX feed (free tier) instead of SIP (paid)
                 ).df
                 if not bars.empty:
                     all_bars.append(bars)

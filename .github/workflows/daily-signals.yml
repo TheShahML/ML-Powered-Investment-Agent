@@ -1,4 +1,4 @@
-name: Daily Signal Generation
+name: Daily Signal and Summary
 
 on:
   schedule:
