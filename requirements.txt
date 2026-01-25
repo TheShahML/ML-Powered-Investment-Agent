@@ -5,6 +5,7 @@ sqlalchemy
 psycopg2-binary
 pyyaml
 lightgbm
+xgboost
 scikit-learn
 pyqlib
 streamlit
@@ -16,4 +17,5 @@ pytest
 schedule
 requests
 loguru
+joblib
 

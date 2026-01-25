@@ -1,0 +1,315 @@
+"""
+Discord Webhook Notification Service.
+Sends trading signals, rebalance updates, and portfolio performance to Discord.
+"""
+
+import requests
+import json
+from datetime import datetime
+from typing import Dict, List, Optional
+from loguru import logger
+import os
+
+
+class DiscordNotifier:
+    """
+    Sends formatted notifications to Discord via webhook.
+    """
+
+    def __init__(self, webhook_url: str = None):
+        self.webhook_url = webhook_url or os.environ.get('DISCORD_WEBHOOK_URL')
+        if not self.webhook_url:
+            logger.warning("Discord webhook URL not configured")
+
+    def _send_message(self, embed: Dict) -> bool:
+        """Send a message to Discord."""
+        if not self.webhook_url:
+            logger.warning("Discord webhook URL not set, skipping notification")
+            return False
+
+        payload = {"embeds": [embed]}
+
+        try:
+            response = requests.post(
+                self.webhook_url,
+                json=payload,
+                headers={"Content-Type": "application/json"}
+            )
+            response.raise_for_status()
+            logger.info("Discord notification sent successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send Discord notification: {e}")
+            return False
+
+    def send_daily_signals(self, signals_df, date: str = None):
+        """
+        Send daily signal generation notification.
+
+        Args:
+            signals_df: DataFrame with ticker, score, rank columns
+            date: Date string for the signals
+        """
+        if date is None:
+            date = datetime.now().strftime('%Y-%m-%d')
+
+        # Get top 15 stocks
+        top_stocks = signals_df.head(15)
+
+        # Format stock list
+        stock_list = ""
+        for i, (ticker, row) in enumerate(top_stocks.iterrows(), 1):
+            score = row['score'] if 'score' in row else 0
+            stock_list += f"`{i:2d}.` **{ticker}** (score: {score:.3f})\n"
+
+        embed = {
+            "title": "📊 Daily Signal Generation Complete",
+            "description": f"ML predictions generated for **{date}**",
+            "color": 3447003,  # Blue
+            "fields": [
+                {
+                    "name": "🏆 Top 15 Stocks",
+                    "value": stock_list or "No signals generated",
+                    "inline": False
+                },
+                {
+                    "name": "📈 Total Stocks Analyzed",
+                    "value": f"{len(signals_df)} stocks",
+                    "inline": True
+                },
+                {
+                    "name": "⏰ Next Rebalance",
+                    "value": "Check monthly-rebalance workflow",
+                    "inline": True
+                }
+            ],
+            "footer": {"text": "Investment Bot • Daily Signals"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        return self._send_message(embed)
+
+    def send_rebalance_notification(
+        self,
+        orders: List[Dict],
+        account_info: Dict,
+        performance: Dict = None,
+        dry_run: bool = False
+    ):
+        """
+        Send rebalance execution notification.
+
+        Args:
+            orders: List of order dictionaries
+            account_info: Account equity/cash info
+            performance: Performance metrics
+            dry_run: Whether this was a dry run
+        """
+        buy_orders = [o for o in orders if o.get('side') == 'buy']
+        sell_orders = [o for o in orders if o.get('side') == 'sell']
+
+        # Format buy orders
+        buys_text = ""
+        for o in buy_orders[:10]:  # Limit to 10
+            buys_text += f"• **{o['symbol']}**: {o['qty']:.2f} shares (${o.get('notional', 0):.0f})\n"
+        if len(buy_orders) > 10:
+            buys_text += f"*...and {len(buy_orders) - 10} more*\n"
+
+        # Format sell orders
+        sells_text = ""
+        for o in sell_orders[:10]:
+            sells_text += f"• **{o['symbol']}**: {o['qty']:.2f} shares (${o.get('notional', 0):.0f})\n"
+        if len(sell_orders) > 10:
+            sells_text += f"*...and {len(sell_orders) - 10} more*\n"
+
+        # Status color
+        if dry_run:
+            color = 16776960  # Yellow
+            title = "🧪 Rebalance DRY RUN Complete"
+        else:
+            color = 3066993  # Green
+            title = "✅ Monthly Rebalance Executed"
+
+        fields = [
+            {
+                "name": "💰 Portfolio Value",
+                "value": f"${account_info.get('equity', 0):,.2f}",
+                "inline": True
+            },
+            {
+                "name": "💵 Cash",
+                "value": f"${account_info.get('cash', 0):,.2f}",
+                "inline": True
+            },
+            {
+                "name": "📊 Orders",
+                "value": f"{len(buy_orders)} buys, {len(sell_orders)} sells",
+                "inline": True
+            }
+        ]
+
+        if buys_text:
+            fields.append({
+                "name": "🟢 Buy Orders",
+                "value": buys_text or "None",
+                "inline": False
+            })
+
+        if sells_text:
+            fields.append({
+                "name": "🔴 Sell Orders",
+                "value": sells_text or "None",
+                "inline": False
+            })
+
+        if performance:
+            fields.append({
+                "name": "📈 Performance",
+                "value": (
+                    f"Total Return: **{performance.get('total_return_pct', 0):.2f}%**\n"
+                    f"Max Drawdown: **{performance.get('max_drawdown_pct', 0):.2f}%**"
+                ),
+                "inline": False
+            })
+
+        embed = {
+            "title": title,
+            "description": f"20-day rebalance {'simulation' if dry_run else 'execution'} completed",
+            "color": color,
+            "fields": fields,
+            "footer": {"text": "Investment Bot • Monthly Rebalance"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        return self._send_message(embed)
+
+    def send_portfolio_update(self, account_info: Dict, positions: List[Dict], performance: Dict = None):
+        """
+        Send portfolio status update (can be used for weekly summaries).
+
+        Args:
+            account_info: Account equity/cash info
+            positions: List of current positions
+            performance: Performance metrics
+        """
+        # Format positions
+        positions_text = ""
+        sorted_positions = sorted(positions, key=lambda x: x.get('market_value', 0), reverse=True)
+        for p in sorted_positions[:10]:
+            symbol = p.get('symbol', 'N/A')
+            qty = p.get('qty', 0)
+            value = p.get('market_value', 0)
+            pnl_pct = p.get('unrealized_plpc', 0) * 100 if p.get('unrealized_plpc') else 0
+            emoji = "🟢" if pnl_pct >= 0 else "🔴"
+            positions_text += f"{emoji} **{symbol}**: {qty:.2f} shares (${value:,.0f}, {pnl_pct:+.1f}%)\n"
+
+        if len(positions) > 10:
+            positions_text += f"*...and {len(positions) - 10} more positions*"
+
+        fields = [
+            {
+                "name": "💰 Total Equity",
+                "value": f"${account_info.get('equity', 0):,.2f}",
+                "inline": True
+            },
+            {
+                "name": "💵 Cash",
+                "value": f"${account_info.get('cash', 0):,.2f}",
+                "inline": True
+            },
+            {
+                "name": "📊 Positions",
+                "value": f"{len(positions)} holdings",
+                "inline": True
+            }
+        ]
+
+        if performance:
+            fields.append({
+                "name": "📈 Performance",
+                "value": (
+                    f"**Total Return:** {performance.get('total_return_pct', 0):+.2f}%\n"
+                    f"**Max Drawdown:** {performance.get('max_drawdown_pct', 0):.2f}%\n"
+                    f"**Days Tracked:** {performance.get('days_tracked', 0)}"
+                ),
+                "inline": False
+            })
+
+        if positions_text:
+            fields.append({
+                "name": "🏦 Current Holdings",
+                "value": positions_text,
+                "inline": False
+            })
+
+        embed = {
+            "title": "📋 Portfolio Status Update",
+            "description": f"Weekly summary as of {datetime.now().strftime('%Y-%m-%d')}",
+            "color": 10181046,  # Purple
+            "fields": fields,
+            "footer": {"text": "Investment Bot • Portfolio Update"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        return self._send_message(embed)
+
+    def send_alert(self, title: str, message: str, level: str = "info"):
+        """
+        Send a generic alert message.
+
+        Args:
+            title: Alert title
+            message: Alert message
+            level: "info", "warning", or "error"
+        """
+        colors = {
+            "info": 3447003,     # Blue
+            "warning": 16776960, # Yellow
+            "error": 15158332    # Red
+        }
+        emojis = {
+            "info": "ℹ️",
+            "warning": "⚠️",
+            "error": "🚨"
+        }
+
+        embed = {
+            "title": f"{emojis.get(level, 'ℹ️')} {title}",
+            "description": message,
+            "color": colors.get(level, 3447003),
+            "footer": {"text": "Investment Bot • Alert"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        return self._send_message(embed)
+
+    def send_model_training_complete(self, metrics: Dict):
+        """
+        Send notification when model training completes.
+
+        Args:
+            metrics: Training metrics dictionary
+        """
+        metrics_text = ""
+        for name, value in metrics.items():
+            if isinstance(value, float):
+                metrics_text += f"• **{name}:** {value:.4f}\n"
+            else:
+                metrics_text += f"• **{name}:** {value}\n"
+
+        embed = {
+            "title": "🧠 Model Training Complete",
+            "description": "Weekly stacking ensemble retraining finished",
+            "color": 10181046,  # Purple
+            "fields": [
+                {
+                    "name": "📊 Model Performance",
+                    "value": metrics_text or "No metrics available",
+                    "inline": False
+                }
+            ],
+            "footer": {"text": "Investment Bot • Model Training"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        return self._send_message(embed)

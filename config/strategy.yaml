@@ -1,12 +1,18 @@
 # Strategy configuration
 strategy:
-  name: "ml_momentum_ranking"
+  name: "ml_stacking_ensemble"
   n_holdings: 15
-  rebalance_day: 1 # 0=Monday, 1=Tuesday (for execution)
-  signal_day: 0 # Monday (for signals)
-  min_hold_weeks: 1
+  rebalance_frequency: 20  # Every 20 trading days (~monthly)
+  min_hold_days: 20
   turnover_threshold: 0.05 # Only replace if score gap > 5%
   benchmark_tickers: ["SPY", "QQQ", "VTI"]
+
+# Model configuration
+model:
+  type: "stacking_ensemble"
+  retrain_frequency: "weekly"
+  training_lookback_days: 730  # 2 years
+  target_horizon_days: 5  # Predict 5-day forward returns
 
 
 

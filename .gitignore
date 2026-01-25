@@ -47,3 +47,12 @@ external/
 research/models/
 ~/.qlib/
 
+# Keep models/ tracked for GitHub Actions
+!models/
+!models/*.pkl
+
+# Keep data/ tracked for GitHub Actions (state persistence)
+!data/
+!data/**/*.json
+!data/**/*.csv
+
