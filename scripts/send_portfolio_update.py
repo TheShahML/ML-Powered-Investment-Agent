@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
 Send weekly portfolio update to Discord.
-Shows current holdings, performance, and account status.
+Shows current holdings, performance, and account status with benchmark comparison.
 """
 
 import os
 import sys
-from datetime import date
+from datetime import date, timedelta
 from loguru import logger
 import alpaca_trade_api as tradeapi
 
@@ -54,6 +54,18 @@ def get_positions_with_details(api) -> list:
     ]
 
 
+def get_benchmark_prices(api) -> dict:
+    """Get current prices for benchmark ETFs."""
+    benchmarks = {'spy': 0, 'qqq': 0, 'vti': 0}
+    for symbol in ['SPY', 'QQQ', 'VTI']:
+        try:
+            quote = api.get_latest_trade(symbol)
+            benchmarks[symbol.lower()] = float(quote.price)
+        except Exception as e:
+            logger.warning(f"Could not fetch {symbol} price: {e}")
+    return benchmarks
+
+
 def main():
     logger.info("=" * 60)
     logger.info("WEEKLY PORTFOLIO UPDATE")
@@ -77,31 +89,57 @@ def main():
     # Save current portfolio value
     storage.save_portfolio_value(account_info['equity'], account_info['cash'])
 
-    # Get performance metrics
+    # Get and save benchmark prices
+    benchmark_prices = get_benchmark_prices(api)
+    storage.save_benchmark_prices(
+        spy=benchmark_prices['spy'],
+        qqq=benchmark_prices['qqq'],
+        vti=benchmark_prices['vti']
+    )
+    logger.info(f"Benchmarks: SPY=${benchmark_prices['spy']:.2f}, QQQ=${benchmark_prices['qqq']:.2f}, VTI=${benchmark_prices['vti']:.2f}")
+
+    # Get performance metrics (now includes benchmark comparison)
     performance = storage.get_performance_metrics()
+
+    # Get chart data for benchmark comparison
+    benchmark_data = storage.get_benchmark_chart_data()
 
     # Get rebalance state
     state = storage.get_rebalance_state()
-    days_until_rebalance = 20 - state.get('days_since_rebalance', 0)
+    days_since = state.get('days_since_rebalance', 0)
+    days_until_rebalance = max(0, 20 - days_since)
+
+    # Calculate next rebalance date
+    next_rebalance = date.today()
+    days_added = 0
+    while days_added < days_until_rebalance:
+        next_rebalance += timedelta(days=1)
+        if next_rebalance.weekday() < 5:
+            days_added += 1
+    next_rebalance_str = next_rebalance.strftime('%Y-%m-%d')
 
     logger.info(f"\nPerformance:")
     if performance:
-        logger.info(f"  Total Return: {performance.get('total_return_pct', 0):.2f}%")
+        logger.info(f"  Portfolio Return: {performance.get('total_return_pct', 0):+.2f}%")
+        logger.info(f"  vs SPY: {performance.get('total_return_pct', 0) - performance.get('spy_return_pct', 0):+.2f}%")
+        logger.info(f"  vs QQQ: {performance.get('total_return_pct', 0) - performance.get('qqq_return_pct', 0):+.2f}%")
+        logger.info(f"  vs VTI: {performance.get('total_return_pct', 0) - performance.get('vti_return_pct', 0):+.2f}%")
         logger.info(f"  Max Drawdown: {performance.get('max_drawdown_pct', 0):.2f}%")
-    logger.info(f"  Days until next rebalance: {days_until_rebalance}")
+    logger.info(f"  Next rebalance: {next_rebalance_str} ({days_until_rebalance} days)")
 
-    # Send Discord notification
-    discord.send_portfolio_update(
+    # Send enhanced Discord notification with chart
+    discord.send_portfolio_with_chart(
         account_info=account_info,
         positions=positions,
-        performance=performance
+        performance=performance,
+        benchmark_data=benchmark_data
     )
 
     # Also send a quick status about upcoming rebalance
     if days_until_rebalance <= 3:
         discord.send_alert(
             title="Rebalance Coming Soon",
-            message=f"Portfolio will rebalance in **{days_until_rebalance}** trading days.",
+            message=f"Portfolio will rebalance in **{days_until_rebalance}** trading days ({next_rebalance_str}).",
             level="info"
         )
 

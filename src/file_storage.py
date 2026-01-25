@@ -218,10 +218,97 @@ class FileStorage:
             drawdown = (peak - value) / peak
             max_drawdown = max(max_drawdown, drawdown)
 
+        # Get benchmark returns if available
+        benchmark_file = os.path.join(self.state_dir, 'benchmark_history.json')
+        spy_ret = qqq_ret = vti_ret = 0
+        if os.path.exists(benchmark_file):
+            with open(benchmark_file, 'r') as f:
+                benchmarks = json.load(f)
+                if len(benchmarks) >= 2:
+                    spy_ret = (benchmarks[-1].get('spy', 100) / benchmarks[0].get('spy', 100) - 1) * 100
+                    qqq_ret = (benchmarks[-1].get('qqq', 100) / benchmarks[0].get('qqq', 100) - 1) * 100
+                    vti_ret = (benchmarks[-1].get('vti', 100) / benchmarks[0].get('vti', 100) - 1) * 100
+
         return {
             'total_return_pct': round(total_return, 2),
             'max_drawdown_pct': round(max_drawdown * 100, 2),
             'initial_equity': initial,
             'current_equity': current,
-            'days_tracked': len(history)
+            'days_tracked': len(history),
+            'spy_return_pct': round(spy_ret, 2),
+            'qqq_return_pct': round(qqq_ret, 2),
+            'vti_return_pct': round(vti_ret, 2)
+        }
+
+    def save_benchmark_prices(self, spy: float, qqq: float, vti: float, timestamp: datetime = None):
+        """Save benchmark prices for comparison."""
+        if timestamp is None:
+            timestamp = datetime.now()
+
+        benchmark_file = os.path.join(self.state_dir, 'benchmark_history.json')
+
+        if os.path.exists(benchmark_file):
+            with open(benchmark_file, 'r') as f:
+                history = json.load(f)
+        else:
+            history = []
+
+        history.append({
+            'timestamp': timestamp.isoformat(),
+            'spy': spy,
+            'qqq': qqq,
+            'vti': vti
+        })
+
+        # Keep last 365 days
+        if len(history) > 365:
+            history = history[-365:]
+
+        with open(benchmark_file, 'w') as f:
+            json.dump(history, f, indent=2)
+
+    def get_benchmark_chart_data(self) -> Dict:
+        """Get data for portfolio vs benchmarks chart."""
+        portfolio_history = self.get_portfolio_history()
+        benchmark_file = os.path.join(self.state_dir, 'benchmark_history.json')
+
+        if not os.path.exists(benchmark_file) or len(portfolio_history) < 2:
+            return {}
+
+        with open(benchmark_file, 'r') as f:
+            benchmark_history = json.load(f)
+
+        if len(benchmark_history) < 2:
+            return {}
+
+        # Calculate cumulative returns as percentages
+        initial_equity = portfolio_history[0]['equity']
+        initial_spy = benchmark_history[0]['spy']
+        initial_qqq = benchmark_history[0]['qqq']
+        initial_vti = benchmark_history[0]['vti']
+
+        # Get last 30 data points max for cleaner chart
+        n_points = min(30, len(portfolio_history), len(benchmark_history))
+
+        portfolio_returns = []
+        spy_returns = []
+        qqq_returns = []
+        vti_returns = []
+        labels = []
+
+        step = max(1, len(portfolio_history) // n_points)
+        for i in range(0, len(portfolio_history), step):
+            if i < len(benchmark_history):
+                portfolio_returns.append(round((portfolio_history[i]['equity'] / initial_equity - 1) * 100, 2))
+                spy_returns.append(round((benchmark_history[i]['spy'] / initial_spy - 1) * 100, 2))
+                qqq_returns.append(round((benchmark_history[i]['qqq'] / initial_qqq - 1) * 100, 2))
+                vti_returns.append(round((benchmark_history[i]['vti'] / initial_vti - 1) * 100, 2))
+                labels.append(portfolio_history[i]['timestamp'][:10])
+
+        return {
+            'portfolio': portfolio_returns,
+            'spy': spy_returns,
+            'qqq': qqq_returns,
+            'vti': vti_returns,
+            'labels': labels
         }

@@ -1,10 +1,46 @@
 # Universe configuration
 universe:
-  min_market_cap: 10000000000 # $10B
-  min_avg_dollar_volume: 50000000 # $50M
+  # Universe type: 'sp500', 'all', or 'custom'
+  universe_type: "all"  # All US equities
+  target_size: 500  # Top 500 most liquid stocks
+
+  # Filters (used when universe_type is 'all')
+  min_market_cap: 10000000000  # $10B
+  min_avg_dollar_volume: 50000000  # $50M
   min_price: 5.0
   exclude_otc: true
-  target_size: 500
 
+  # Custom tickers (used when universe_type is 'custom')
+  # custom_tickers: ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"]
 
+# Crypto configuration
+crypto:
+  trade_crypto: true  # Enable Bitcoin trading
+  crypto_tickers:
+    - "BTC/USD"
+    # - "ETH/USD"  # Uncomment to add Ethereum
+    # - "LTC/USD"  # Uncomment to add Litecoin
 
+  # Crypto allocation (percentage of portfolio)
+  crypto_allocation: 0.10  # 10% of portfolio in crypto
+
+# Combined settings
+trade_equities: true  # Trade S&P 500 stocks
+trade_crypto: true    # Trade Bitcoin
+
+# Universe Options:
+#
+# 1. sp500 (RECOMMENDED)
+#    - S&P 500 companies only
+#    - ~500 large-cap US stocks
+#    - Most liquid, well-researched
+#    - Same as your friend's approach
+#
+# 2. all
+#    - All US equities on Alpaca
+#    - Thousands of stocks
+#    - Includes small-caps (more volatile)
+#
+# 3. custom
+#    - Your own list of tickers
+#    - Use custom_tickers list

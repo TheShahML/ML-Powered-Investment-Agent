@@ -5,6 +5,7 @@ This guide explains how to set up the automated trading bot on GitHub Actions fo
 ## Overview
 
 The bot runs on GitHub Actions with the following schedule:
+
 - **Daily (9:00 AM ET)**: Generate ML signals before market opens + Discord notification
 - **Daily (9:35 AM ET)**: Check if it's a rebalance day (every 20 trading days)
 - **Weekly (Saturday)**: Portfolio update summary to Discord
@@ -25,14 +26,14 @@ Go to your repo → Settings → Secrets and variables → Actions → New repos
 
 Add these secrets:
 
-| Secret Name | Description | Example |
-|-------------|-------------|---------|
-| `ALPACA_API_KEY` | Your Alpaca API key | `PKXXXXXXXX` |
-| `ALPACA_SECRET_KEY` | Your Alpaca secret key | `XXXXXXXXXXXXXXXX` |
-| `ALPACA_BASE_URL` | Paper or live URL | `https://paper-api.alpaca.markets` |
-| `BROKER_MODE` | `paper` or `live` | `paper` |
-| `I_ACKNOWLEDGE_LIVE_TRADING` | Set to `true` for live | `false` |
-| `DISCORD_WEBHOOK_URL` | Discord webhook for notifications | `https://discord.com/api/webhooks/...` |
+| Secret Name                  | Description                       | Example                                |
+| ---------------------------- | --------------------------------- | -------------------------------------- |
+| `ALPACA_API_KEY`             | Your Alpaca API key               | `PKXXXXXXXX`                           |
+| `ALPACA_SECRET_KEY`          | Your Alpaca secret key            | `XXXXXXXXXXXXXXXX`                     |
+| `ALPACA_BASE_URL`            | Paper or live URL                 | `https://paper-api.alpaca.markets`     |
+| `BROKER_MODE`                | `paper` or `live`                 | `paper`                                |
+| `I_ACKNOWLEDGE_LIVE_TRADING` | Set to `true` for live            | `false`                                |
+| `DISCORD_WEBHOOK_URL`        | Discord webhook for notifications | `https://discord.com/api/webhooks/...` |
 
 ### 3. Get Alpaca API Keys
 
@@ -53,6 +54,7 @@ Get notified about daily signals, rebalances, and portfolio updates:
 5. Add it as `DISCORD_WEBHOOK_URL` in your GitHub secrets
 
 **What you'll receive:**
+
 - 📊 **Daily signals** - Top 15 stock picks after market close
 - ✅ **Rebalance notifications** - Buy/sell orders when executed
 - 📋 **Weekly portfolio updates** - Performance summary every Saturday
@@ -63,11 +65,13 @@ Get notified about daily signals, rebalances, and portfolio updates:
 Before the bot can generate signals, you need to train the model:
 
 **Option A: Run manually via GitHub Actions**
+
 1. Go to Actions → Weekly Model Training
 2. Click "Run workflow"
 3. Wait for completion (~10-15 minutes)
 
 **Option B: Run locally**
+
 ```bash
 pip install -r requirements.txt
 python scripts/train_stacking_model.py
@@ -85,27 +89,33 @@ git push
 ## Workflows
 
 ### Daily Signal Generation
+
 **File**: `.github/workflows/daily-signals.yml`
 **Schedule**: 5:00 PM ET (after market close)
 **What it does**:
+
 - Fetches latest market data from Alpaca
 - Computes ML features (momentum, RSI, MACD, etc.)
 - Generates stock rankings using the stacking ensemble
 - Saves signals to `data/signals/`
 
 ### Monthly Rebalance
+
 **File**: `.github/workflows/monthly-rebalance.yml`
 **Schedule**: 9:35 AM ET (5 min after market open)
 **What it does**:
+
 - Checks if it's a rebalance day (every 20 trading days)
 - If yes: executes trades via Alpaca API
 - If no: increments day counter
 - Logs all orders to `data/logs/`
 
 ### Weekly Model Training
+
 **File**: `.github/workflows/weekly-train.yml`
 **Schedule**: Sunday 6:00 PM ET
 **What it does**:
+
 - Fetches 2 years of historical data
 - Trains the stacking ensemble (XGBoost, LightGBM, RF, etc.)
 - Saves models to `models/`
@@ -113,28 +123,34 @@ git push
 ## Configuration
 
 ### Strategy Settings
+
 Edit `config/strategy.yaml`:
+
 ```yaml
 strategy:
   name: "ml_momentum_ranking"
-  n_holdings: 15          # Number of stocks to hold
-  rebalance_day: 1        # Not used with 20-day cycle
+  n_holdings: 20 # Number of stocks to hold
+  rebalance_day: 1 # Not used with 20-day cycle
   benchmark_tickers: ["SPY", "QQQ", "VTI"]
 ```
 
 ### Risk Settings
+
 Edit `config/risk.yaml`:
+
 ```yaml
 risk:
-  max_position_weight: 0.12    # Max 12% per stock
-  min_trade_notional: 10       # Min $10 per trade
-  max_drawdown: 0.20           # 20% max drawdown stop
+  max_position_weight: 0.12 # Max 12% per stock
+  min_trade_notional: 10 # Min $10 per trade
+  max_drawdown: 0.20 # 20% max drawdown stop
 ```
 
 ### Rebalancing Frequency
+
 The bot rebalances every 20 trading days (~monthly). To change this:
 
 Edit `scripts/execute_rebalance.py`:
+
 ```python
 should_rebalance = days >= 20  # Change 20 to your preferred frequency
 ```
@@ -142,19 +158,23 @@ should_rebalance = days >= 20  # Change 20 to your preferred frequency
 ## Manual Operations
 
 ### Force a Rebalance
+
 1. Go to Actions → Monthly Rebalance
 2. Click "Run workflow"
 3. Check "Force rebalance regardless of day count"
 4. Run
 
 ### Dry Run (Test Without Trading)
+
 1. Go to Actions → Monthly Rebalance
 2. Click "Run workflow"
 3. Check "Run without placing actual orders"
 4. Run
 
 ### Check Current State
+
 Look at `data/state/rebalance_state.json`:
+
 ```json
 {
   "days_since_rebalance": 15,
@@ -184,29 +204,36 @@ Look at `data/state/rebalance_state.json`:
 ## Monitoring
 
 ### View Logs
+
 - Go to Actions → Select a workflow run → Click on job → View logs
 
 ### Check Performance
+
 Look at `data/state/portfolio_history.json` for equity curve data.
 
 ### View Recent Signals
+
 Check `data/signals/latest_signals.csv` for current stock rankings.
 
 ## Troubleshooting
 
 ### "No signals found"
+
 - Run the Daily Signal Generation workflow manually
 - Check if the market was open that day
 
 ### "Model not trained"
+
 - Run the Weekly Model Training workflow manually
 
 ### Orders not executing
+
 - Check if market is open (9:30 AM - 4:00 PM ET)
 - Verify Alpaca API keys are correct
 - Check if `BROKER_MODE` matches your intent
 
 ### Rate limits
+
 - Alpaca has rate limits on API calls
 - The bot includes delays to avoid hitting limits
 
@@ -217,11 +244,11 @@ Check `data/signals/latest_signals.csv` for current stock rankings.
 
 ## Comparison: Your Friend's Setup
 
-| Feature | Your Friend | This Bot |
-|---------|-------------|----------|
-| ML Model | XGBoost | Stacking Ensemble (XGBoost + LightGBM + RF + GB + ET) |
-| Features | Basic | Enhanced (RSI, MACD, Bollinger, OBV, etc.) |
-| Rebalancing | ~Monthly | Every 20 trading days |
-| Execution | Manual/Email | Automated via Alpaca API |
-| Infrastructure | GitHub Actions | GitHub Actions |
-| Cost | Free | Free |
+| Feature        | Your Friend    | This Bot                                              |
+| -------------- | -------------- | ----------------------------------------------------- |
+| ML Model       | XGBoost        | Stacking Ensemble (XGBoost + LightGBM + RF + GB + ET) |
+| Features       | Basic          | Enhanced (RSI, MACD, Bollinger, OBV, etc.)            |
+| Rebalancing    | ~Monthly       | Every 20 trading days                                 |
+| Execution      | Manual/Email   | Automated via Alpaca API                              |
+| Infrastructure | GitHub Actions | GitHub Actions                                        |
+| Cost           | Free           | Free                                                  |

@@ -55,7 +55,11 @@ jobs:
         if: steps.market-check.outputs.market_open == 'true' || github.event_name == 'workflow_dispatch'
         run: python scripts/generate_daily_signals.py
 
-      - name: Commit signals to repo
+      - name: Send daily portfolio summary to Discord
+        if: steps.market-check.outputs.market_open == 'true' || github.event_name == 'workflow_dispatch'
+        run: python scripts/send_portfolio_update.py
+
+      - name: Commit signals and data to repo
         if: steps.market-check.outputs.market_open == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           git config --local user.email "action@github.com"

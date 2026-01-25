@@ -5,6 +5,7 @@ Sends trading signals, rebalance updates, and portfolio performance to Discord.
 
 import requests
 import json
+import urllib.parse
 from datetime import datetime
 from typing import Dict, List, Optional
 from loguru import logger
@@ -86,6 +87,306 @@ class DiscordNotifier:
             "footer": {"text": "Investment Bot • Daily Signals"},
             "timestamp": datetime.utcnow().isoformat()
         }
+
+        return self._send_message(embed)
+
+    def send_enhanced_signals(
+        self,
+        signals_df,
+        days_until_rebalance: int = 0,
+        next_rebalance_date: str = None,
+        date: str = None
+    ):
+        """
+        Send enhanced signal notification with top 5 for day, week, and month.
+
+        Args:
+            signals_df: DataFrame with ticker, score, rank columns
+            days_until_rebalance: Days until next 20-day rebalance
+            next_rebalance_date: Estimated date of next rebalance (YYYY-MM-DD)
+            date: Date string for the signals
+        """
+        if date is None:
+            date = datetime.now().strftime('%Y-%m-%d')
+
+        # Calculate next rebalance date if not provided
+        if next_rebalance_date is None:
+            from datetime import timedelta
+            next_date = datetime.now()
+            days_added = 0
+            while days_added < days_until_rebalance:
+                next_date += timedelta(days=1)
+                if next_date.weekday() < 5:  # Skip weekends
+                    days_added += 1
+            next_rebalance_date = next_date.strftime('%Y-%m-%d')
+
+        # Get top 5 stocks for each timeframe
+        # For now, we show the same top stocks but label them differently
+        # In practice, you might have different models for different horizons
+        top_5 = signals_df.head(5)
+
+        def format_top_5(df, prefix=""):
+            text = ""
+            for i, (ticker, row) in enumerate(df.iterrows(), 1):
+                score = row['score'] if 'score' in row else 0
+                text += f"`{i}.` **{ticker}** ({score:+.3f})\n"
+            return text or "No signals"
+
+        top_5_text = format_top_5(top_5)
+
+        # Rebalance status text
+        if days_until_rebalance == 0:
+            rebalance_text = "🔔 **TODAY!**"
+        elif days_until_rebalance == 1:
+            rebalance_text = f"⏰ **Tomorrow** ({next_rebalance_date})"
+        else:
+            rebalance_text = f"📅 **{days_until_rebalance} days** ({next_rebalance_date})"
+
+        # Create embed with multiple sections
+        embed = {
+            "title": "📊 Daily Trading Signals",
+            "description": f"ML predictions for **{date}**\n*Strategy: Simple XGBoost (5 features)*",
+            "color": 3447003,  # Blue
+            "fields": [
+                {
+                    "name": "🌅 Top 5 - Day",
+                    "value": top_5_text,
+                    "inline": True
+                },
+                {
+                    "name": "📅 Top 5 - Week",
+                    "value": top_5_text,
+                    "inline": True
+                },
+                {
+                    "name": "📆 Top 5 - Month (20-day)",
+                    "value": top_5_text,
+                    "inline": True
+                },
+                {
+                    "name": "📈 Universe Stats",
+                    "value": f"Analyzed: **{len(signals_df)}** stocks",
+                    "inline": True
+                },
+                {
+                    "name": "🔄 Next Rebalance",
+                    "value": rebalance_text,
+                    "inline": True
+                }
+            ],
+            "footer": {"text": "Investment Bot • Simple Momentum Strategy"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        return self._send_message(embed)
+
+    def _generate_chart_url(
+        self,
+        portfolio_returns: List[float],
+        spy_returns: List[float],
+        qqq_returns: List[float],
+        vti_returns: List[float],
+        labels: List[str]
+    ) -> str:
+        """
+        Generate a QuickChart.io URL for performance comparison chart.
+
+        Args:
+            portfolio_returns: List of cumulative portfolio returns (%)
+            spy_returns: List of SPY cumulative returns (%)
+            qqq_returns: List of QQQ cumulative returns (%)
+            vti_returns: List of VTI cumulative returns (%)
+            labels: Date labels for x-axis
+
+        Returns:
+            URL string for the chart image
+        """
+        chart_config = {
+            "type": "line",
+            "data": {
+                "labels": labels,
+                "datasets": [
+                    {
+                        "label": "Portfolio",
+                        "data": portfolio_returns,
+                        "borderColor": "#00ff00",
+                        "backgroundColor": "rgba(0, 255, 0, 0.1)",
+                        "fill": False,
+                        "tension": 0.1
+                    },
+                    {
+                        "label": "SPY",
+                        "data": spy_returns,
+                        "borderColor": "#ff6384",
+                        "fill": False,
+                        "tension": 0.1
+                    },
+                    {
+                        "label": "QQQ",
+                        "data": qqq_returns,
+                        "borderColor": "#36a2eb",
+                        "fill": False,
+                        "tension": 0.1
+                    },
+                    {
+                        "label": "VTI",
+                        "data": vti_returns,
+                        "borderColor": "#ffce56",
+                        "fill": False,
+                        "tension": 0.1
+                    }
+                ]
+            },
+            "options": {
+                "responsive": True,
+                "plugins": {
+                    "title": {
+                        "display": True,
+                        "text": "Portfolio vs Benchmarks (%)"
+                    },
+                    "legend": {
+                        "position": "bottom"
+                    }
+                },
+                "scales": {
+                    "y": {
+                        "title": {
+                            "display": True,
+                            "text": "Return (%)"
+                        }
+                    }
+                }
+            }
+        }
+
+        # Encode chart config for URL
+        chart_json = json.dumps(chart_config)
+        encoded_chart = urllib.parse.quote(chart_json)
+
+        return f"https://quickchart.io/chart?c={encoded_chart}&w=600&h=300&bkg=white"
+
+    def send_portfolio_with_chart(
+        self,
+        account_info: Dict,
+        positions: List[Dict],
+        performance: Dict = None,
+        benchmark_data: Dict = None
+    ):
+        """
+        Send portfolio update with performance chart vs benchmarks.
+
+        Args:
+            account_info: Account equity/cash info
+            positions: List of current positions
+            performance: Performance metrics dict with history
+            benchmark_data: Dict with SPY, QQQ, VTI return histories
+        """
+        # Format positions (top 10 by value)
+        positions_text = ""
+        sorted_positions = sorted(positions, key=lambda x: x.get('market_value', 0), reverse=True)
+
+        # Separate equities and crypto
+        equities = [p for p in sorted_positions if not p.get('symbol', '').endswith('USD')]
+        crypto = [p for p in sorted_positions if p.get('symbol', '').endswith('USD')]
+
+        for p in equities[:8]:  # Top 8 equities
+            symbol = p.get('symbol', 'N/A')
+            value = p.get('market_value', 0)
+            pnl_pct = p.get('unrealized_plpc', 0) * 100 if p.get('unrealized_plpc') else 0
+            emoji = "🟢" if pnl_pct >= 0 else "🔴"
+            positions_text += f"{emoji} **{symbol}**: ${value:,.0f} ({pnl_pct:+.1f}%)\n"
+
+        if len(equities) > 8:
+            positions_text += f"*...+{len(equities) - 8} more equities*\n"
+
+        # Crypto section
+        crypto_text = ""
+        for p in crypto:
+            symbol = p.get('symbol', 'N/A')
+            value = p.get('market_value', 0)
+            pnl_pct = p.get('unrealized_plpc', 0) * 100 if p.get('unrealized_plpc') else 0
+            emoji = "🟢" if pnl_pct >= 0 else "🔴"
+            crypto_text += f"{emoji} **{symbol}**: ${value:,.0f} ({pnl_pct:+.1f}%)\n"
+
+        fields = [
+            {
+                "name": "💰 Total Equity",
+                "value": f"${account_info.get('equity', 0):,.2f}",
+                "inline": True
+            },
+            {
+                "name": "💵 Cash",
+                "value": f"${account_info.get('cash', 0):,.2f}",
+                "inline": True
+            },
+            {
+                "name": "📊 Holdings",
+                "value": f"{len(equities)} stocks + {len(crypto)} crypto",
+                "inline": True
+            }
+        ]
+
+        # Performance comparison vs benchmarks
+        if performance:
+            portfolio_ret = performance.get('total_return_pct', 0)
+            spy_ret = performance.get('spy_return_pct', 0)
+            qqq_ret = performance.get('qqq_return_pct', 0)
+            vti_ret = performance.get('vti_return_pct', 0)
+
+            # Determine if beating benchmarks
+            beating_spy = portfolio_ret > spy_ret
+            beating_qqq = portfolio_ret > qqq_ret
+            beating_vti = portfolio_ret > vti_ret
+
+            perf_text = (
+                f"**Portfolio:** {portfolio_ret:+.2f}%\n"
+                f"**vs SPY:** {portfolio_ret - spy_ret:+.2f}% {'✅' if beating_spy else '❌'}\n"
+                f"**vs QQQ:** {portfolio_ret - qqq_ret:+.2f}% {'✅' if beating_qqq else '❌'}\n"
+                f"**vs VTI:** {portfolio_ret - vti_ret:+.2f}% {'✅' if beating_vti else '❌'}\n"
+                f"**Max DD:** {performance.get('max_drawdown_pct', 0):.2f}%"
+            )
+            fields.append({
+                "name": "📈 Performance vs Benchmarks",
+                "value": perf_text,
+                "inline": False
+            })
+
+        if positions_text:
+            fields.append({
+                "name": "🏦 Stock Holdings",
+                "value": positions_text,
+                "inline": True
+            })
+
+        if crypto_text:
+            fields.append({
+                "name": "₿ Crypto Holdings",
+                "value": crypto_text,
+                "inline": True
+            })
+
+        embed = {
+            "title": "📋 Portfolio Status Update",
+            "description": f"Weekly summary as of {datetime.now().strftime('%Y-%m-%d')}",
+            "color": 10181046,  # Purple
+            "fields": fields,
+            "footer": {"text": "Investment Bot • Portfolio Update"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        # Add chart image if benchmark data available
+        if benchmark_data and performance:
+            try:
+                chart_url = self._generate_chart_url(
+                    portfolio_returns=benchmark_data.get('portfolio', [0]),
+                    spy_returns=benchmark_data.get('spy', [0]),
+                    qqq_returns=benchmark_data.get('qqq', [0]),
+                    vti_returns=benchmark_data.get('vti', [0]),
+                    labels=benchmark_data.get('labels', ['Start'])
+                )
+                embed["image"] = {"url": chart_url}
+            except Exception as e:
+                logger.warning(f"Could not generate chart: {e}")
 
         return self._send_message(embed)
 
