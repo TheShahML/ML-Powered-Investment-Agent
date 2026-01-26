@@ -88,19 +88,32 @@ class DataService:
             return SP500_TICKERS
 
     def _get_all_equities(self) -> List[str]:
-        """Get all tradeable US equities."""
-        logger.info("Using all US equities universe...")
+        """Get all tradeable US equities from major exchanges (NYSE, NASDAQ, AMEX)."""
+        logger.info("Using all US equities universe (NYSE, NASDAQ, AMEX)...")
 
         assets = self.api.list_assets(status='active', asset_class='us_equity')
 
+        # Filter for major exchanges
+        target_exchanges = {'NYSE', 'NASDAQ', 'AMEX'}
+
         universe = [
             a.symbol for a in assets
-            if a.tradable and a.shortable and a.marginable
+            if a.tradable
+            and a.shortable
+            and a.marginable
+            and a.exchange in target_exchanges
             and (not self.config.get('fractional_shares') or a.fractionable)
         ]
 
-        logger.info(f"All equities universe: {len(universe)} stocks")
-        return universe[:self.config.get('target_size', 500)]
+        logger.info(f"All equities universe: {len(universe)} stocks from {target_exchanges}")
+
+        # Apply target_size limit if specified, otherwise return all
+        target_size = self.config.get('target_size', None)
+        if target_size:
+            logger.info(f"Limiting to top {target_size} stocks")
+            return universe[:target_size]
+
+        return universe
 
     def get_historical_data(self, tickers: List[str], start_date: str, end_date: str) -> pd.DataFrame:
         """
