@@ -398,16 +398,18 @@ class DiscordNotifier:
         account_info: Dict,
         positions: List[Dict],
         performance: Dict = None,
-        benchmark_data: Dict = None
+        benchmark_data: Dict = None,
+        crypto_positions: List[Dict] = None
     ):
         """
         Send portfolio update with performance chart vs benchmarks.
 
         Args:
             account_info: Account equity/cash info
-            positions: List of current positions
+            positions: List of all current positions (equities + crypto)
             performance: Performance metrics dict with history
             benchmark_data: Dict with SPY, QQQ, VTI return histories
+            crypto_positions: Optional list of crypto positions (for explicit display)
         """
         # Format positions (top 10 by value)
         positions_text = ""
@@ -534,22 +536,35 @@ class DiscordNotifier:
             performance: Performance metrics
             dry_run: Whether this was a dry run
         """
-        buy_orders = [o for o in orders if o.get('side') == 'buy']
-        sell_orders = [o for o in orders if o.get('side') == 'sell']
+        # Separate equity and crypto orders
+        equity_orders = [o for o in orders if '/' not in o.get('symbol', '')]
+        crypto_orders = [o for o in orders if '/' in o.get('symbol', '')]
 
-        # Format buy orders
+        buy_orders = [o for o in equity_orders if o.get('side') == 'buy']
+        sell_orders = [o for o in equity_orders if o.get('side') == 'sell']
+        crypto_buys = [o for o in crypto_orders if o.get('side') == 'buy']
+        crypto_sells = [o for o in crypto_orders if o.get('side') == 'sell']
+
+        # Format equity buy orders
         buys_text = ""
         for o in buy_orders[:10]:  # Limit to 10
             buys_text += f"• **{o['symbol']}**: {o['qty']:.2f} shares (${o.get('notional', 0):.0f})\n"
         if len(buy_orders) > 10:
             buys_text += f"*...and {len(buy_orders) - 10} more*\n"
 
-        # Format sell orders
+        # Format equity sell orders
         sells_text = ""
         for o in sell_orders[:10]:
             sells_text += f"• **{o['symbol']}**: {o['qty']:.2f} shares (${o.get('notional', 0):.0f})\n"
         if len(sell_orders) > 10:
             sells_text += f"*...and {len(sell_orders) - 10} more*\n"
+
+        # Format crypto orders
+        crypto_text = ""
+        for o in crypto_buys:
+            crypto_text += f"🟢 **{o['symbol']}**: ${o.get('notional', 0):,.0f}\n"
+        for o in crypto_sells:
+            crypto_text += f"🔴 **{o['symbol']}**: ${o.get('notional', 0):,.0f}\n"
 
         # Status color
         if dry_run:
@@ -571,23 +586,37 @@ class DiscordNotifier:
                 "inline": True
             },
             {
-                "name": "📊 Orders",
+                "name": "📊 Equity Orders",
                 "value": f"{len(buy_orders)} buys, {len(sell_orders)} sells",
                 "inline": True
             }
         ]
 
+        if crypto_orders:
+            fields.append({
+                "name": "₿ Crypto Orders",
+                "value": f"{len(crypto_buys)} buys, {len(crypto_sells)} sells",
+                "inline": True
+            })
+
         if buys_text:
             fields.append({
-                "name": "🟢 Buy Orders",
+                "name": "🟢 Equity Buys",
                 "value": buys_text or "None",
                 "inline": False
             })
 
         if sells_text:
             fields.append({
-                "name": "🔴 Sell Orders",
+                "name": "🔴 Equity Sells",
                 "value": sells_text or "None",
+                "inline": False
+            })
+
+        if crypto_text:
+            fields.append({
+                "name": "₿ Bitcoin Rebalance",
+                "value": crypto_text,
                 "inline": False
             })
 

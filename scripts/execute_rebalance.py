@@ -18,6 +18,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.file_storage import FileStorage
 from src.config import load_config
 from src.discord_notifier import DiscordNotifier
+from src.crypto_strategy import BitcoinMomentumStrategy, get_crypto_orders
+from src.data_service import DataService
 
 
 def get_alpaca_api(config):
@@ -45,16 +47,22 @@ def get_account_info(api) -> dict:
     }
 
 
-def calculate_target_positions(signals, account_info, config) -> dict:
+def calculate_target_positions(signals, account_info, config, btc_allocation=0.0) -> dict:
     """
     Calculate target positions based on signals and account value.
+
+    Args:
+        btc_allocation: Percentage of equity reserved for Bitcoin (0-0.15)
 
     Returns: {symbol: target_qty}
     """
     n_holdings = config.get('n_holdings', 15)
     max_weight = config.get('max_position_weight', 0.12)
 
+    # Reserve Bitcoin allocation from equity
     equity = account_info['equity']
+    equity_for_stocks = equity * (1.0 - btc_allocation)
+
     target_weight = min(1.0 / n_holdings, max_weight)
 
     # Get top N stocks from signals
@@ -72,7 +80,7 @@ def calculate_target_positions(signals, account_info, config) -> dict:
             quote = api.get_latest_trade(symbol, feed='iex')  # Use IEX feed (free tier)
             price = float(quote.price)
 
-            target_value = equity * target_weight
+            target_value = equity_for_stocks * target_weight
             target_qty = target_value / price
 
             # Round to reasonable precision (Alpaca supports fractional)
@@ -188,7 +196,7 @@ def main():
         logger.error("No signals found! Run generate_daily_signals.py first.")
         sys.exit(1)
 
-    logger.info(f"Loaded signals with {len(signals)} stocks")
+    logger.info(f"Loaded signals with {len(signals)} stocks (using 20-day model)")
 
     # Get current state
     account_info = get_account_info(api)
@@ -199,13 +207,79 @@ def main():
     logger.info(f"  Cash: ${account_info['cash']:,.2f}")
     logger.info(f"  Current positions: {len(current_positions)}")
 
-    # Calculate target positions
-    target_positions = calculate_target_positions(signals, account_info, config)
-    logger.info(f"  Target positions: {len(target_positions)}")
+    # === BITCOIN MOMENTUM ALLOCATION ===
+    btc_allocation = 0.0
+    btc_orders = []
 
-    # Execute rebalance
-    logger.info("\nExecuting rebalance...")
-    orders = execute_rebalance(api, current_positions, target_positions, dry_run=args.dry_run)
+    if config.get('trade_crypto', False):
+        logger.info("\n" + "=" * 60)
+        logger.info("BITCOIN MOMENTUM ALLOCATION")
+        logger.info("=" * 60)
+
+        try:
+            # Initialize Bitcoin momentum strategy
+            btc_strategy = BitcoinMomentumStrategy(config)
+            data_service = DataService(config)
+
+            # Fetch Bitcoin price history (need 200 days for SMA)
+            from datetime import date, timedelta
+            end_date = date.today()
+            start_date = end_date - timedelta(days=365)  # 1 year to ensure 200 trading days
+
+            logger.info("Fetching Bitcoin price history for momentum calculation...")
+            btc_df = data_service.get_historical_data(
+                ['BTC/USD'],
+                start_date.strftime('%Y-%m-%d'),
+                end_date.strftime('%Y-%m-%d')
+            )
+
+            if not btc_df.empty:
+                # Extract BTC prices
+                btc_prices = btc_df['close']
+
+                # Calculate dynamic allocation (5-15% based on momentum)
+                btc_allocation = btc_strategy.get_dynamic_allocation(btc_prices)
+
+                logger.info(f"Dynamic Bitcoin allocation: {btc_allocation*100:.1f}% of portfolio")
+
+                # Calculate target Bitcoin value
+                target_btc_value = account_info['equity'] * btc_allocation
+
+                # Execute Bitcoin orders
+                btc_orders = get_crypto_orders(
+                    api,
+                    target_allocations={'BTC/USD': target_btc_value},
+                    dry_run=args.dry_run
+                )
+
+                logger.info(f"Bitcoin target value: ${target_btc_value:,.2f}")
+                if btc_orders:
+                    for order in btc_orders:
+                        if order['status'] in ['submitted', 'dry_run']:
+                            logger.info(f"  Bitcoin {order['side']}: ${order['notional']:,.2f}")
+            else:
+                logger.warning("Could not fetch Bitcoin data, skipping crypto allocation")
+
+        except Exception as e:
+            logger.error(f"Error processing Bitcoin allocation: {e}")
+            logger.warning("Continuing with equities only")
+
+    # Calculate equity target positions (reserving Bitcoin allocation)
+    logger.info(f"\nEquity allocation: {(1.0 - btc_allocation)*100:.1f}% of portfolio")
+    target_positions = calculate_target_positions(signals, account_info, config, btc_allocation=btc_allocation)
+    logger.info(f"  Target equity positions: {len(target_positions)}")
+
+    # Execute rebalance (equities + Bitcoin)
+    logger.info("\n" + "=" * 60)
+    logger.info("EXECUTING REBALANCE")
+    logger.info("=" * 60)
+
+    # Execute equity orders
+    logger.info("\nEquity orders...")
+    equity_orders = execute_rebalance(api, current_positions, target_positions, dry_run=args.dry_run)
+
+    # Combine all orders
+    orders = equity_orders + btc_orders
 
     # Log results
     storage.log_orders(orders)
@@ -225,13 +299,15 @@ def main():
         storage.reset_day_counter()
 
     # Summary
-    buy_orders = [o for o in orders if o['side'] == 'buy']
-    sell_orders = [o for o in orders if o['side'] == 'sell']
+    equity_buy = [o for o in equity_orders if o['side'] == 'buy']
+    equity_sell = [o for o in equity_orders if o['side'] == 'sell']
+    btc_buy = [o for o in btc_orders if o.get('side') == 'buy']
+    btc_sell = [o for o in btc_orders if o.get('side') == 'sell']
 
     logger.info("\n" + "=" * 60)
     logger.info("REBALANCE SUMMARY")
-    logger.info(f"  Buy orders: {len(buy_orders)}")
-    logger.info(f"  Sell orders: {len(sell_orders)}")
+    logger.info(f"  Equity: {len(equity_buy)} buys, {len(equity_sell)} sells")
+    logger.info(f"  Bitcoin: {len(btc_buy)} buys, {len(btc_sell)} sells")
     logger.info(f"  Total orders: {len(orders)}")
 
     performance = None

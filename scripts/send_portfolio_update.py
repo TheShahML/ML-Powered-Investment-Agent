@@ -37,11 +37,19 @@ def get_account_info(api) -> dict:
     }
 
 
-def get_positions_with_details(api) -> list:
-    """Get current positions with market values and P&L."""
+def get_positions_with_details(api) -> tuple:
+    """Get current positions with market values and P&L.
+
+    Returns:
+        tuple: (equity_positions, crypto_positions)
+    """
     positions = api.list_positions()
-    return [
-        {
+
+    equity_positions = []
+    crypto_positions = []
+
+    for p in positions:
+        position_dict = {
             'symbol': p.symbol,
             'qty': float(p.qty),
             'market_value': float(p.market_value),
@@ -50,8 +58,14 @@ def get_positions_with_details(api) -> list:
             'unrealized_plpc': float(p.unrealized_plpc),
             'current_price': float(p.current_price)
         }
-        for p in positions
-    ]
+
+        # Separate crypto (BTC, ETH, etc.) from equities
+        if p.symbol in ['BTCUSD', 'ETHUSD', 'LTCUSD']:
+            crypto_positions.append(position_dict)
+        else:
+            equity_positions.append(position_dict)
+
+    return equity_positions, crypto_positions
 
 
 def get_benchmark_prices(api) -> dict:
@@ -80,11 +94,22 @@ def main():
 
     # Get current account info
     account_info = get_account_info(api)
-    positions = get_positions_with_details(api)
+    equity_positions, crypto_positions = get_positions_with_details(api)
 
     logger.info(f"Account Equity: ${account_info['equity']:,.2f}")
     logger.info(f"Cash: ${account_info['cash']:,.2f}")
-    logger.info(f"Positions: {len(positions)}")
+    logger.info(f"Equity Positions: {len(equity_positions)}")
+    logger.info(f"Crypto Positions: {len(crypto_positions)}")
+
+    # Calculate position breakdown
+    equity_value = sum(p['market_value'] for p in equity_positions)
+    crypto_value = sum(p['market_value'] for p in crypto_positions)
+    total_positions_value = equity_value + crypto_value
+
+    if total_positions_value > 0:
+        logger.info(f"  Equities: ${equity_value:,.2f} ({equity_value/total_positions_value*100:.1f}%)")
+        logger.info(f"  Crypto: ${crypto_value:,.2f} ({crypto_value/total_positions_value*100:.1f}%)")
+        logger.info(f"  Cash: ${account_info['cash']:,.2f} ({account_info['cash']/account_info['equity']*100:.1f}%)")
 
     # Save current portfolio value
     storage.save_portfolio_value(account_info['equity'], account_info['cash'])
@@ -128,11 +153,15 @@ def main():
     logger.info(f"  Next rebalance: {next_rebalance_str} ({days_until_rebalance} days)")
 
     # Send enhanced Discord notification with chart
+    # Combine positions for backward compatibility with existing Discord method
+    all_positions = equity_positions + crypto_positions
+
     discord.send_portfolio_with_chart(
         account_info=account_info,
-        positions=positions,
+        positions=all_positions,
         performance=performance,
-        benchmark_data=benchmark_data
+        benchmark_data=benchmark_data,
+        crypto_positions=crypto_positions  # Pass separately for special display
     )
 
     # Also send a quick status about upcoming rebalance

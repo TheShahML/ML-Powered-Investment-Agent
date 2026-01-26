@@ -118,27 +118,60 @@ class DataService:
     def get_historical_data(self, tickers: List[str], start_date: str, end_date: str) -> pd.DataFrame:
         """
         Fetches historical EOD bars for the given tickers.
+        Supports both equities and crypto (BTC/USD, ETH/USD, etc.)
         """
         logger.info(f"Fetching historical data for {len(tickers)} tickers from {start_date} to {end_date}...")
 
+        # Separate crypto tickers from equity tickers
+        crypto_tickers = [t for t in tickers if '/' in t]
+        equity_tickers = [t for t in tickers if '/' not in t]
+
         all_bars = []
-        chunk_size = 50
-        for i in range(0, len(tickers), chunk_size):
-            chunk = tickers[i:i + chunk_size]
-            try:
-                bars = self.api.get_bars(
-                    chunk,
-                    tradeapi.rest.TimeFrame.Day,
-                    start_date,
-                    end_date,
-                    adjustment='all',
-                    feed='iex'  # Use IEX feed (free tier) instead of SIP (paid)
-                ).df
-                if not bars.empty:
-                    all_bars.append(bars)
-            except Exception as e:
-                logger.error(f"Error fetching data for chunk {i}: {e}")
-            time.sleep(0.5)  # Increased to avoid rate limits with large universe
+
+        # Fetch equity data
+        if equity_tickers:
+            chunk_size = 50
+            for i in range(0, len(equity_tickers), chunk_size):
+                chunk = equity_tickers[i:i + chunk_size]
+                try:
+                    bars = self.api.get_bars(
+                        chunk,
+                        tradeapi.rest.TimeFrame.Day,
+                        start_date,
+                        end_date,
+                        adjustment='all',
+                        feed='iex'  # Use IEX feed (free tier) instead of SIP (paid)
+                    ).df
+                    if not bars.empty:
+                        all_bars.append(bars)
+                except Exception as e:
+                    logger.error(f"Error fetching equity data for chunk {i}: {e}")
+                time.sleep(0.5)  # Increased to avoid rate limits with large universe
+
+        # Fetch crypto data
+        if crypto_tickers:
+            for symbol in crypto_tickers:
+                try:
+                    # Alpaca crypto API expects symbols without '/' (e.g., 'BTCUSD')
+                    crypto_symbol = symbol.replace('/', '')
+                    logger.info(f"Fetching crypto data for {crypto_symbol}...")
+
+                    bars = self.api.get_crypto_bars(
+                        crypto_symbol,
+                        tradeapi.rest.TimeFrame.Day,
+                        start_date,
+                        end_date
+                    ).df
+
+                    if not bars.empty:
+                        # Add symbol column to match equity data format
+                        bars['symbol'] = symbol
+                        bars = bars.reset_index().set_index(['timestamp', 'symbol'])
+                        all_bars.append(bars)
+
+                except Exception as e:
+                    logger.error(f"Error fetching crypto data for {symbol}: {e}")
+                time.sleep(0.5)
 
         if not all_bars:
             return pd.DataFrame()
