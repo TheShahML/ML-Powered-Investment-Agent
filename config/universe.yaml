@@ -2,8 +2,8 @@
 universe:
   # Universe type: 'sp500', 'all', or 'custom'
   universe_type: "all"  # All US equities from NYSE, NASDAQ, AMEX
-  target_size: null  # No limit - use all stocks from major exchanges (NYSE, NASDAQ, AMEX, ARCA, BATS)
-                     # Set to a number (e.g. 1000) to limit universe size
+  target_size: 1500  # Limit to top 1,500 most liquid stocks (3x more than before)
+                     # null = no limit (will hit rate limits with 3,000+ stocks)
 
   # Filters (used when universe_type is 'all')
   min_market_cap: 10000000000  # $10B

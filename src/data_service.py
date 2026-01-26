@@ -138,7 +138,7 @@ class DataService:
                     all_bars.append(bars)
             except Exception as e:
                 logger.error(f"Error fetching data for chunk {i}: {e}")
-            time.sleep(0.1)
+            time.sleep(0.5)  # Increased to avoid rate limits with large universe
 
         if not all_bars:
             return pd.DataFrame()
