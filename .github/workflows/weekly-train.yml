@@ -3,8 +3,11 @@ name: Weekly Model Training
 on:
   schedule:
     # Run every Sunday at 6:00 PM ET (23:00 UTC)
-    - cron: '0 23 * * 0'
+    - cron: "0 23 * * 0"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 env:
   ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
@@ -25,8 +28,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'pip'
+          python-version: "3.10"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
