@@ -131,7 +131,21 @@ class DataService:
             return pd.DataFrame()
 
         df = pd.concat(all_bars)
-        df.index = pd.to_datetime(df.index)
+
+        # Alpaca returns MultiIndex (symbol, timestamp) - we need (timestamp, symbol)
+        # for the strategy to work correctly
+        if isinstance(df.index, pd.MultiIndex):
+            # Swap levels to get (timestamp, symbol)
+            df = df.swaplevel()
+            df = df.sort_index()
+        else:
+            # If not MultiIndex, the 'symbol' column should exist
+            if 'symbol' in df.columns:
+                df = df.reset_index()
+                df['timestamp'] = pd.to_datetime(df['timestamp'])
+                df = df.set_index(['timestamp', 'symbol'])
+                df = df.sort_index()
+
         return df
 
     def check_data_freshness(self, df: pd.DataFrame, expected_date: datetime.date) -> bool:
