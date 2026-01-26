@@ -8,7 +8,7 @@ Runs every 20 trading days (monthly rebalancing).
 import os
 import sys
 import argparse
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from loguru import logger
 import alpaca_trade_api as tradeapi
 
@@ -222,7 +222,6 @@ def main():
             data_service = DataService(config)
 
             # Fetch Bitcoin price history (need 200 days for SMA)
-            from datetime import date, timedelta
             end_date = date.today()
             start_date = end_date - timedelta(days=365)  # 1 year to ensure 200 trading days
 
