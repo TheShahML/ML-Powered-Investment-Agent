@@ -27,12 +27,14 @@ class SimpleStrategy:
     - Gu, Kelly & Xiu (2020): Simple features often beat complex ones
     """
 
-    def __init__(self, config: Dict, model_dir: str = 'models'):
+    def __init__(self, config: Dict, model_dir: str = 'models', horizon: str = '5d'):
         self.config = config
         self.model_dir = model_dir
+        self.horizon = horizon  # '1d', '5d', or '20d'
         self.model = None
 
         # Only 5 features - all academically documented
+        # Same features used across all horizons to avoid overfitting
         self.feature_cols = [
             'momentum_12_1',   # 12-month return minus 1-month (classic momentum)
             'momentum_6m',     # 6-month return
@@ -137,10 +139,13 @@ class SimpleStrategy:
         )
         self.model.fit(X, y)
 
-        # Save
+        # Save with horizon suffix
         os.makedirs(self.model_dir, exist_ok=True)
-        joblib.dump(self.model, os.path.join(self.model_dir, 'simple_xgb.pkl'))
-        joblib.dump(available_features, os.path.join(self.model_dir, 'simple_features.pkl'))
+        model_path = os.path.join(self.model_dir, f'simple_xgb_{self.horizon}.pkl')
+        features_path = os.path.join(self.model_dir, f'simple_features_{self.horizon}.pkl')
+        joblib.dump(self.model, model_path)
+        joblib.dump(available_features, features_path)
+        logger.info(f"Model saved: {model_path}")
 
         metrics = {
             'cv_mean_corr': np.mean(cv_scores),
@@ -155,20 +160,23 @@ class SimpleStrategy:
 
         return metrics
 
-    def load_model(self) -> bool:
-        """Load trained model."""
+    def load_model(self, horizon: str = None) -> bool:
+        """Load trained model for specific horizon."""
+        if horizon:
+            self.horizon = horizon
+
         try:
-            model_path = os.path.join(self.model_dir, 'simple_xgb.pkl')
-            features_path = os.path.join(self.model_dir, 'simple_features.pkl')
+            model_path = os.path.join(self.model_dir, f'simple_xgb_{self.horizon}.pkl')
+            features_path = os.path.join(self.model_dir, f'simple_features_{self.horizon}.pkl')
 
             if os.path.exists(model_path):
                 self.model = joblib.load(model_path)
                 if os.path.exists(features_path):
                     self.feature_cols = joblib.load(features_path)
-                logger.info("Simple XGBoost model loaded")
+                logger.info(f"Loaded {self.horizon} model from {model_path}")
                 return True
         except Exception as e:
-            logger.error(f"Error loading model: {e}")
+            logger.error(f"Error loading {self.horizon} model: {e}")
         return False
 
     def compute_signals(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -199,6 +207,28 @@ class SimpleStrategy:
 
         signals['rank'] = signals['score'].rank(ascending=False)
         return signals.sort_values('rank').set_index('ticker')
+
+    def compute_multi_horizon_signals(self, df: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+        """
+        Generate signals from all 3 time horizons.
+
+        Returns:
+            Dict with keys '1d', '5d', '20d' mapping to signal DataFrames
+        """
+        # Compute features once
+        if 'momentum_12_1' not in df.columns:
+            df = self.compute_features(df)
+
+        signals = {}
+        for horizon in ['1d', '5d', '20d']:
+            logger.info(f"Computing {horizon} signals...")
+            if self.load_model(horizon):
+                signals[horizon] = self.compute_signals(df)
+                logger.info(f"  {horizon}: {len(signals[horizon])} stocks ranked")
+            else:
+                logger.warning(f"Could not load {horizon} model")
+
+        return signals
 
     def get_feature_importance(self) -> pd.DataFrame:
         """Get feature importance."""

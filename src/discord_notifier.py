@@ -180,6 +180,134 @@ class DiscordNotifier:
 
         return self._send_message(embed)
 
+    def send_multi_horizon_signals(
+        self,
+        signals_1d: Optional,
+        signals_5d: Optional,
+        signals_20d: Optional,
+        days_until_rebalance: int = 0,
+        next_rebalance_date: str = None,
+        date: str = None
+    ):
+        """
+        Send signal notification with separate Top 5 for each time horizon.
+
+        Args:
+            signals_1d: 1-day model predictions
+            signals_5d: 5-day model predictions
+            signals_20d: 20-day model predictions (primary)
+            days_until_rebalance: Days until next 20-day rebalance
+            next_rebalance_date: Estimated date of next rebalance
+            date: Date string for the signals
+        """
+        if date is None:
+            date = datetime.now().strftime('%Y-%m-%d')
+
+        # Format Top 5 for each horizon
+        def format_top_5(df, horizon_label):
+            if df is None or df.empty:
+                return f"*No {horizon_label} signals*"
+
+            text = ""
+            top_5 = df.head(5)
+            for i, (ticker, row) in enumerate(top_5.iterrows(), 1):
+                score = row['score'] if 'score' in row else 0
+                text += f"`{i}.` **{ticker}** ({score:+.3f})\n"
+            return text
+
+        top_5_1d = format_top_5(signals_1d, "1-day")
+        top_5_5d = format_top_5(signals_5d, "5-day")
+        top_5_20d = format_top_5(signals_20d, "20-day")
+
+        # Rebalance status
+        if days_until_rebalance == 0:
+            rebalance_text = "🔔 **TODAY!**"
+        elif days_until_rebalance == 1:
+            rebalance_text = f"⏰ **Tomorrow** ({next_rebalance_date})"
+        else:
+            rebalance_text = f"📅 **{days_until_rebalance} days** ({next_rebalance_date})"
+
+        # Create enhanced embed
+        embed = {
+            "title": "📊 Multi-Horizon Trading Signals",
+            "description": (
+                f"ML predictions for **{date}**\n"
+                f"*Strategy: 3 XGBoost models (1d/5d/20d horizons)*\n"
+                f"*Rebalancing uses 20-day model*"
+            ),
+            "color": 3447003,  # Blue
+            "fields": [
+                {
+                    "name": "🌅 Top 5 - Daily (1-day)",
+                    "value": top_5_1d,
+                    "inline": True
+                },
+                {
+                    "name": "📅 Top 5 - Weekly (5-day)",
+                    "value": top_5_5d,
+                    "inline": True
+                },
+                {
+                    "name": "📆 Top 5 - Monthly (20-day) 🎯",
+                    "value": top_5_20d,
+                    "inline": True
+                },
+                {
+                    "name": "📈 Universe Stats",
+                    "value": f"Analyzed: **{len(signals_20d) if signals_20d is not None else 0}** stocks",
+                    "inline": True
+                },
+                {
+                    "name": "🔄 Next Rebalance",
+                    "value": rebalance_text,
+                    "inline": True
+                }
+            ],
+            "footer": {"text": "Investment Bot • Multi-Horizon Strategy"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        return self._send_message(embed)
+
+    def send_multi_horizon_training_complete(self, all_metrics: Dict):
+        """
+        Send notification when all 3 models finish training.
+
+        Args:
+            all_metrics: Dict with keys '1d', '5d', '20d' mapping to metrics
+        """
+        metrics_text = ""
+
+        for horizon in ['1d', '5d', '20d']:
+            if horizon in all_metrics:
+                metrics = all_metrics[horizon]
+                metrics_text += f"\n**{horizon.upper()} Model:**\n"
+                metrics_text += f"• CV Mean Corr: {metrics.get('cv_mean_corr', 0):.4f}\n"
+                metrics_text += f"• CV Std: {metrics.get('cv_std_corr', 0):.4f}\n"
+                metrics_text += f"• Samples: {metrics.get('n_samples', 0):,}\n"
+
+        embed = {
+            "title": "🧠 Multi-Horizon Model Training Complete",
+            "description": "3 XGBoost models retrained (1d/5d/20d forward returns)",
+            "color": 10181046,  # Purple
+            "fields": [
+                {
+                    "name": "📊 Model Performance",
+                    "value": metrics_text or "No metrics available",
+                    "inline": False
+                },
+                {
+                    "name": "🎯 Primary Model",
+                    "value": "**20-day** model drives portfolio rebalancing",
+                    "inline": False
+                }
+            ],
+            "footer": {"text": "Investment Bot • Model Training"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        return self._send_message(embed)
+
     def _generate_chart_url(
         self,
         portfolio_returns: List[float],

@@ -57,41 +57,69 @@ def main():
     df_features = strategy.compute_features(df)
     logger.info(f"Features computed: {len(df_features)} rows")
 
-    # Target: 5-day forward returns
-    logger.info("Computing target (5-day forward returns)...")
+    # Compute targets for all horizons
+    logger.info("Computing targets for all horizons (1d, 5d, 20d)...")
     grouped = df_features.groupby(level=1)
-    df_features['target'] = grouped['close'].transform(lambda x: x.shift(-5) / x - 1)
+    df_features['target_1d'] = grouped['close'].transform(lambda x: x.shift(-1) / x - 1)
+    df_features['target_5d'] = grouped['close'].transform(lambda x: x.shift(-5) / x - 1)
+    df_features['target_20d'] = grouped['close'].transform(lambda x: x.shift(-20) / x - 1)
 
-    df_train = df_features.dropna(subset=['target'])
-    logger.info(f"Training samples: {len(df_train)}")
+    # Train 3 separate models
+    horizons = [
+        ('1d', 'target_1d', 1),
+        ('5d', 'target_5d', 5),
+        ('20d', 'target_20d', 20)
+    ]
 
-    # Train
-    logger.info("Training simple XGBoost...")
-    metrics = strategy.train(df_train, target_col='target')
+    all_metrics = {}
 
-    # Results
+    for horizon_name, target_col, days in horizons:
+        logger.info("\n" + "=" * 60)
+        logger.info(f"TRAINING {horizon_name.upper()} MODEL ({days}-day forward returns)")
+        logger.info("=" * 60)
+
+        # Create strategy instance for this horizon
+        strategy_h = SimpleStrategy(config, model_dir='models', horizon=horizon_name)
+
+        # Filter out rows with missing target
+        df_train = df_features.dropna(subset=[target_col])
+        logger.info(f"Training samples for {horizon_name}: {len(df_train)}")
+
+        # Train model
+        metrics = strategy_h.train(df_train, target_col=target_col)
+        all_metrics[horizon_name] = metrics
+
+        # Feature importance
+        importance = strategy_h.get_feature_importance()
+        if not importance.empty:
+            logger.info(f"\n{horizon_name.upper()} Feature Importances:")
+            for _, row in importance.iterrows():
+                logger.info(f"  {row['feature']}: {row['importance']:.4f}")
+
+    # Results summary for all horizons
     logger.info("\n" + "=" * 60)
-    logger.info("TRAINING RESULTS")
+    logger.info("MULTI-HORIZON TRAINING RESULTS")
     logger.info("=" * 60)
-    for name, value in metrics.items():
-        if isinstance(value, float):
-            logger.info(f"  {name}: {value:.4f}")
-        else:
-            logger.info(f"  {name}: {value}")
 
-    # Feature importance
-    importance = strategy.get_feature_importance()
-    if not importance.empty:
-        logger.info("\nFeature Importances:")
-        for _, row in importance.iterrows():
-            logger.info(f"  {row['feature']}: {row['importance']:.4f}")
+    for horizon_name in ['1d', '5d', '20d']:
+        if horizon_name in all_metrics:
+            metrics = all_metrics[horizon_name]
+            logger.info(f"\n{horizon_name.upper()} Model:")
+            for name, value in metrics.items():
+                if isinstance(value, float):
+                    logger.info(f"  {name}: {value:.4f}")
+                else:
+                    logger.info(f"  {name}: {value}")
 
     # Discord notification
     discord = DiscordNotifier()
-    discord.send_model_training_complete(metrics)
+    discord.send_multi_horizon_training_complete(all_metrics)
 
     logger.info("\n" + "=" * 60)
-    logger.info("Training complete! Model saved to models/simple_xgb.pkl")
+    logger.info("Training complete! 3 models saved:")
+    logger.info("  - models/simple_xgb_1d.pkl")
+    logger.info("  - models/simple_xgb_5d.pkl")
+    logger.info("  - models/simple_xgb_20d.pkl (PRIMARY for rebalancing)")
     logger.info("=" * 60)
 
 

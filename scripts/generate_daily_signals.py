@@ -96,21 +96,29 @@ def main():
 
     logger.info(f"Features computed: {len(df)} rows")
 
-    # Generate signals
-    logger.info("Generating signals...")
-    signals = strategy.compute_signals(df)
+    # Generate signals from all 3 horizons
+    logger.info("Generating multi-horizon signals (1d, 5d, 20d)...")
+    multi_signals = strategy.compute_multi_horizon_signals(df)
 
-    # Get top picks
-    n_holdings = config.get('n_holdings', 15)
-    top_picks = signals.head(n_holdings)
+    signals_1d = multi_signals.get('1d')
+    signals_5d = multi_signals.get('5d')
+    signals_20d = multi_signals.get('20d')  # PRIMARY for rebalancing
 
-    logger.info(f"\nTop {n_holdings} stocks for today ({strategy_type}):")
+    if not signals_20d or signals_20d.empty:
+        logger.error("20-day model signals missing! Cannot proceed.")
+        sys.exit(1)
+
+    # Get top picks from 20d model (primary)
+    n_holdings = config.get('n_holdings', 20)
+    top_picks = signals_20d.head(n_holdings)
+
+    logger.info(f"\nTop {n_holdings} stocks for today (20d model - PRIMARY):")
     logger.info("-" * 40)
     for ticker, row in top_picks.iterrows():
         logger.info(f"  {int(row['rank']):2d}. {ticker:6s} | Score: {row['score']:.4f}")
 
-    # Save signals
-    storage.save_signals(signals, date.today())
+    # Save 20d signals as primary (for rebalancing)
+    storage.save_signals(signals_20d, date.today())
 
     # Get rebalance info for Discord notification
     state = storage.get_rebalance_state()
@@ -128,10 +136,12 @@ def main():
 
     logger.info(f"Days until rebalance: {days_until_rebalance} (estimated: {next_rebalance_str})")
 
-    # Send enhanced Discord notification
+    # Send multi-horizon Discord notification
     discord = DiscordNotifier()
-    discord.send_enhanced_signals(
-        signals_df=signals,
+    discord.send_multi_horizon_signals(
+        signals_1d=signals_1d,
+        signals_5d=signals_5d,
+        signals_20d=signals_20d,
         days_until_rebalance=days_until_rebalance,
         next_rebalance_date=next_rebalance_str,
         date=date.today().strftime('%Y-%m-%d')

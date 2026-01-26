@@ -1,8 +1,8 @@
 # Strategy configuration
 strategy:
-  name: "simple_momentum"
+  name: "multi_horizon_momentum"
   strategy_type: "simple" # Options: simple (recommended), stacking, pure_momentum
-  n_holdings: 20
+  n_holdings: 25 # UPDATED: Increased from 20 to capture more opportunities
   rebalance_frequency: 20 # Every 20 trading days (~monthly)
   min_hold_days: 20
   turnover_threshold: 0.05 # Only replace if score gap > 5%
@@ -10,10 +10,11 @@ strategy:
 
 # Model configuration
 model:
-  type: "simple_xgboost" # Options: simple_xgboost, stacking_ensemble
+  type: "multi_horizon_xgboost" # UPDATED: Multi-horizon XGBoost
   retrain_frequency: "weekly"
   training_lookback_days: 730 # 2 years
-  target_horizon_days: 5 # Predict 5-day forward returns
+  horizons: [1, 5, 20] # Train 3 models for different time horizons
+  primary_horizon: 20 # Use 20-day model for rebalancing decisions
 
 
 # Strategy Options:
