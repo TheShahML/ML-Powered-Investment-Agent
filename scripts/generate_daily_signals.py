@@ -104,7 +104,7 @@ def main():
     signals_5d = multi_signals.get('5d')
     signals_20d = multi_signals.get('20d')  # PRIMARY for rebalancing
 
-    if not signals_20d or signals_20d.empty:
+    if signals_20d is None or signals_20d.empty:
         logger.error("20-day model signals missing! Cannot proceed.")
         sys.exit(1)
 
