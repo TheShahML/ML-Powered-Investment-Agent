@@ -4,19 +4,22 @@ on:
   schedule:
     # Run at 9:35 AM ET (14:35 UTC) every trading day
     # The script will check if it's a rebalance day (every 20 trading days)
-    - cron: '35 14 * * 1-5'
+    - cron: "35 14 * * 1-5"
   workflow_dispatch:
     inputs:
       force_rebalance:
-        description: 'Force rebalance regardless of day count'
+        description: "Force rebalance regardless of day count"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
       dry_run:
-        description: 'Run without placing actual orders'
+        description: "Run without placing actual orders"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
+
+permissions:
+  contents: write
 
 env:
   ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
@@ -41,8 +44,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'pip'
+          python-version: "3.10"
+          cache: "pip"
 
       - name: Install dependencies
         run: |

@@ -3,8 +3,11 @@ name: Weekly Summary
 on:
   schedule:
     # Run every Saturday at 10:00 AM ET (15:00 UTC)
-    - cron: '0 15 * * 6'
+    - cron: "0 15 * * 6"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 env:
   ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
@@ -28,8 +31,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'pip'
+          python-version: "3.10"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
