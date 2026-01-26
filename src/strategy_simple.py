@@ -62,9 +62,8 @@ class SimpleStrategy:
         df['momentum_6m'] = grouped['close'].pct_change(126)
 
         # 3. Volatility (risk-adjusted)
-        df['volatility_3m'] = grouped['close'].apply(
-            lambda x: x.pct_change().rolling(63).std()
-        )
+        df['returns'] = grouped['close'].pct_change()
+        df['volatility_3m'] = grouped['returns'].transform(lambda x: x.rolling(63).std())
 
         # 4. Volume trend (liquidity)
         vol_sma = grouped['volume'].transform(lambda x: x.rolling(21).mean())
