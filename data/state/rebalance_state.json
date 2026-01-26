@@ -1,6 +1,6 @@
 {
-  "days_since_rebalance": 20,
-  "last_rebalance": null,
+  "days_since_rebalance": 0,
+  "last_rebalance": "2026-01-26T19:16:47.755583",
   "last_signal_date": "2026-01-26",
-  "total_rebalances": 0
+  "total_rebalances": 1
 }

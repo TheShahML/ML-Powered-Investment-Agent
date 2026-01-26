@@ -1,0 +1,97 @@
+{
+  "timestamp": "2026-01-26T19:16:47.681614",
+  "positions": [
+    {
+      "symbol": "AGIO",
+      "qty": 135.0
+    },
+    {
+      "symbol": "ALXO",
+      "qty": 2777.7778
+    },
+    {
+      "symbol": "ASPI",
+      "qty": 536.5526
+    },
+    {
+      "symbol": "BW",
+      "qty": 407.332
+    },
+    {
+      "symbol": "CAPR",
+      "qty": 105.0
+    },
+    {
+      "symbol": "CRBP",
+      "qty": 441.0143
+    },
+    {
+      "symbol": "CRNC",
+      "qty": 340.1361
+    },
+    {
+      "symbol": "CSTE",
+      "qty": 1593.6255
+    },
+    {
+      "symbol": "DAWN",
+      "qty": 328.2725
+    },
+    {
+      "symbol": "FLUX",
+      "qty": 2601.0
+    },
+    {
+      "symbol": "FRGE",
+      "qty": 89.7364
+    },
+    {
+      "symbol": "FULC",
+      "qty": 366.3004
+    },
+    {
+      "symbol": "GRWG",
+      "qty": 2787.4564
+    },
+    {
+      "symbol": "INBX",
+      "qty": 53.7201
+    },
+    {
+      "symbol": "KRRO",
+      "qty": 378.6086
+    },
+    {
+      "symbol": "MNOV",
+      "qty": 2105.2632
+    },
+    {
+      "symbol": "NHTC",
+      "qty": 1056.8032
+    },
+    {
+      "symbol": "NUVB",
+      "qty": 723.3273
+    },
+    {
+      "symbol": "ORGO",
+      "qty": 1011.378
+    },
+    {
+      "symbol": "PETS",
+      "qty": 26.0
+    },
+    {
+      "symbol": "PUMP",
+      "qty": 353.6693
+    },
+    {
+      "symbol": "REFR",
+      "qty": 2002.0
+    },
+    {
+      "symbol": "RLMD",
+      "qty": 424.0
+    }
+  ]
+}
