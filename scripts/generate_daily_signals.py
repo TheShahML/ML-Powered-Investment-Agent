@@ -67,8 +67,9 @@ def main():
     logger.info(f"Universe size: {len(universe)} stocks")
 
     # Fetch historical data (need enough for feature calculation)
+    # Need 2 years: 1 year for data + 1 year lookback for 12-month momentum
     end_date = date.today()
-    start_date = end_date - timedelta(days=365)  # 1 year for features
+    start_date = end_date - timedelta(days=365 * 2)
 
     logger.info(f"Fetching historical data from {start_date} to {end_date}...")
     df = data_service.get_historical_data(

@@ -69,7 +69,7 @@ def calculate_target_positions(signals, account_info, config) -> dict:
                 os.environ['ALPACA_SECRET_KEY'],
                 os.environ['ALPACA_BASE_URL']
             )
-            quote = api.get_latest_trade(symbol)
+            quote = api.get_latest_trade(symbol, feed='iex')  # Use IEX feed (free tier)
             price = float(quote.price)
 
             target_value = equity * target_weight
@@ -105,7 +105,7 @@ def execute_rebalance(api, current_positions, target_positions, dry_run=False) -
 
         # Skip tiny trades (less than $10 notional)
         try:
-            quote = api.get_latest_trade(symbol)
+            quote = api.get_latest_trade(symbol, feed='iex')  # Use IEX feed (free tier)
             price = float(quote.price)
             notional = abs(diff * price)
 
