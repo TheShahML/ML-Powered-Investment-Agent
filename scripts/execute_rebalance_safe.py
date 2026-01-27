@@ -48,7 +48,7 @@ def main():
     logger.info(f"As-of date: {as_of_date}")
 
     # Load state
-    state_manager = StateManager()
+    state_manager = StateManager(state_file_path="state-repo/latest_state.json")
     state = state_manager.load_state()
 
     # Check if rebalance due

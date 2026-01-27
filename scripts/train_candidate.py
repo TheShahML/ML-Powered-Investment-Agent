@@ -169,7 +169,7 @@ def main():
     report_path = save_backtest_report(candidate_results, baselines, (passed, gate_details))
 
     # Update state
-    state_manager = StateManager()
+    state_manager = StateManager(state_file_path="state-repo/latest_state.json")
     state = state_manager.load_state()
 
     candidate_version = f"multi_horizon_{as_of_date.strftime('%Y%m%d')}"

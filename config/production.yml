@@ -3,7 +3,7 @@
 universe:
   type: "sp500_ndx100_union"  # S&P 500 ∪ NASDAQ-100
   min_price: 5.0  # Minimum stock price
-  min_adv: 20000000  # Minimum $20M average daily volume
+  min_adv: 5000000  # Minimum $5M average daily volume
 
 model:
   horizons: [1, 5, 20]  # Train 3 models for different timeframes
