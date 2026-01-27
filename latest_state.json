@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-01-27T04:36:18.652245Z",
+  "last_updated_utc": "2026-01-27T07:41:50.932249Z",
   "rebalance": {
     "last_rebalance_date": null,
     "next_rebalance_date": null,
@@ -10,14 +10,60 @@
   "models": {
     "active_model": null,
     "candidate_model": {
-      "version": "multi_horizon_20260126",
-      "trained_date": "2026-01-26",
-      "training_window_start": "2024-01-27",
-      "training_window_end": "2026-01-26",
-      "cv_1d_mean_ic": 0,
-      "cv_5d_mean_ic": 0,
-      "cv_20d_mean_ic": 0,
-      "backtest_sharpe": 2.2419374793100015,
-      "backtest_cagr": 0.633677449864946,
-      "backtest_maxdd": -0.1556315243427421,
-      "approved_for_next_rebalance": 
+      "version": "multi_strategy_20260126",
+      "strategy_type": "pure_momentum",
+      "trained_date": "2026-01-26T00:00:00",
+      "backtest_sharpe": 2.554243538291247,
+      "backtest_cagr": 0.7264902015614174,
+      "backtest_maxdd": -0.09167888941458895,
+      "approved_for_next_rebalance": true,
+      "promotion_gate": {
+        "sharpe_margin_required": 0.2,
+        "maxdd_tolerance": 0.05,
+        "best_baseline_sharpe": 0.9154118171923205,
+        "candidate_sharpe": 2.554243538291247,
+        "sharpe_margin_achieved": 1.6388317210989267,
+        "sharpe_pass": true,
+        "best_baseline_maxdd": -0.18737311215647454,
+        "candidate_maxdd": -0.09167888941458895,
+        "maxdd_diff": -0.09569422274188559,
+        "maxdd_pass": true,
+        "overall_pass": true
+      }
+    }
+  },
+  "holdings": {
+    "equities": [],
+    "crypto": [],
+    "cash": 0,
+    "total_equity": 0
+  },
+  "performance": {},
+  "data_freshness": {
+    "is_fresh": true
+  },
+  "kill_switch": {
+    "enabled": false
+  },
+  "last_workflow_runs": {},
+  "strategies": {
+    "available": [
+      "simple",
+      "pure_momentum"
+    ],
+    "best": "pure_momentum",
+    "results": {
+      "simple": {
+        "sharpe": 1.129908495712284,
+        "cagr": 0.18778768647442434,
+        "maxdd": -0.09216665239138709
+      },
+      "pure_momentum": {
+        "sharpe": 2.554243538291247,
+        "cagr": 0.7264902015614174,
+        "maxdd": -0.09167888941458895
+      }
+    },
+    "last_comparison_date": "2026-01-26T00:00:00"
+  }
+}
