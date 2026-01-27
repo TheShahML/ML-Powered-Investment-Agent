@@ -1,11 +1,11 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-01-27T19:15:59.162314Z",
+  "last_updated_utc": "2026-01-27T21:47:24.695373Z",
   "rebalance": {
     "last_rebalance_date": null,
     "next_rebalance_date": null,
-    "days_since_rebalance": 2,
-    "days_until_rebalance": 18
+    "days_since_rebalance": 3,
+    "days_until_rebalance": 17
   },
   "models": {
     "active_model": null,
@@ -72,11 +72,13 @@
       "weights": {},
       "equity_curve": [
         100000.0,
+        100000.0,
         100000.0
       ],
       "dates": [
         "2026-01-26T00:00:00",
-        "2026-01-26T00:00:00"
+        "2026-01-26T00:00:00",
+        "2026-01-27"
       ],
       "last_rebalance_date": null,
       "initial_value": 100000.0
@@ -86,11 +88,13 @@
       "weights": {},
       "equity_curve": [
         100000.0,
+        100000.0,
         100000.0
       ],
       "dates": [
         "2026-01-26T00:00:00",
-        "2026-01-26T00:00:00"
+        "2026-01-26T00:00:00",
+        "2026-01-27"
       ],
       "last_rebalance_date": null,
       "initial_value": 100000.0
@@ -99,11 +103,13 @@
       "spy": {
         "equity_curve": [
           1.0,
-          1.0
+          1.0,
+          1.0040057451768662
         ],
         "dates": [
           "2026-01-26T00:00:00",
-          "2026-01-26T00:00:00"
+          "2026-01-26T00:00:00",
+          "2026-01-27"
         ],
         "initial_value": 692.755
       },
