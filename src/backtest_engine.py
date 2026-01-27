@@ -384,6 +384,26 @@ def check_promotion_gate(
     return passed, details
 
 
+def _convert_numpy_types(obj):
+    """Convert NumPy types to Python native types for JSON serialization."""
+    import numpy as np
+
+    if isinstance(obj, dict):
+        return {key: _convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [_convert_numpy_types(item) for item in obj]
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    else:
+        return obj
+
+
 def save_backtest_report(
     candidate_metrics: Dict,
     baseline_metrics: Dict,
@@ -406,6 +426,9 @@ def save_backtest_report(
             'details': gate_result[1]
         }
     }
+
+    # Convert all NumPy types to Python native types
+    report = _convert_numpy_types(report)
 
     with open(filepath, 'w') as f:
         json.dump(report, f, indent=2)
