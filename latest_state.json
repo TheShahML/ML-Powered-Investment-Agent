@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-01-27T07:41:50.932249Z",
+  "last_updated_utc": "2026-01-27T17:51:27.055049Z",
   "rebalance": {
     "last_rebalance_date": null,
     "next_rebalance_date": null,
@@ -13,20 +13,20 @@
       "version": "multi_strategy_20260126",
       "strategy_type": "pure_momentum",
       "trained_date": "2026-01-26T00:00:00",
-      "backtest_sharpe": 2.554243538291247,
-      "backtest_cagr": 0.7264902015614174,
-      "backtest_maxdd": -0.09167888941458895,
+      "backtest_sharpe": 2.542283044291663,
+      "backtest_cagr": 0.706005345676125,
+      "backtest_maxdd": -0.09293616108979293,
       "approved_for_next_rebalance": true,
       "promotion_gate": {
         "sharpe_margin_required": 0.2,
         "maxdd_tolerance": 0.05,
         "best_baseline_sharpe": 0.9154118171923205,
-        "candidate_sharpe": 2.554243538291247,
-        "sharpe_margin_achieved": 1.6388317210989267,
+        "candidate_sharpe": 2.542283044291663,
+        "sharpe_margin_achieved": 1.6268712270993426,
         "sharpe_pass": true,
         "best_baseline_maxdd": -0.18737311215647454,
-        "candidate_maxdd": -0.09167888941458895,
-        "maxdd_diff": -0.09569422274188559,
+        "candidate_maxdd": -0.09293616108979293,
+        "maxdd_diff": -0.09443695106668161,
         "maxdd_pass": true,
         "overall_pass": true
       }
@@ -54,14 +54,14 @@
     "best": "pure_momentum",
     "results": {
       "simple": {
-        "sharpe": 1.129908495712284,
-        "cagr": 0.18778768647442434,
-        "maxdd": -0.09216665239138709
+        "sharpe": 0.7642891441489793,
+        "cagr": 0.12656404559199164,
+        "maxdd": -0.10232508456633671
       },
       "pure_momentum": {
-        "sharpe": 2.554243538291247,
-        "cagr": 0.7264902015614174,
-        "maxdd": -0.09167888941458895
+        "sharpe": 2.542283044291663,
+        "cagr": 0.706005345676125,
+        "maxdd": -0.09293616108979293
       }
     },
     "last_comparison_date": "2026-01-26T00:00:00"
