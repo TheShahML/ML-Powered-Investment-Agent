@@ -71,6 +71,7 @@ jobs:
         with:
           name: reports-${{ github.run_number }}
           path: reports/
+          if-no-files-found: ignore
 
       - name: Push state update
         working-directory: state-repo
