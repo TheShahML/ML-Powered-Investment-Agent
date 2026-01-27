@@ -1,11 +1,11 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-01-27T18:43:28.086663Z",
+  "last_updated_utc": "2026-01-27T19:15:59.162314Z",
   "rebalance": {
     "last_rebalance_date": null,
     "next_rebalance_date": null,
-    "days_since_rebalance": 1,
-    "days_until_rebalance": 19
+    "days_since_rebalance": 2,
+    "days_until_rebalance": 18
   },
   "models": {
     "active_model": null,
@@ -71,9 +71,11 @@
       "holdings": {},
       "weights": {},
       "equity_curve": [
+        100000.0,
         100000.0
       ],
       "dates": [
+        "2026-01-26T00:00:00",
         "2026-01-26T00:00:00"
       ],
       "last_rebalance_date": null,
@@ -83,9 +85,11 @@
       "holdings": {},
       "weights": {},
       "equity_curve": [
+        100000.0,
         100000.0
       ],
       "dates": [
+        "2026-01-26T00:00:00",
         "2026-01-26T00:00:00"
       ],
       "last_rebalance_date": null,
@@ -94,9 +98,11 @@
     "benchmarks": {
       "spy": {
         "equity_curve": [
+          1.0,
           1.0
         ],
         "dates": [
+          "2026-01-26T00:00:00",
           "2026-01-26T00:00:00"
         ],
         "initial_value": 692.755
