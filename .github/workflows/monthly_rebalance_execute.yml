@@ -2,7 +2,7 @@ name: Monthly Rebalance Execute
 
 on:
   schedule:
-    - cron: '35 14 * * 1-5'  # Weekdays 2:35PM UTC (30 min after US market open)
+    - cron: "35 14 * * 1-5" # Weekdays 2:35PM UTC (30 min after US market open)
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,7 @@ jobs:
           path: state-repo
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
         uses: docker/build-push-action@v6
