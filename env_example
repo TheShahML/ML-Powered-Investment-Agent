@@ -11,7 +11,12 @@ BROKER_MODE=paper # paper or live
 I_ACKNOWLEDGE_LIVE_TRADING=false
 
 # Notifications (Optional)
+# Single webhook (backward compatible):
 DISCORD_WEBHOOK_URL=
+
+# Multiple webhooks (comma-separated, takes precedence over DISCORD_WEBHOOK_URL):
+# DISCORD_WEBHOOK_URLS=https://discord.com/api/webhooks/...,https://discord.com/api/webhooks/...
+
 SLACK_WEBHOOK_URL=
 
 

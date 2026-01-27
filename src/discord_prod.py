@@ -9,40 +9,69 @@ from loguru import logger
 class DiscordProductionNotifier:
     """Clean operational Discord notifications."""
 
-    def __init__(self, webhook_url: str = None):
-        self.webhook_url = webhook_url or os.environ.get('DISCORD_WEBHOOK_URL')
+    def __init__(self, webhook_url: str = None, webhook_urls: List[str] = None):
+        """
+        Initialize Discord notifier with single or multiple webhooks.
+        
+        Args:
+            webhook_url: Single webhook URL (for backward compatibility)
+            webhook_urls: List of webhook URLs (takes precedence over webhook_url)
+        """
+        # Support multiple webhooks via comma-separated env var or list
+        if webhook_urls:
+            self.webhook_urls = webhook_urls
+        elif webhook_url:
+            self.webhook_urls = [webhook_url]
+        else:
+            # Check for multiple webhooks in env (comma-separated)
+            env_urls = os.environ.get('DISCORD_WEBHOOK_URLS', '')
+            if env_urls:
+                self.webhook_urls = [url.strip() for url in env_urls.split(',') if url.strip()]
+            else:
+                # Fall back to single webhook for backward compatibility
+                single_url = os.environ.get('DISCORD_WEBHOOK_URL')
+                self.webhook_urls = [single_url] if single_url else []
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        self.webhook_urls = [url for url in self.webhook_urls if url and url not in seen and not seen.add(url)]
 
     def _send(self, embed: Dict) -> bool:
-        """Send embed to Discord."""
-        if not self.webhook_url:
+        """Send embed to Discord (all configured webhooks)."""
+        if not self.webhook_urls:
             logger.warning("Discord webhook not configured")
             return False
 
-        try:
-            response = requests.post(
-                self.webhook_url,
-                json={"embeds": [embed]},
-                headers={"Content-Type": "application/json"}
-            )
-            response.raise_for_status()
-            logger.info("Discord notification sent")
+        success_count = 0
+        for webhook_url in self.webhook_urls:
+            try:
+                response = requests.post(
+                    webhook_url,
+                    json={"embeds": [embed]},
+                    headers={"Content-Type": "application/json"}
+                )
+                response.raise_for_status()
+                success_count += 1
+            except Exception as e:
+                logger.error(f"Discord send failed to {webhook_url[:50]}...: {e}")
+        
+        if success_count > 0:
+            logger.info(f"Discord notification sent to {success_count}/{len(self.webhook_urls)} webhook(s)")
             return True
-        except Exception as e:
-            logger.error(f"Discord send failed: {e}")
-            return False
+        return False
 
     def send_image(self, text: str, image_path: str) -> bool:
         """
-        Send image to Discord via webhook.
+        Send image to Discord via webhook(s).
         
         Args:
             text: Text content (can be empty string)
             image_path: Path to image file
         
         Returns:
-            Success status
+            Success status (True if at least one webhook succeeded)
         """
-        if not self.webhook_url:
+        if not self.webhook_urls:
             logger.warning("Discord webhook not configured")
             return False
 
@@ -50,25 +79,30 @@ class DiscordProductionNotifier:
             logger.error(f"Image file not found: {image_path}")
             return False
 
-        try:
-            with open(image_path, 'rb') as f:
-                files = {
-                    'file': (os.path.basename(image_path), f, 'image/png')
-                }
-                data = {
-                    'content': text
-                }
-                response = requests.post(
-                    self.webhook_url,
-                    files=files,
-                    data=data
-                )
-                response.raise_for_status()
-                logger.info(f"Discord image sent: {image_path}")
-                return True
-        except Exception as e:
-            logger.error(f"Discord image send failed: {e}")
-            return False
+        success_count = 0
+        for webhook_url in self.webhook_urls:
+            try:
+                with open(image_path, 'rb') as f:
+                    files = {
+                        'file': (os.path.basename(image_path), f, 'image/png')
+                    }
+                    data = {
+                        'content': text
+                    }
+                    response = requests.post(
+                        webhook_url,
+                        files=files,
+                        data=data
+                    )
+                    response.raise_for_status()
+                    success_count += 1
+            except Exception as e:
+                logger.error(f"Discord image send failed to {webhook_url[:50]}...: {e}")
+        
+        if success_count > 0:
+            logger.info(f"Discord image sent to {success_count}/{len(self.webhook_urls)} webhook(s): {image_path}")
+            return True
+        return False
 
     def send_multiple_images(self, text: str, image_paths: List[str]) -> bool:
         """

@@ -54,6 +54,7 @@ jobs:
             -e ALPACA_SECRET_KEY="${{ secrets.ALPACA_SECRET_KEY }}" \
             -e ALPACA_BASE_URL="${{ secrets.ALPACA_BASE_URL }}" \
             -e DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            -e DISCORD_WEBHOOK_URLS="${{ secrets.DISCORD_WEBHOOK_URLS }}" \
             -e KILL_SWITCH_ENABLED="${{ vars.KILL_SWITCH_ENABLED }}" \
             -v "${{ github.workspace }}:/app" \
             -w /app \
