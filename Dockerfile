@@ -32,7 +32,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY config/ ./config/
 COPY scripts/ ./scripts/
-COPY streamlit_app/ ./streamlit_app/
 
 # Create necessary directories (populated at runtime or mounted)
 RUN mkdir -p \
