@@ -5,6 +5,11 @@ xgboost
 scikit-learn
 joblib
 
+# Market Data
+yfinance
+lxml
+html5lib
+
 # Trading API
 alpaca-trade-api
 

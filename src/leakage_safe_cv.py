@@ -31,7 +31,7 @@ class DateGroupedPurgedCV:
         n_splits: int = 5,
         embargo_days: int = 0,
         test_size_pct: float = 0.2,
-        min_train_dates: int = 252  # 1 year minimum
+        min_train_dates: int = 60  # 3 months minimum (252 was too strict for 2yr history!)
     ):
         """
         Args:
@@ -98,7 +98,7 @@ class DateGroupedPurgedCV:
             val_dates_mask = (dates >= val_start_date) & (dates <= val_end_date)
             val_indices = self._get_indices_for_dates(X, dates[val_dates_mask])
 
-            if len(train_indices) < 1000:
+            if len(train_indices) < 500:  # Was 1000 - too strict for 401-stock universe!
                 logger.warning(f"Fold {i+1}: Too few training samples ({len(train_indices)}), skipping")
                 continue
 

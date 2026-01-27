@@ -28,11 +28,33 @@ class StateManager:
             logger.error(f"Error loading state: {e}")
             return self._empty_state()
 
+    def _convert_numpy_types(self, obj):
+        """Convert NumPy types to Python native types for JSON serialization."""
+        import numpy as np
+
+        if isinstance(obj, dict):
+            return {key: self._convert_numpy_types(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self._convert_numpy_types(item) for item in obj]
+        elif isinstance(obj, np.bool_):
+            return bool(obj)
+        elif isinstance(obj, (np.integer, np.int64, np.int32)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64, np.float32)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return obj
+
     def save_state(self, state: Dict):
         """Save state to file."""
         try:
             os.makedirs(os.path.dirname(self.state_file), exist_ok=True)
             state['last_updated_utc'] = datetime.utcnow().isoformat() + 'Z'
+
+            # Convert NumPy types to Python native types
+            state = self._convert_numpy_types(state)
 
             with open(self.state_file, 'w') as f:
                 json.dump(state, f, indent=2)

@@ -70,29 +70,35 @@ class Universe:
 
     def get_sp500_constituents(self) -> List[str]:
         """
-        Fetch S&P 500 constituent symbols from Wikipedia.
+        Fetch S&P 500 constituent symbols using fallback to static list.
 
         Returns:
             List of S&P 500 symbols (normalized)
         """
         try:
             logger.info("Fetching S&P 500 constituents...")
-            url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-            tables = pd.read_html(url)
-            df = tables[0]
 
-            # Symbol is in 'Symbol' column
-            symbols = df['Symbol'].tolist()
-
-            # Normalize all symbols
-            normalized = [self.normalize_symbol_for_alpaca(s) for s in symbols]
-
-            logger.info(f"Fetched {len(normalized)} S&P 500 symbols")
-            return normalized
+            # Try Wikipedia first
+            try:
+                url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+                tables = pd.read_html(url)
+                df = tables[0]
+                symbols = df['Symbol'].tolist()
+                normalized = [self.normalize_symbol_for_alpaca(s) for s in symbols]
+                logger.info(f"Fetched {len(normalized)} S&P 500 symbols via Wikipedia")
+                return normalized
+            except:
+                # Fallback to static list from config
+                import os
+                static_file = os.path.join('config', 'sp500_static.txt')
+                with open(static_file, 'r') as f:
+                    tickers = f.read().strip().split(',')
+                logger.info(f"Using static S&P 500 list: {len(tickers)} symbols")
+                return [self.normalize_symbol_for_alpaca(s.strip()) for s in tickers]
 
         except Exception as e:
             logger.error(f"Error fetching S&P 500 constituents: {e}")
-            # Fallback to a core set
+            # Ultimate fallback to core 30
             return [self.normalize_symbol_for_alpaca(s) for s in [
                 "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "META", "TSLA", "BRK-B", "UNH", "XOM",
                 "JPM", "V", "PG", "MA", "HD", "CVX", "MRK", "ABBV", "LLY", "PEP",

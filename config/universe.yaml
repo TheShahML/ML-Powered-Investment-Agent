@@ -1,13 +1,14 @@
 # Universe configuration
 universe:
-  # Universe type: 'sp500', 'all', or 'custom'
-  universe_type: "all"  # All US equities from NYSE, NASDAQ, AMEX
-  target_size: 1500  # Limit to top 1,500 most liquid stocks (3x more than before)
-                     # null = no limit (will hit rate limits with 3,000+ stocks)
+  # Universe type: 'sp500', 'all', 'sp500_ndx100_union', or 'custom'
+  universe_type: "sp500_ndx100_union"  # S&P 500 + NASDAQ-100 union
+  type: "sp500_ndx100_union"  # Alias for universe_type
+  target_size: null  # No limit for S&P 500 + NDX100 union (~700 stocks)
 
-  # Filters (used when universe_type is 'all')
-  min_market_cap: 10000000000  # $10B
-  min_avg_dollar_volume: 50000000  # $50M
+  # Filters
+  min_market_cap: null  # Not used for predefined universes
+  min_avg_dollar_volume: 5000000  # $5M minimum ADV
+  min_adv: 5000000  # Alias for min_avg_dollar_volume
   min_price: 5.0
   exclude_otc: true
 

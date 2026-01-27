@@ -8,7 +8,7 @@ def load_config():
     config = {}
     config_dir = "config"
     for filename in os.listdir(config_dir):
-        if filename.endswith(".yaml"):
+        if filename.endswith((".yaml", ".yml")):
             with open(os.path.join(config_dir, filename), "r") as f:
                 config.update(yaml.safe_all_load(f) if hasattr(yaml, 'safe_all_load') else yaml.safe_load(f))
     

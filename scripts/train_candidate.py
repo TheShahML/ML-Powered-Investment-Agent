@@ -41,8 +41,8 @@ def main():
     symbols, universe_stats = universe_builder.build_universe()
     logger.info(f"Universe: {len(symbols)} stocks")
 
-    # Use top 200 for training (reduce compute)
-    training_universe = symbols[:200]
+    # Use ALL stocks for training (we have 400, not 3000+)
+    training_universe = symbols
 
     # Fetch 2 years of data
     end_date = as_of_date
