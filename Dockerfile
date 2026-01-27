@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
     libgomp1 \
     libpq-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
     git \
     curl \
     && rm -rf /var/lib/apt/lists/*
