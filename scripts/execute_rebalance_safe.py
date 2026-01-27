@@ -65,6 +65,20 @@ def main():
     if (not args.force) and (not state_manager.check_rebalance_due(threshold=20)):
         days_until = state.get('rebalance', {}).get('days_until_rebalance', 20)
         logger.info(f"Rebalance NOT due ({days_until} days remaining)")
+        # Send Discord notification for skipped rebalance
+        discord = DiscordProductionNotifier()
+        strategy_type = (state.get('models', {}).get('active_model', {}) or {}).get('strategy_type')
+        discord.send_generic_alert(
+            title="⏭️ REBALANCE SKIPPED - NOT DUE",
+            message=(
+                f"**Date:** {as_of_date.isoformat()}\n"
+                f"**Days Until Rebalance:** {days_until}\n"
+                f"**Strategy:** {strategy_type or 'N/A'}\n"
+                f"**Mode:** {'DRY RUN' if args.dry_run else 'LIVE'}\n\n"
+                f"Rebalance will occur in {days_until} trading days."
+            ),
+            level="info"
+        )
         sys.exit(0)
 
     logger.info("Rebalance IS DUE - proceeding with checks" if not args.force else "FORCED REBALANCE (testing) - proceeding with checks")
@@ -72,6 +86,19 @@ def main():
     # Check idempotency
     if state_manager.check_already_rebalanced(as_of_date):
         logger.warning("Already rebalanced today - exiting")
+        # Send Discord notification for skipped rebalance
+        discord = DiscordProductionNotifier()
+        strategy_type = (state.get('models', {}).get('active_model', {}) or {}).get('strategy_type')
+        discord.send_generic_alert(
+            title="⏭️ REBALANCE SKIPPED - ALREADY DONE",
+            message=(
+                f"**Date:** {as_of_date.isoformat()}\n"
+                f"**Strategy:** {strategy_type or 'N/A'}\n"
+                f"**Mode:** {'DRY RUN' if args.dry_run else 'LIVE'}\n\n"
+                f"Rebalance was already executed today. Skipping to avoid duplicate trades."
+            ),
+            level="info"
+        )
         sys.exit(0)
 
     # Check market open
@@ -131,6 +158,13 @@ def main():
 
     if signals is None or signals.empty:
         logger.error("No signals available!")
+        # Send Discord notification for error
+        discord = DiscordProductionNotifier()
+        discord.send_generic_alert(
+            title="❌ REBALANCE FAILED - NO SIGNALS",
+            message=f"**Date:** {as_of_date.isoformat()}\n**Reason:** No signals available for portfolio construction.\n**Action:** Check signal generation workflow.",
+            level="error"
+        )
         sys.exit(1)
 
     # Fetch data for portfolio construction (need historical data for inverse-vol)
@@ -153,6 +187,13 @@ def main():
     
     if df.empty:
         logger.error("No data available for portfolio construction!")
+        # Send Discord notification for error
+        discord = DiscordProductionNotifier()
+        discord.send_generic_alert(
+            title="❌ REBALANCE FAILED - NO DATA",
+            message=f"**Date:** {as_of_date.isoformat()}\n**Reason:** No historical data available for portfolio construction.\n**Action:** Check data service and API connectivity.",
+            level="error"
+        )
         sys.exit(1)
     
     # Get SPY data for regime filter
@@ -161,6 +202,13 @@ def main():
         spy_data = df.xs('SPY', level=1)
     except KeyError:
         logger.error("SPY not found in data - required for regime filter")
+        # Send Discord notification for error
+        discord = DiscordProductionNotifier()
+        discord.send_generic_alert(
+            title="❌ REBALANCE FAILED - SPY MISSING",
+            message=f"**Date:** {as_of_date.isoformat()}\n**Reason:** SPY not found in data - required for regime filter.\n**Action:** Check data service and ensure SPY is included.",
+            level="error"
+        )
         sys.exit(1)
     
     # Compute features if needed
