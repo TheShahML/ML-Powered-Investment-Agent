@@ -5,6 +5,10 @@ on:
     - cron: '30 21 * * 1-5'  # Weekdays 9:30PM UTC (after US market close)
   workflow_dispatch:
 
+concurrency:
+  group: investment-bot-${{ github.workflow }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -13,12 +17,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Checkout state branch
         uses: actions/checkout@v4
         with:
           ref: state
           path: state-repo
+
+      - name: Load latest state from state branch
+        run: |
+          if [ -f state-repo/latest_state.json ]; then
+            cp state-repo/latest_state.json ./latest_state.json
+          else
+            echo '{}' > ./latest_state.json
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -45,6 +59,17 @@ jobs:
             investment-bot:latest \
             python scripts/generate_signals.py
 
+      - name: Save updated state back to state branch
+        run: |
+          cp ./latest_state.json state-repo/latest_state.json
+
+      - name: Upload reports artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ github.run_number }}
+          path: reports/
+
       - name: Push state update
         working-directory: state-repo
         run: |
@@ -52,4 +77,4 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add latest_state.json
           git commit -m "Update state after signals generation (${{ github.run_number }})" || echo "No changes"
-          git push
+          git push origin state

@@ -31,6 +31,68 @@ class DiscordProductionNotifier:
             logger.error(f"Discord send failed: {e}")
             return False
 
+    def send_image(self, text: str, image_path: str) -> bool:
+        """
+        Send image to Discord via webhook.
+        
+        Args:
+            text: Text content (can be empty string)
+            image_path: Path to image file
+        
+        Returns:
+            Success status
+        """
+        if not self.webhook_url:
+            logger.warning("Discord webhook not configured")
+            return False
+
+        if not os.path.exists(image_path):
+            logger.error(f"Image file not found: {image_path}")
+            return False
+
+        try:
+            with open(image_path, 'rb') as f:
+                files = {
+                    'file': (os.path.basename(image_path), f, 'image/png')
+                }
+                data = {
+                    'content': text
+                }
+                response = requests.post(
+                    self.webhook_url,
+                    files=files,
+                    data=data
+                )
+                response.raise_for_status()
+                logger.info(f"Discord image sent: {image_path}")
+                return True
+        except Exception as e:
+            logger.error(f"Discord image send failed: {e}")
+            return False
+
+    def send_multiple_images(self, text: str, image_paths: List[str]) -> bool:
+        """
+        Send multiple images to Discord (as separate messages).
+        
+        Args:
+            text: Text content for first message
+            image_paths: List of image file paths
+        
+        Returns:
+            Success status
+        """
+        if not image_paths:
+            return False
+
+        # Send first image with text
+        success = self.send_image(text, image_paths[0])
+        
+        # Send remaining images without text
+        for img_path in image_paths[1:]:
+            self.send_image("", img_path)
+        
+        return success
+
     def send_multi_horizon_signals(
         self,
         as_of_date: str,
@@ -53,26 +115,35 @@ class DiscordProductionNotifier:
         ml_list_5d = "\n".join([f"{i}. **{sym}** ({score:+.4f})" for i, (sym, score) in enumerate(ml_top10_5d[:5], 1)])
         ml_list_20d = "\n".join([f"{i}. **{sym}** ({score:+.4f})" for i, (sym, score) in enumerate(ml_top10_20d[:5], 1)])
 
-        # Canary top 5
+        # Benchmark momentum (canary) top 5
         canary_list = "\n".join([f"{i}. **{sym}** ({score:+.1f}%)" for i, (sym, score) in enumerate(canary_top10[:5], 1)])
 
         # Performance since last rebal
         perf_since = (
             f"**Actual:** {performance_since_rebal.get('actual', 0):+.1f}%\n"
-            f"**Canary:** {performance_since_rebal.get('canary', 0):+.1f}%\n"
+            f"**Benchmark Momentum (Canary):** {performance_since_rebal.get('canary', 0):+.1f}%\n"
             f"**SPY:** {performance_since_rebal.get('spy', 0):+.1f}%"
         )
 
         # Rolling 30d
         perf_30d = (
             f"Actual: {performance_rolling.get('actual_30d', 0):+.1f}% | "
-            f"Canary: {performance_rolling.get('canary_30d', 0):+.1f}% | "
+            f"Benchmark Momentum: {performance_rolling.get('canary_30d', 0):+.1f}% | "
             f"SPY: {performance_rolling.get('spy_30d', 0):+.1f}%"
         )
 
+        # Determine strategy type from active model
+        strategy_type = active_model.get('strategy_type', 'simple')
+        strategy_names = {
+            'simple': 'XGBoost Multi-Horizon',
+            'lstm': 'LSTM Neural Network',
+            'pure_momentum': 'Pure Momentum'
+        }
+        strategy_name = strategy_names.get(strategy_type, strategy_type)
+        
         embed = {
             "title": f"📊 MULTI-HORIZON SIGNALS | {as_of_date}",
-            "description": "3 XGBoost models (1d/5d/20d horizons)",
+            "description": f"**Strategy:** {strategy_name} (1d/5d/20d horizons)",
             "color": 3447003,
             "fields": [
                 {
@@ -80,6 +151,7 @@ class DiscordProductionNotifier:
                     "value": (
                         f"**As-of:** {as_of_date}\n"
                         f"**Active Model:** {active_model.get('version', 'None')}\n"
+                        f"**Strategy:** {strategy_name}\n"
                         f"**Candidate:** {'✅ Approved' if candidate_approved else '❌ Pending'}\n"
                         f"**Universe:** {universe_size} stocks"
                     ),
@@ -101,7 +173,7 @@ class DiscordProductionNotifier:
                     "inline": True
                 },
                 {
-                    "name": "📈 Canary Top 5 (Pure Momentum)",
+                    "name": "📈 Benchmark Momentum (Canary) Top 5",
                     "value": canary_list or "No signals",
                     "inline": True
                 },
@@ -150,13 +222,13 @@ class DiscordProductionNotifier:
         # ML top 10
         ml_list = "\n".join([f"{i}. **{sym}** ({score:+.4f})" for i, (sym, score) in enumerate(ml_top10[:10], 1)])
 
-        # Canary top 10
+        # Benchmark momentum (canary) top 10
         canary_list = "\n".join([f"{i}. **{sym}** ({score:+.1f}%)" for i, (sym, score) in enumerate(canary_top10[:10], 1)])
 
         # Performance since last rebal
         perf_since = (
             f"**Actual:** {performance_since_rebal.get('actual', 0):+.1f}%\n"
-            f"**Canary:** {performance_since_rebal.get('canary', 0):+.1f}%\n"
+            f"**Benchmark Momentum (Canary):** {performance_since_rebal.get('canary', 0):+.1f}%\n"
             f"**SPY:** {performance_since_rebal.get('spy', 0):+.1f}%\n"
             f"**BTC:** {performance_since_rebal.get('btc', 0):+.1f}%"
         )
@@ -164,7 +236,7 @@ class DiscordProductionNotifier:
         # Rolling 30d
         perf_30d = (
             f"Actual: {performance_rolling.get('actual_30d', 0):+.1f}% | "
-            f"Canary: {performance_rolling.get('canary_30d', 0):+.1f}% | "
+            f"Benchmark Momentum: {performance_rolling.get('canary_30d', 0):+.1f}% | "
             f"SPY: {performance_rolling.get('spy_30d', 0):+.1f}%"
         )
 
@@ -177,6 +249,7 @@ class DiscordProductionNotifier:
                     "value": (
                         f"**As-of:** {as_of_date}\n"
                         f"**Active Model:** {active_model.get('version', 'None')}\n"
+                        f"**Strategy:** {active_model.get('strategy_type', 'simple')}\n"
                         f"**Candidate:** {'✅ Approved' if candidate_approved else '❌ Pending'}\n"
                         f"**Universe:** {universe_size} stocks"
                     ),
@@ -188,7 +261,7 @@ class DiscordProductionNotifier:
                     "inline": True
                 },
                 {
-                    "name": "📈 Canary Top 10 (Momentum)",
+                    "name": "📈 Benchmark Momentum (Canary) Top 10",
                     "value": canary_list or "No signals",
                     "inline": True
                 },
@@ -227,9 +300,32 @@ class DiscordProductionNotifier:
         backtest_candidate: Dict,
         backtest_baselines: Dict,
         gate_passed: bool,
-        gate_details: Dict
+        gate_details: Dict,
+        strategy_type: str = "simple",
+        multi_strategy_results: Dict = None
     ):
-        """Weekly training completion report (multi-horizon)."""
+        """
+        Weekly training completion report (multi-horizon, multi-strategy).
+        
+        Args:
+            candidate_version: Model version string
+            training_window: (start_date, end_date) tuple
+            cv_metrics: Cross-validation metrics (can be multi-horizon dict or single)
+            backtest_candidate: Backtest results for candidate
+            backtest_baselines: Dict of baseline results
+            gate_passed: Whether promotion gate passed
+            gate_details: Gate check details
+            strategy_type: Strategy type ('simple', 'lstm', etc.)
+            multi_strategy_results: Optional dict mapping strategy_type -> results for comparison
+        """
+        # Strategy name mapping
+        strategy_names = {
+            'simple': 'XGBoost Multi-Horizon',
+            'lstm': 'LSTM Neural Network',
+            'pure_momentum': 'Pure Momentum'
+        }
+        strategy_name = strategy_names.get(strategy_type, strategy_type.upper())
+        
         # CV metrics - check if multi-horizon or single
         if '1d' in cv_metrics and '5d' in cv_metrics and '20d' in cv_metrics:
             # Multi-horizon format
@@ -247,21 +343,26 @@ class DiscordProductionNotifier:
                 f"**% Positive Days:** {cv_metrics.get('cv_mean_pct_positive', 0):.1f}%"
             )
 
-        # Backtest
+        # Backtest (richer)
         bt_text = (
             f"**CAGR:** {backtest_candidate.get('cagr', 0)*100:.1f}%\n"
             f"**Sharpe:** {backtest_candidate.get('sharpe', 0):.2f}\n"
             f"**MaxDD:** {backtest_candidate.get('max_drawdown', 0)*100:.1f}%\n"
-            f"**Turnover:** {backtest_candidate.get('avg_turnover', 0)*100:.1f}%"
+            f"**Total Return:** {backtest_candidate.get('total_return', 0)*100:.1f}%\n"
+            f"**Worst Month:** {backtest_candidate.get('worst_month', 0)*100:.1f}%\n"
+            f"**Trades:** {backtest_candidate.get('total_trades', 0)}\n"
+            f"**Turnover:** {backtest_candidate.get('avg_turnover', 0)*100:.1f}%\n"
+            f"**Cost Drag:** {backtest_candidate.get('cost_drag_cumulative', 0)*100:.2f}%"
         )
 
-        # vs Baselines
+        # vs Baselines (include MaxDD)
         baseline_text = ""
         for name, metrics in backtest_baselines.items():
             baseline_text += (
                 f"**{name.upper()}:** "
                 f"{metrics.get('cagr', 0)*100:.1f}% CAGR, "
-                f"{metrics.get('sharpe', 0):.2f} Sharpe\n"
+                f"{metrics.get('sharpe', 0):.2f} Sharpe, "
+                f"{metrics.get('max_drawdown', 0)*100:.1f}% MaxDD\n"
             )
 
         # Gate
@@ -274,40 +375,178 @@ class DiscordProductionNotifier:
             f"(tol: {gate_details.get('maxdd_tolerance', 0):+.2f})"
         )
 
+        fields = [
+            {
+                "name": "🆕 Candidate Model",
+                "value": (
+                    f"**Version:** {candidate_version}\n"
+                    f"**Strategy:** {strategy_name}\n"
+                    f"**Window:** {training_window[0]} to {training_window[1]}"
+                ),
+                "inline": False
+            },
+            {
+                "name": "📊 Cross-Validation (Leakage-Safe)",
+                "value": cv_text,
+                "inline": False
+            },
+            {
+                "name": "📈 Walk-Forward Backtest",
+                "value": bt_text,
+                "inline": True
+            },
+            {
+                "name": "📊 vs Baselines",
+                "value": baseline_text or "No baselines",
+                "inline": True
+            },
+            {
+                "name": "🚪 Promotion Gate",
+                "value": gate_text,
+                "inline": False
+            }
+        ]
+        
+        # Add multi-strategy comparison if available
+        if multi_strategy_results:
+            comparison_text = ""
+            for strat_type, results in multi_strategy_results.items():
+                strat_name = strategy_names.get(strat_type, strat_type.upper())
+                sharpe = results.get('sharpe', 0)
+                cagr = results.get('cagr', 0) * 100
+                maxdd = results.get('max_drawdown', 0) * 100
+                comparison_text += (
+                    f"**{strat_name}:** "
+                    f"{cagr:.1f}% CAGR, "
+                    f"{sharpe:.2f} Sharpe, "
+                    f"{maxdd:.1f}% MaxDD\n"
+                )
+            
+            fields.append({
+                "name": "🔄 Strategy Comparison",
+                "value": comparison_text or "No comparison data",
+                "inline": False
+            })
+
         embed = {
             "title": "🧠 WEEKLY TRAINING COMPLETE",
+            "description": f"**Strategy:** {strategy_name}",
+            "color": 5763719 if gate_passed else 15158332,
+            "fields": fields,
+            "footer": {"text": "Investment Bot • Weekly Training"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        return self._send(embed)
+    
+    def send_multi_strategy_comparison(
+        self,
+        as_of_date: str,
+        strategy_results: Dict[str, Dict],
+        baselines: Dict[str, Dict],
+        best_strategy: str,
+        training_window: tuple,
+        gate_passed: bool = False,
+        gate_details: Optional[Dict] = None
+    ):
+        """
+        Send multi-strategy comparison report.
+        
+        Args:
+            as_of_date: Training date
+            strategy_results: Dict mapping strategy_type -> {sharpe, cagr, max_drawdown, ...}
+            baselines: Dict mapping baseline_name -> {sharpe, cagr, max_drawdown, ...}
+            best_strategy: Name of best performing strategy
+            training_window: (start_date, end_date) tuple
+        """
+        strategy_names = {
+            'simple': '🤖 XGBoost',
+            'pure_momentum': '📈 Pure Momentum'
+        }
+        
+        # Build strategy comparison (include richer metrics)
+        strategy_comparison = ""
+        for strat_type, results in strategy_results.items():
+            strat_name = strategy_names.get(strat_type, strat_type.upper())
+            sharpe = results.get('sharpe', 0)
+            cagr = results.get('cagr', 0) * 100
+            maxdd = results.get('max_drawdown', 0) * 100
+            total_ret = results.get('total_return', 0) * 100
+            worst_month = results.get('worst_month', 0) * 100
+            trades = results.get('total_trades', 0)
+            cost_drag = results.get('cost_drag_cumulative', 0) * 100
+            is_best = "**(best candidate)**" if strat_type == best_strategy else ""
+            
+            strategy_comparison += (
+                f"{is_best} **{strat_name}**\n"
+                f"  CAGR: {cagr:.1f}% | Sharpe: {sharpe:.2f} | MaxDD: {maxdd:.1f}%\n"
+                f"  TotalRet: {total_ret:.1f}% | WorstMo: {worst_month:.1f}% | Trades: {trades} | Cost: {cost_drag:.2f}%\n\n"
+            )
+        
+        # Baselines (include richer metrics)
+        baseline_text = ""
+        for name, metrics in baselines.items():
+            baseline_text += (
+                f"**{name.upper()}:** "
+                f"{metrics.get('cagr', 0)*100:.1f}% CAGR, "
+                f"{metrics.get('sharpe', 0):.2f} Sharpe, "
+                f"{metrics.get('max_drawdown', 0)*100:.1f}% MaxDD, "
+                f"{metrics.get('worst_month', 0)*100:.1f}% WorstMo\n"
+            )
+        
+        best_strategy_name = strategy_names.get(best_strategy, best_strategy.upper())
+
+        # Promotion gate summary
+        gate_details = gate_details or {}
+        gate_status = "✅ PASSED" if gate_passed else "❌ FAILED"
+        gate_text = (
+            f"**Status:** {gate_status}\n"
+            f"Sharpe margin: {gate_details.get('sharpe_margin_achieved', 0):+.2f} (req {gate_details.get('sharpe_margin_required', 0):+.2f})\n"
+            f"MaxDD diff: {gate_details.get('maxdd_diff', 0):+.2f} (tol {gate_details.get('maxdd_tolerance', 0):+.2f})"
+        )
+        
+        embed = {
+            "title": "🔄 MULTI-STRATEGY COMPARISON",
+            "description": f"**Selected Strategy (among candidates):** {best_strategy_name}",
             "color": 5763719 if gate_passed else 15158332,
             "fields": [
                 {
-                    "name": "🆕 Candidate Model",
-                    "value": f"**Version:** {candidate_version}\n**Window:** {training_window[0]} to {training_window[1]}",
+                    "name": "📅 Training Info",
+                    "value": (
+                        f"**Date:** {as_of_date}\n"
+                        f"**Window:** {training_window[0]} to {training_window[1]}"
+                    ),
                     "inline": False
                 },
                 {
-                    "name": "📊 Cross-Validation (Leakage-Safe)",
-                    "value": cv_text,
+                    "name": "🤖 Strategy Performance",
+                    "value": strategy_comparison or "No results",
                     "inline": False
                 },
                 {
-                    "name": "📈 Walk-Forward Backtest",
-                    "value": bt_text,
-                    "inline": True
-                },
-                {
-                    "name": "📊 vs Baselines",
-                    "value": baseline_text or "No baselines",
-                    "inline": True
+                    "name": "📊 Benchmarks (Buy & Hold)",
+                    "value": baseline_text or "No benchmarks",
+                    "inline": False
                 },
                 {
                     "name": "🚪 Promotion Gate",
                     "value": gate_text,
                     "inline": False
+                },
+                {
+                    "name": "✅ Next Rebalance Action",
+                    "value": (
+                        f"**PROMOTE candidate** → use **{best_strategy_name}**"
+                        if gate_passed else
+                        "**DO NOT PROMOTE** → keep current active model (benchmarks outperformed)"
+                    ),
+                    "inline": False
                 }
             ],
-            "footer": {"text": "Investment Bot • Weekly Training"},
+            "footer": {"text": "Investment Bot • Multi-Strategy Training"},
             "timestamp": datetime.utcnow().isoformat()
         }
-
+        
         return self._send(embed)
 
     def send_monthly_rebalance_execution(
@@ -315,6 +554,7 @@ class DiscordProductionNotifier:
         broker_mode: str,
         as_of_date: str,
         model_promoted: Optional[str],
+        strategy_type: Optional[str],
         equity_allocation: float,
         btc_allocation: float,
         portfolio_value: float,
@@ -370,16 +610,24 @@ class DiscordProductionNotifier:
                 "value": (
                     f"**Date:** {as_of_date}\n"
                     f"**Broker:** {broker_mode.upper()}\n"
-                    f"**Mode:** {'DRY RUN' if dry_run else 'LIVE'}"
+                    f"**Mode:** {'DRY RUN' if dry_run else 'LIVE'}\n"
+                    f"**Strategy:** {strategy_type or 'N/A'}"
                 ),
                 "inline": False
             }
         ]
 
         if model_promoted:
+            # Extract strategy type if available
+            strategy_info = ""
+            if 'lstm' in model_promoted.lower():
+                strategy_info = " (LSTM Neural Network)"
+            elif 'simple' in model_promoted.lower() or 'xgb' in model_promoted.lower() or 'multi_horizon' in model_promoted.lower():
+                strategy_info = " (XGBoost Multi-Horizon)"
+            
             fields.append({
                 "name": "🔄 Model Promotion",
-                "value": f"**{model_promoted}** → ACTIVE",
+                "value": f"**{model_promoted}**{strategy_info} → ACTIVE",
                 "inline": False
             })
 

@@ -50,7 +50,10 @@ class StateManager:
     def save_state(self, state: Dict):
         """Save state to file."""
         try:
-            os.makedirs(os.path.dirname(self.state_file), exist_ok=True)
+            # Handle case where state_file is just a filename (no directory)
+            state_dir = os.path.dirname(self.state_file)
+            if state_dir:
+                os.makedirs(state_dir, exist_ok=True)
             state['last_updated_utc'] = datetime.utcnow().isoformat() + 'Z'
 
             # Convert NumPy types to Python native types

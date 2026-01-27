@@ -1,0 +1,170 @@
+{
+  "as_of_date": "2026-01-27",
+  "last_updated_utc": "2026-01-27T07:27:15.442733Z",
+  "rebalance": {
+    "last_rebalance_date": null,
+    "next_rebalance_date": null,
+    "days_since_rebalance": 1,
+    "days_until_rebalance": 19
+  },
+  "models": {
+    "active_model": null,
+    "candidate_model": {
+      "version": "multi_strategy_20260126",
+      "strategy_type": "pure_momentum",
+      "trained_date": "2026-01-26T00:00:00",
+      "backtest_sharpe": 2.5542435382912507,
+      "backtest_cagr": 0.7264902015614174,
+      "backtest_maxdd": -0.09167888941458915,
+      "approved_for_next_rebalance": true,
+      "promotion_gate": {
+        "sharpe_margin_required": 0.2,
+        "maxdd_tolerance": 0.05,
+        "best_baseline_sharpe": 0.9154118171923205,
+        "candidate_sharpe": 2.5542435382912507,
+        "sharpe_margin_achieved": 1.6388317210989303,
+        "sharpe_pass": true,
+        "best_baseline_maxdd": -0.18737311215647454,
+        "candidate_maxdd": -0.09167888941458915,
+        "maxdd_diff": -0.09569422274188538,
+        "maxdd_pass": true,
+        "overall_pass": true
+      }
+    }
+  },
+  "holdings": {
+    "equities": [],
+    "crypto": [],
+    "cash": 0,
+    "total_equity": 0
+  },
+  "performance": {},
+  "data_freshness": {
+    "is_fresh": true
+  },
+  "kill_switch": {
+    "enabled": false
+  },
+  "last_workflow_runs": {},
+  "strategies": {
+    "available": [
+      "simple",
+      "pure_momentum"
+    ],
+    "best": "pure_momentum",
+    "results": {
+      "simple": {
+        "sharpe": 1.1167670038706032,
+        "cagr": 0.1886837954729541,
+        "maxdd": -0.07989209440770519
+      },
+      "pure_momentum": {
+        "sharpe": 2.5542435382912507,
+        "cagr": 0.7264902015614174,
+        "maxdd": -0.09167888941458915
+      }
+    },
+    "last_comparison_date": "2026-01-26T00:00:00"
+  },
+  "shadow_portfolios": {
+    "ml": {
+      "holdings": {
+        "DASH": 0.04,
+        "MPWR": 0.04,
+        "FISV": 0.04,
+        "EME": 0.04,
+        "TSLA": 0.04,
+        "KEYS": 0.04,
+        "MOH": 0.04,
+        "CMG": 0.04,
+        "TXN": 0.04,
+        "LLY": 0.04,
+        "CI": 0.04,
+        "MRVL": 0.04,
+        "CVNA": 0.04,
+        "DECK": 0.04,
+        "META": 0.04,
+        "GNRC": 0.04,
+        "EBAY": 0.04,
+        "ON": 0.04,
+        "HPE": 0.04,
+        "SBUX": 0.04,
+        "ROK": 0.04,
+        "WYNN": 0.04,
+        "OMC": 0.04,
+        "PWR": 0.04,
+        "TPL": 0.04
+      },
+      "weights": {
+        "DASH": 0.04,
+        "MPWR": 0.04,
+        "FISV": 0.04,
+        "EME": 0.04,
+        "TSLA": 0.04,
+        "KEYS": 0.04,
+        "MOH": 0.04,
+        "CMG": 0.04,
+        "TXN": 0.04,
+        "LLY": 0.04,
+        "CI": 0.04,
+        "MRVL": 0.04,
+        "CVNA": 0.04,
+        "DECK": 0.04,
+        "META": 0.04,
+        "GNRC": 0.04,
+        "EBAY": 0.04,
+        "ON": 0.04,
+        "HPE": 0.04,
+        "SBUX": 0.04,
+        "ROK": 0.04,
+        "WYNN": 0.04,
+        "OMC": 0.04,
+        "PWR": 0.04,
+        "TPL": 0.04
+      },
+      "equity_curve": [
+        100000.0
+      ],
+      "dates": [
+        "2026-01-26T00:00:00"
+      ],
+      "last_rebalance_date": "2026-01-26T00:00:00",
+      "initial_value": 100000.0,
+      "last_turnover": 0.0,
+      "last_cost": 0.0
+    },
+    "canary": {
+      "holdings": {
+        "BTC/USD": 1.0
+      },
+      "weights": {
+        "BTC/USD": 1.0
+      },
+      "equity_curve": [
+        100000.0
+      ],
+      "dates": [
+        "2026-01-26T00:00:00"
+      ],
+      "last_rebalance_date": "2026-01-26T00:00:00",
+      "initial_value": 100000.0,
+      "last_turnover": 0.0,
+      "last_cost": 0.0
+    },
+    "benchmarks": {
+      "spy": {
+        "equity_curve": [
+          1.0
+        ],
+        "dates": [
+          "2026-01-26T00:00:00"
+        ],
+        "initial_value": 692.755
+      },
+      "btc": {
+        "equity_curve": [],
+        "dates": []
+      }
+    }
+  }
+}

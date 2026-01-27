@@ -25,6 +25,9 @@ crypto:
 
   # Crypto allocation (percentage of portfolio)
   crypto_allocation: 0.10  # 10% of portfolio in crypto
+  crypto_allocation_strategy: "momentum"  # options: "fixed", "momentum"
+  crypto_min_allocation: 0.05  # 5% floor
+  crypto_max_allocation: 0.15  # 15% cap
 
 # Combined settings
 trade_equities: true  # Trade S&P 500 stocks

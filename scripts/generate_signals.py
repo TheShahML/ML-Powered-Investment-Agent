@@ -13,9 +13,13 @@ from src.universe import Universe
 from src.data_service import DataService
 from src.strategy_simple import SimpleStrategy
 from src.canary_tracker import CanaryTracker
+from src.shadow_tracker import ShadowPortfolioTracker
 from src.state_manager import StateManager
 from src.file_storage import FileStorage
 from src.discord_prod import DiscordProductionNotifier
+from src.reporting.dashboard import DashboardGenerator
+# Fix alpaca import issue
+from src import alpaca_fix
 import alpaca_trade_api as tradeapi
 
 
@@ -46,10 +50,12 @@ def main():
     start_date = end_date - timedelta(days=365 * 2)
 
     data_service = DataService(config)
+    # Ensure SPY is included for regime filter
     df = data_service.get_historical_data(
         symbols,
         start_date.strftime('%Y-%m-%d'),
-        end_date.strftime('%Y-%m-%d')
+        end_date.strftime('%Y-%m-%d'),
+        ensure_spy=True
     )
 
     if df.empty:
@@ -74,29 +80,43 @@ def main():
         ], severity="error")
         sys.exit(1)
 
-    # Load state
-    state_manager = StateManager(state_file_path="state-repo/latest_state.json")
+    # Load state (from workspace, not state-repo - workflow copies it)
+    state_manager = StateManager(state_file_path="./latest_state.json")
     state = state_manager.load_state()
 
     # Load active model
     active_model = state.get('models', {}).get('active_model')
     if not active_model:
         logger.warning("No active model, using fallback")
-        active_model = {'version': 'fallback'}
+        active_model = {'version': 'fallback', 'strategy_type': 'simple'}
+    
+    # Get strategy type from state or config
+    strategy_type = active_model.get('strategy_type') or state.get('strategies', {}).get('best') or config.get('strategy', {}).get('strategy_type', 'simple')
+    active_model['strategy_type'] = strategy_type
 
     # Generate multi-horizon ML signals
-    logger.info(f"Generating multi-horizon signals (active: {active_model.get('version')})")
-    strategy = SimpleStrategy(config, horizon='20d')
+    logger.info(f"Generating multi-horizon signals (active: {active_model.get('version')}, strategy: {strategy_type})")
+    
+    # Use strategy selector to get the correct strategy
+    from src.strategy_selector import StrategySelector
+    selector = StrategySelector(config)
+    strategy = selector.get_strategy(strategy_type, horizon='20d')
 
     # Compute features once
     df_features = strategy.compute_features(df)
 
     # Generate signals from all 3 horizons
-    multi_signals = strategy.compute_multi_horizon_signals(df_features)
-
-    signals_1d = multi_signals.get('1d')
-    signals_5d = multi_signals.get('5d')
-    signals_20d = multi_signals.get('20d')  # PRIMARY for rebalancing
+    # Check if strategy supports multi-horizon, otherwise use single horizon
+    if hasattr(strategy, 'compute_multi_horizon_signals'):
+        multi_signals = strategy.compute_multi_horizon_signals(df_features)
+        signals_1d = multi_signals.get('1d')
+        signals_5d = multi_signals.get('5d')
+        signals_20d = multi_signals.get('20d')  # PRIMARY for rebalancing
+    else:
+        # Fallback: use single horizon for all
+        signals_20d = strategy.compute_signals(df_features)
+        signals_1d = signals_20d  # Use same signals
+        signals_5d = signals_20d  # Use same signals
 
     if signals_20d is None or signals_20d.empty:
         logger.error("20-day model (primary) missing or failed!")
@@ -106,8 +126,8 @@ def main():
     logger.info(f"✓ 5d signals: {len(signals_5d) if signals_5d is not None else 0} stocks")
     logger.info(f"✓ 20d signals: {len(signals_20d)} stocks (PRIMARY)")
 
-    # Generate canary signals
-    logger.info("Generating canary signals (pure momentum)")
+    # Generate benchmark momentum (canary) signals
+    logger.info("Generating benchmark momentum (canary) signals")
     canary = CanaryTracker(config)
     canary_signals = canary.compute_momentum_signals(df, top_n=25)
 
@@ -115,23 +135,91 @@ def main():
     storage = FileStorage()
     storage.save_signals(signals_20d, as_of_date)  # Primary for rebalancing
 
-    # Get performance metrics (stub - would compute from state)
-    perf_since_rebal = {
-        'actual': 0.0,
+    # Update shadow portfolios
+    shadow_tracker = ShadowPortfolioTracker(config)
+    shadow_state = shadow_tracker.initialize_from_state(state)
+    
+    # Get latest prices for all symbols + SPY + BTC
+    latest_prices = {}
+    spy_price = None
+    btc_price = None
+    
+    try:
+        for symbol in symbols + ['SPY']:
+            try:
+                symbol_data = df.xs(symbol, level=1)
+                if len(symbol_data) > 0:
+                    latest_prices[symbol] = float(symbol_data['close'].iloc[-1])
+                    if symbol == 'SPY':
+                        spy_price = latest_prices[symbol]
+            except:
+                continue
+        
+        # Try to get BTC price if enabled
+        if config.get('trade_crypto', False):
+            try:
+                btc_data = df.xs('BTC/USD', level=1) if 'BTC/USD' in df.index.get_level_values(1) else None
+                if btc_data is not None and len(btc_data) > 0:
+                    btc_price = float(btc_data['close'].iloc[-1])
+            except:
+                pass
+    except Exception as e:
+        logger.warning(f"Error getting latest prices: {e}")
+
+    # Update shadow portfolios daily
+    shadow_state = shadow_tracker.update_daily(
+        shadow_state,
+        as_of_date,
+        latest_prices,
+        spy_price=spy_price,
+        btc_price=btc_price
+    )
+    
+    # Compute performance metrics
+    performance_metrics = shadow_tracker.compute_performance_metrics(shadow_state, as_of_date)
+    
+    # Update state with shadow portfolios
+    state['shadow_portfolios'] = shadow_state
+    state_manager.save_state(state)
+
+    # Get performance metrics for Discord
+    perf_since_rebal = performance_metrics.get('since_rebalance', {
+        'ml': 0.0,
         'canary': 0.0,
         'spy': 0.0,
-        'btc': 0.0,
         'days': state.get('rebalance', {}).get('days_since_rebalance', 0)
-    }
+    })
 
-    perf_rolling = {
-        'actual_30d': 0.0,
-        'canary_30d': 0.0,
-        'spy_30d': 0.0
-    }
+    perf_rolling = performance_metrics.get('rolling_30d', {
+        'ml': 0.0,
+        'canary': 0.0,
+        'spy': 0.0
+    })
 
     # Increment day counter
     state_manager.increment_day_counter()
+    
+    # Generate dashboard
+    dashboard_gen = DashboardGenerator()
+    
+    # Get current holdings from state (if available)
+    current_holdings = shadow_state.get('ml', {}).get('weights', {})
+    
+    # Get broker mode and kill switch
+    broker_mode = os.environ.get('BROKER_MODE', 'paper')
+    kill_switch_enabled = os.environ.get('KILL_SWITCH_ENABLED', 'false').lower() == 'true'
+    
+    dashboard_path = dashboard_gen.generate_daily_dashboard(
+        as_of_date=as_of_date,
+        active_model=active_model,
+        ml_top10=[(sym, row['score']) for sym, row in signals_20d.head(10).iterrows()],
+        canary_top10=[(sym, row['score']*100) for sym, row in canary_signals.head(10).iterrows()],
+        current_holdings=current_holdings,
+        shadow_state=shadow_state,
+        performance_metrics=performance_metrics,
+        broker_mode=broker_mode,
+        kill_switch=kill_switch_enabled
+    )
 
     # Send Discord summary (multi-horizon)
     discord = DiscordProductionNotifier()
@@ -144,6 +232,7 @@ def main():
 
     candidate_approved = state.get('models', {}).get('candidate_model', {}).get('approved_for_next_rebalance', False)
 
+    # Send Discord message with dashboard image
     discord.send_multi_horizon_signals(
         as_of_date=as_of_date.isoformat(),
         active_model=active_model,
@@ -159,6 +248,9 @@ def main():
         days_until_rebal=state.get('rebalance', {}).get('days_until_rebalance', 20),
         next_rebal_date=state.get('rebalance', {}).get('next_rebalance_date', 'TBD')
     )
+    
+    # Send dashboard image
+    discord.send_image("📊 Daily Dashboard", dashboard_path)
 
     logger.info("=" * 60)
     logger.info("SIGNAL GENERATION COMPLETE")

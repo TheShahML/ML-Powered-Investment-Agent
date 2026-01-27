@@ -29,7 +29,15 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python dependencies
+# Install alpha-vantage first to fix alpaca-trade-api import issue
+RUN pip install --no-cache-dir alpha-vantage>=2.3.0
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Optionally install TensorFlow for LSTM strategy (can be skipped if not using LSTM)
+ARG INSTALL_TENSORFLOW=false
+RUN if [ "$INSTALL_TENSORFLOW" = "true" ]; then \
+      pip install --no-cache-dir tensorflow>=2.10.0; \
+    fi
 
 # Copy source code
 COPY src/ ./src/
@@ -42,6 +50,7 @@ RUN mkdir -p \
     data/signals \
     data/portfolio \
     backtests \
+    reports \
     logs
 
 # Health check for production deployments

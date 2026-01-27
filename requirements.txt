@@ -5,16 +5,20 @@ xgboost
 scikit-learn
 joblib
 
+# Deep Learning (optional - for LSTM strategy)
+tensorflow>=2.10.0  # Install only if using LSTM strategy
+
 # Market Data
 yfinance
 lxml
 html5lib
 
-# Trading API
-alpaca-trade-api
+# Trading API  
+alpha-vantage>=2.3.0  # Install first - required by alpaca-trade-api
+alpaca-trade-api>=3.0.0,<4.0.0
 
 # Configuration
-pyyaml
+pyyaml>=6.0
 python-dotenv
 
 # Notifications
@@ -22,3 +26,7 @@ requests
 
 # Logging
 loguru
+
+# Plotting
+matplotlib
+seaborn

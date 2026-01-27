@@ -1,5 +1,7 @@
 """Safe, idempotent order execution with multiple safety controls."""
 import os
+# Fix alpaca import issue
+from . import alpaca_fix
 import alpaca_trade_api as tradeapi
 import pandas as pd
 import numpy as np

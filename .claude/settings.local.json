@@ -6,7 +6,10 @@
       "Bash(gh api:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(gh repo view:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(findstr:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)"
     ]
   }
 }

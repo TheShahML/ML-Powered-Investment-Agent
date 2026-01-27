@@ -10,9 +10,12 @@ Provides:
 - Price/volume/liquidity filters
 """
 
+# Fix alpaca import issue
+from . import alpaca_fix
 import alpaca_trade_api as tradeapi
 import requests
 import pandas as pd
+from io import StringIO
 from loguru import logger
 from typing import List, Dict, Set
 from datetime import date, timedelta
@@ -70,35 +73,56 @@ class Universe:
 
     def get_sp500_constituents(self) -> List[str]:
         """
-        Fetch S&P 500 constituent symbols using fallback to static list.
-
+        Fetch S&P 500 constituent symbols dynamically.
+        
+        Tries multiple sources in order:
+        1. Wikipedia (most reliable, up-to-date)
+        2. Static file fallback
+        
         Returns:
             List of S&P 500 symbols (normalized)
         """
         try:
             logger.info("Fetching S&P 500 constituents...")
 
-            # Try Wikipedia first
+            # Method 1: Try Wikipedia first (most reliable and up-to-date)
             try:
                 url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-                tables = pd.read_html(url)
+                # Fetch with proper headers to avoid 403 Forbidden
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                }
+                response = requests.get(url, headers=headers, timeout=10)
+                response.raise_for_status()
+                tables = pd.read_html(StringIO(response.text))
                 df = tables[0]
                 symbols = df['Symbol'].tolist()
                 normalized = [self.normalize_symbol_for_alpaca(s) for s in symbols]
-                logger.info(f"Fetched {len(normalized)} S&P 500 symbols via Wikipedia")
-                return normalized
-            except:
-                # Fallback to static list from config
-                import os
-                static_file = os.path.join('config', 'sp500_static.txt')
+                if len(normalized) >= 490:  # Should be ~500, allow some tolerance
+                    logger.info(f"✓ Fetched {len(normalized)} S&P 500 symbols via Wikipedia")
+                    return normalized
+                else:
+                    logger.warning(f"Wikipedia returned only {len(normalized)} symbols (expected ~500)")
+                    raise ValueError(f"Insufficient symbols from Wikipedia: {len(normalized)}")
+            except Exception as e:
+                logger.warning(f"Wikipedia fetch failed: {e}")
+
+            # Method 2: Fallback to static list
+            import os
+            static_file = os.path.join('config', 'sp500_static.txt')
+            if os.path.exists(static_file):
                 with open(static_file, 'r') as f:
                     tickers = f.read().strip().split(',')
-                logger.info(f"Using static S&P 500 list: {len(tickers)} symbols")
+                logger.warning(f"Using static S&P 500 list: {len(tickers)} symbols")
+                logger.warning(f"Static list has {len(tickers)} symbols (S&P 500 should have ~500). Consider updating config/sp500_static.txt")
                 return [self.normalize_symbol_for_alpaca(s.strip()) for s in tickers]
+            else:
+                raise FileNotFoundError(f"Static S&P 500 file not found: {static_file}")
 
         except Exception as e:
             logger.error(f"Error fetching S&P 500 constituents: {e}")
             # Ultimate fallback to core 30
+            logger.error("Using minimal fallback list (30 symbols)")
             return [self.normalize_symbol_for_alpaca(s) for s in [
                 "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "META", "TSLA", "BRK-B", "UNH", "XOM",
                 "JPM", "V", "PG", "MA", "HD", "CVX", "MRK", "ABBV", "LLY", "PEP",
@@ -107,13 +131,73 @@ class Universe:
 
     def get_nasdaq100_constituents(self) -> List[str]:
         """
-        Get NASDAQ-100 constituent symbols.
-
+        Fetch NASDAQ-100 constituent symbols dynamically.
+        
+        Tries multiple sources in order:
+        1. Wikipedia (most reliable, up-to-date)
+        2. NASDAQ website scraping
+        3. Static list fallback
+        
         Returns:
             List of NASDAQ-100 symbols (normalized)
         """
-        logger.info(f"Using NASDAQ-100 list: {len(NASDAQ_100_TICKERS)} symbols")
-        return [self.normalize_symbol_for_alpaca(s) for s in NASDAQ_100_TICKERS]
+        try:
+            logger.info("Fetching NASDAQ-100 constituents...")
+
+            # Method 1: Try Wikipedia (most reliable)
+            try:
+                url = "https://en.wikipedia.org/wiki/NASDAQ-100"
+                # Fetch with proper headers to avoid 403 Forbidden
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                }
+                response = requests.get(url, headers=headers, timeout=10)
+                response.raise_for_status()
+                tables = pd.read_html(StringIO(response.text))
+                # Look for table with ticker symbols
+                for table in tables:
+                    # Check for common column names
+                    for col_name in ['Symbol', 'Ticker', 'Ticker symbol']:
+                        if col_name in table.columns:
+                            symbols = table[col_name].dropna().tolist()
+                            # Filter out non-ticker entries
+                            symbols = [s for s in symbols if isinstance(s, str) and len(s) <= 5 and s.isupper()]
+                            normalized = [self.normalize_symbol_for_alpaca(s) for s in symbols]
+                            if len(normalized) >= 90:  # Should be ~100
+                                logger.info(f"✓ Fetched {len(normalized)} NASDAQ-100 symbols via Wikipedia")
+                                return normalized
+            except Exception as e:
+                logger.debug(f"Wikipedia NASDAQ-100 fetch failed: {e}")
+
+            # Method 2: Try NASDAQ website (alternative)
+            try:
+                url = "https://www.nasdaq.com/market-activity/quotes/nasdaq-ndx-index"
+                response = requests.get(url, timeout=10, headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                })
+                if response.status_code == 200:
+                    tables = pd.read_html(response.text)
+                    for table in tables:
+                        if 'Symbol' in table.columns or 'Ticker' in table.columns:
+                            col = 'Symbol' if 'Symbol' in table.columns else 'Ticker'
+                            symbols = table[col].dropna().tolist()
+                            symbols = [s for s in symbols if isinstance(s, str) and len(s) <= 5]
+                            normalized = [self.normalize_symbol_for_alpaca(s) for s in symbols]
+                            if len(normalized) >= 90:
+                                logger.info(f"✓ Fetched {len(normalized)} NASDAQ-100 symbols via NASDAQ website")
+                                return normalized
+            except Exception as e:
+                logger.debug(f"NASDAQ website fetch failed: {e}")
+
+            # Method 3: Fallback to static list
+            logger.warning(f"Using static NASDAQ-100 list: {len(NASDAQ_100_TICKERS)} symbols")
+            logger.warning("Consider updating NASDAQ_100_TICKERS in src/universe.py if list becomes outdated")
+            return [self.normalize_symbol_for_alpaca(s) for s in NASDAQ_100_TICKERS]
+
+        except Exception as e:
+            logger.error(f"Error fetching NASDAQ-100 constituents: {e}")
+            logger.error("Using static fallback list")
+            return [self.normalize_symbol_for_alpaca(s) for s in NASDAQ_100_TICKERS]
 
     def get_union_universe(self) -> List[str]:
         """
@@ -162,7 +246,9 @@ class Universe:
                 asset = alpaca_symbols[symbol]
 
                 # Check if tradeable
-                if asset.tradable and asset.shortable and asset.marginable and asset.fractionable:
+                # Note: fractionable is optional - many stocks aren't fractionable but are still tradeable
+                # We only require: tradable, shortable (for flexibility), and marginable
+                if asset.tradable and asset.shortable and asset.marginable:
                     tradeable.append(symbol)
                 else:
                     stats['non_tradeable'].append({
@@ -170,7 +256,7 @@ class Universe:
                         'tradable': asset.tradable,
                         'shortable': asset.shortable,
                         'marginable': asset.marginable,
-                        'fractionable': asset.fractionable
+                        'fractionable': getattr(asset, 'fractionable', False)
                     })
 
             stats['tradeable_count'] = len(tradeable)
@@ -303,8 +389,12 @@ class Universe:
         all_stats['tradeable_stats'] = tradeable_stats
 
         # Step 3: Apply liquidity filters
+        # Config is flattened, so keys should be directly accessible
         min_price = self.config.get('min_price', 5.0)
-        min_adv = self.config.get('min_avg_dollar_volume', 20_000_000)
+        # Try multiple possible config keys for ADV
+        min_adv = (self.config.get('min_avg_dollar_volume') or 
+                  self.config.get('min_adv') or 
+                  5_000_000)  # Default to $5M (more lenient than $20M)
 
         final, liquidity_stats = self.apply_liquidity_filters(
             tradeable,

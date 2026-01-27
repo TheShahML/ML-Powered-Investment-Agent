@@ -16,9 +16,10 @@ import os
 from loguru import logger
 from typing import Dict, List, Tuple
 from .leakage_safe_cv import train_with_leakage_safe_cv
+from .strategy_base import BaseStrategy
 
 
-class SimpleStrategy:
+class SimpleStrategy(BaseStrategy):
     """
     Simple momentum strategy using single XGBoost model.
 
@@ -240,7 +241,7 @@ class SimpleStrategy:
         }).sort_values('importance', ascending=False)
 
 
-class PureMomentumStrategy:
+class PureMomentumStrategy(BaseStrategy):
     """
     Even simpler: pure momentum ranking, no ML.
 
@@ -248,8 +249,28 @@ class PureMomentumStrategy:
     This is the academic baseline that's hard to beat.
     """
 
-    def __init__(self, config: Dict):
-        self.config = config
+    def __init__(self, config: Dict, model_dir: str = 'models', horizon: str = '20d'):
+        super().__init__(config, model_dir, horizon)
+        self.feature_cols = []  # No features needed
+
+    def compute_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Pure momentum doesn't compute features, just returns data."""
+        return df
+
+    def train(self, df: pd.DataFrame, target_col: str = 'target', embargo_days: int = None) -> Dict:
+        """Pure momentum doesn't train - it's rule-based."""
+        logger.info("PureMomentumStrategy: No training needed (rule-based)")
+        return {
+            'cv_mean_ic': 0.0,
+            'cv_std_ic': 0.0,
+            'n_samples': 0,
+            'n_features': 0,
+            'embargo_days': 0
+        }
+
+    def load_model(self, horizon: str = None) -> bool:
+        """Pure momentum doesn't have a model to load."""
+        return True  # Always "loaded" since it's rule-based
 
     def compute_signals(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -259,23 +280,50 @@ class PureMomentumStrategy:
         df = df.copy()
         df = df.sort_index()
 
+        # Ensure 'close' column exists
+        if 'close' not in df.columns:
+            logger.error("PureMomentumStrategy requires 'close' column in data")
+            return pd.DataFrame(columns=['score', 'rank'])
+
         grouped = df.groupby(level=1)
 
-        # 12-1 momentum: 12-month return minus 1-month return
+        # Check if we have enough data for 12-month momentum
+        # If not, use shorter lookback periods
+        sample_size = len(df.groupby(level=1).size())
+        if sample_size == 0:
+            logger.warning("PureMomentumStrategy: No data available")
+            return pd.DataFrame(columns=['score', 'rank'])
+
+        # Try 12-1 momentum first, fall back to shorter periods if needed
         ret_12m = grouped['close'].pct_change(252)
         ret_1m = grouped['close'].pct_change(21)
+        
+        # If not enough data, use available lookback
+        if ret_12m.isna().all():
+            # Try 6-month momentum if 12-month doesn't work
+            ret_12m = grouped['close'].pct_change(126)
+            ret_1m = grouped['close'].pct_change(21)
+            if ret_12m.isna().all():
+                # Try 3-month momentum
+                ret_12m = grouped['close'].pct_change(63)
+                ret_1m = grouped['close'].pct_change(5)
+        
         df['momentum'] = ret_12m - ret_1m
 
         # Get latest momentum for each ticker
         latest = df.groupby(level=1).tail(1).copy()
 
+        # Create signals DataFrame with ticker as index (not column)
         signals = pd.DataFrame({
-            'ticker': latest.index.get_level_values(1),
             'score': latest['momentum'].values
-        })
+        }, index=latest.index.get_level_values(1))
 
         # Remove NaN
         signals = signals.dropna()
+        
+        if len(signals) == 0:
+            logger.warning("PureMomentumStrategy: No valid signals after removing NaN (may need more historical data)")
+            return pd.DataFrame(columns=['score', 'rank'])
 
         signals['rank'] = signals['score'].rank(ascending=False)
-        return signals.sort_values('rank').set_index('ticker')
+        return signals.sort_values('rank')

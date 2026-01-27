@@ -1,12 +1,16 @@
 # Strategy configuration
 strategy:
   name: "multi_horizon_momentum"
-  strategy_type: "simple" # Options: simple (recommended), stacking, pure_momentum
+  strategy_type: "simple" # Options: simple (recommended), pure_momentum
+  # Dynamic switching: if enabled, system will automatically switch to best performing strategy
+  enable_dynamic_switching: false  # Set to true to enable automatic strategy switching
   n_holdings: 25 # UPDATED: Increased from 20 to capture more opportunities
   rebalance_frequency: 20 # Every 20 trading days (~monthly)
   min_hold_days: 20
   turnover_threshold: 0.05 # Only replace if score gap > 5%
   benchmark_tickers: ["SPY", "QQQ", "VTI"]
+  
+  # LSTM disabled for now
 
 # Model configuration
 model:

@@ -1,3 +1,5 @@
+# Fix alpaca import issue
+from . import alpaca_fix
 import alpaca_trade_api as tradeapi
 import pandas as pd
 import datetime
@@ -115,16 +117,27 @@ class DataService:
 
         return universe
 
-    def get_historical_data(self, tickers: List[str], start_date: str, end_date: str) -> pd.DataFrame:
+    def get_historical_data(self, tickers: List[str], start_date: str, end_date: str, ensure_spy: bool = True) -> pd.DataFrame:
         """
         Fetches historical EOD bars for the given tickers.
         Supports both equities and crypto (BTC/USD, ETH/USD, etc.)
+        
+        Args:
+            tickers: List of ticker symbols
+            start_date: Start date (YYYY-MM-DD)
+            end_date: End date (YYYY-MM-DD)
+            ensure_spy: If True, ensure SPY is included (required for regime filter)
         """
-        logger.info(f"Fetching historical data for {len(tickers)} tickers from {start_date} to {end_date}...")
+        # Ensure SPY is included if needed
+        equity_tickers = [t for t in tickers if '/' not in t]
+        if ensure_spy and 'SPY' not in equity_tickers:
+            logger.info("Adding SPY to data fetch (required for regime filter)")
+            equity_tickers.append('SPY')
+        
+        logger.info(f"Fetching historical data for {len(equity_tickers)} equity tickers from {start_date} to {end_date}...")
 
         # Separate crypto tickers from equity tickers
         crypto_tickers = [t for t in tickers if '/' in t]
-        equity_tickers = [t for t in tickers if '/' not in t]
 
         all_bars = []
 
@@ -143,6 +156,18 @@ class DataService:
                         feed='iex'  # Use IEX feed (free tier) instead of SIP (paid)
                     ).df
                     if not bars.empty:
+                        # Standardize to MultiIndex (timestamp, symbol)
+                        if isinstance(bars.index, pd.MultiIndex):
+                            # Alpaca equities typically returns (symbol, timestamp)
+                            bars = bars.swaplevel().sort_index()
+                        else:
+                            # If not MultiIndex, try to build (timestamp, symbol)
+                            if 'symbol' in bars.columns:
+                                bars = bars.reset_index()
+                                ts_col = 'timestamp' if 'timestamp' in bars.columns else ('time' if 'time' in bars.columns else None)
+                                if ts_col:
+                                    bars['timestamp'] = pd.to_datetime(bars[ts_col])
+                                    bars = bars.set_index(['timestamp', 'symbol']).sort_index()
                         all_bars.append(bars)
                 except Exception as e:
                     logger.error(f"Error fetching equity data for chunk {i}: {e}")
@@ -152,21 +177,31 @@ class DataService:
         if crypto_tickers:
             for symbol in crypto_tickers:
                 try:
-                    # Alpaca crypto API expects symbols without '/' (e.g., 'BTCUSD')
-                    crypto_symbol = symbol.replace('/', '')
-                    logger.info(f"Fetching crypto data for {crypto_symbol}...")
+                    # Alpaca crypto bars expects symbols like 'BTC/USD'
+                    logger.info(f"Fetching crypto data for {symbol}...")
 
                     bars = self.api.get_crypto_bars(
-                        crypto_symbol,
+                        symbol,
                         tradeapi.rest.TimeFrame.Day,
                         start_date,
                         end_date
                     ).df
 
                     if not bars.empty:
-                        # Add symbol column to match equity data format
-                        bars['symbol'] = symbol
-                        bars = bars.reset_index().set_index(['timestamp', 'symbol'])
+                        # Standardize to MultiIndex (timestamp, symbol)
+                        bars = bars.copy()
+                        if isinstance(bars.index, pd.MultiIndex):
+                            # If it came back as (symbol, timestamp), normalize
+                            bars = bars.swaplevel().sort_index()
+                        else:
+                            # DatetimeIndex -> materialize to 'timestamp' column
+                            bars = bars.reset_index()
+                            ts_col = 'timestamp' if 'timestamp' in bars.columns else ('time' if 'time' in bars.columns else 'index')
+                            if ts_col != 'timestamp':
+                                bars = bars.rename(columns={ts_col: 'timestamp'})
+                            bars['timestamp'] = pd.to_datetime(bars['timestamp'])
+                            bars['symbol'] = symbol
+                            bars = bars.set_index(['timestamp', 'symbol']).sort_index()
                         all_bars.append(bars)
 
                 except Exception as e:
@@ -178,19 +213,26 @@ class DataService:
 
         df = pd.concat(all_bars)
 
-        # Alpaca returns MultiIndex (symbol, timestamp) - we need (timestamp, symbol)
-        # for the strategy to work correctly
+        # Ensure MultiIndex (timestamp, symbol)
         if isinstance(df.index, pd.MultiIndex):
-            # Swap levels to get (timestamp, symbol)
-            df = df.swaplevel()
-            df = df.sort_index()
+            # We standardized each chunk to (timestamp, symbol), but keep this for safety.
+            if df.index.names and df.index.names[0] != 'timestamp':
+                df = df.swaplevel().sort_index()
+            else:
+                df = df.sort_index()
         else:
-            # If not MultiIndex, the 'symbol' column should exist
+            # If not MultiIndex, try to build it from available columns/index
             if 'symbol' in df.columns:
                 df = df.reset_index()
+                ts_col = 'timestamp' if 'timestamp' in df.columns else ('time' if 'time' in df.columns else None)
+                if ts_col is None:
+                    # last resort: use index as timestamp
+                    df = df.rename(columns={'index': 'timestamp'})
+                    ts_col = 'timestamp'
+                if ts_col != 'timestamp':
+                    df = df.rename(columns={ts_col: 'timestamp'})
                 df['timestamp'] = pd.to_datetime(df['timestamp'])
-                df = df.set_index(['timestamp', 'symbol'])
-                df = df.sort_index()
+                df = df.set_index(['timestamp', 'symbol']).sort_index()
 
         return df
 

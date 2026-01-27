@@ -81,8 +81,8 @@ class BitcoinMomentumStrategy:
     def __init__(self, config: Dict):
         self.config = config
         self.base_allocation = config.get('crypto_allocation', 0.10)
-        self.min_allocation = 0.05  # Never less than 5%
-        self.max_allocation = 0.15  # Never more than 15%
+        self.min_allocation = config.get('crypto_min_allocation', 0.05)  # Never less than 5% by default
+        self.max_allocation = config.get('crypto_max_allocation', 0.15)  # Never more than 15% by default
 
     def compute_btc_momentum(self, btc_prices: pd.Series) -> float:
         """
@@ -128,6 +128,7 @@ class BitcoinMomentumStrategy:
 def get_crypto_orders(
     api,
     target_allocations: Dict[str, float],
+    latest_prices: Dict[str, float] | None = None,
     dry_run: bool = False
 ) -> List[Dict]:
     """
@@ -142,6 +143,7 @@ def get_crypto_orders(
         List of order info dicts
     """
     orders = []
+    latest_prices = latest_prices or {}
 
     for symbol, target_value in target_allocations.items():
         try:
@@ -152,24 +154,23 @@ def get_crypto_orders(
             except Exception:
                 current_value = 0.0
 
-            # Get current price
-            quote = api.get_latest_crypto_quote(symbol)
-            price = float(quote.ap)  # Ask price
-
             # Calculate order
             diff_value = target_value - current_value
 
             if abs(diff_value) < 10:  # Min $10 trade
                 continue
 
-            diff_qty = diff_value / price
-            side = 'buy' if diff_qty > 0 else 'sell'
+            side = 'buy' if diff_value > 0 else 'sell'
+
+            # Optional: estimate qty for reporting if we have a recent price (from bars)
+            price = float(latest_prices.get(symbol, 0.0) or 0.0)
+            qty = abs(diff_value) / price if price and price > 0 else None
 
             order_info = {
                 'symbol': symbol,
                 'side': side,
                 'notional': abs(diff_value),
-                'qty': abs(diff_qty),
+                'qty': float(qty) if qty is not None else None,
                 'type': 'market',
                 'time_in_force': 'gtc'  # Good til cancelled for crypto
             }

@@ -1,0 +1,46 @@
+{
+  "as_of_date": "2026-01-26",
+  "last_updated_utc": "2026-01-27T05:08:16.043516Z",
+  "rebalance": {
+    "last_rebalance_date": null,
+    "next_rebalance_date": null,
+    "days_since_rebalance": 1,
+    "days_until_rebalance": 19
+  },
+  "models": {
+    "active_model": null,
+    "candidate_model": {
+      "version": "multi_horizon_20260123",
+      "trained_date": "2026-01-23",
+      "training_window_start": "2024-01-24",
+      "training_window_end": "2026-01-23",
+      "cv_1d_mean_ic": 0.013252525948825027,
+      "cv_5d_mean_ic": 0.03981215873529594,
+      "cv_20d_mean_ic": 0.009770845180078088,
+      "backtest_sharpe": 1.839298108634175,
+      "backtest_cagr": 0.7747456258604428,
+      "backtest_maxdd": -0.23126539932835113,
+      "approved_for_next_rebalance": true,
+      "horizons": [
+        "1d",
+        "5d",
+        "20d"
+      ],
+      "primary_horizon": "20d"
+    }
+  },
+  "holdings": {
+    "equities": [],
+    "crypto": [],
+    "cash": 0,
+    "total_equity": 0
+  },
+  "performance": {},
+  "data_freshness": {
+    "is_fresh": true
+  },
+  "kill_switch": {
+    "enabled": false
+  },
+  "last_workflow_runs": {}
+}

@@ -3,9 +3,11 @@ import pandas as pd
 import numpy as np
 from loguru import logger
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional, Callable
 import json
 import os
+
+from .portfolio_constructor import PortfolioConstructor
 
 
 class WalkForwardBacktest:
@@ -14,13 +16,24 @@ class WalkForwardBacktest:
     def __init__(self, config: Dict):
         self.config = config
         self.top_n = config.get('top_n', 20)
-        self.max_weight = config.get('max_weight', 0.08)
+        self.max_weight = config.get('max_weight', 0.10)
         self.weight_method = config.get('weight_method', 'inverse_vol')
         self.cost_bps = config.get('cost_bps', 15.0)
         self.slippage_bps = config.get('slippage_bps', 5.0)
         self.turnover_buffer_pct = config.get('turnover_buffer_pct', 1.0)
         self.rebalance_freq = config.get('rebalance_freq_days', 20)
         self.regime_filter = config.get('regime_filter', True)
+        self.retrain_each_rebalance = config.get('retrain_each_rebalance', True)
+        
+        # Use shared PortfolioConstructor
+        self.portfolio_constructor = PortfolioConstructor(
+            top_n=self.top_n,
+            max_weight=self.max_weight,
+            vol_window=60,
+            turnover_buffer_pct=self.turnover_buffer_pct,
+            regime_filter=self.regime_filter,
+            regime_scale=0.5
+        )
 
     def run_backtest(
         self,
@@ -28,22 +41,32 @@ class WalkForwardBacktest:
         data: pd.DataFrame,
         start_date: str,
         end_date: str,
-        initial_capital: float = 100000.0
+        initial_capital: float = 100000.0,
+        trainer: Optional[Callable] = None
     ) -> Dict:
         """
-        Run walk-forward backtest.
+        Run walk-forward backtest with optional retraining at each rebalance.
 
         Args:
-            strategy: Strategy instance with compute_signals() method
+            strategy: Strategy instance with compute_signals() method (and optionally fit() method)
             data: Historical data with MultiIndex (timestamp, symbol)
             start_date: Backtest start
             end_date: Backtest end
             initial_capital: Starting portfolio value
+            trainer: Optional callable(train_data, as_of_date) -> strategy to retrain model
 
         Returns:
             Dict with performance metrics
         """
         logger.info(f"Running walk-forward backtest: {start_date} to {end_date}")
+        logger.info(f"Retrain each rebalance: {self.retrain_each_rebalance}")
+
+        # Ensure SPY is in data for regime filter
+        if self.regime_filter:
+            spy_in_data = 'SPY' in data.index.get_level_values(1).unique()
+            if not spy_in_data:
+                logger.error("SPY not found in data - required for regime filter")
+                raise ValueError("SPY must be included in data when regime_filter=True")
 
         # Get rebalance dates
         dates = pd.to_datetime(data.index.get_level_values(0)).unique().sort_values()
@@ -61,30 +84,65 @@ class WalkForwardBacktest:
 
         logger.info(f"Rebalancing {len(rebalance_dates)} times over {len(dates)} days")
 
+        # Get SPY data for regime filter
+        spy_data = None
+        if self.regime_filter:
+            try:
+                spy_data = data.xs('SPY', level=1)
+            except KeyError:
+                logger.error("SPY extraction failed")
+                raise
+
         for i, rebal_date in enumerate(rebalance_dates):
-            # Get data up to rebalance date
+            # Get data strictly up to rebalance date (no lookahead)
             data_slice = data[data.index.get_level_values(0) <= rebal_date]
 
             if len(data_slice) < 500:
+                logger.warning(f"Insufficient data at {rebal_date}, skipping")
                 continue
 
-            # Generate signals
+            # Retrain model if requested
+            if self.retrain_each_rebalance and trainer is not None:
+                logger.info(f"Retraining model at {rebal_date}")
+                try:
+                    strategy = trainer(data_slice, rebal_date)
+                except Exception as e:
+                    logger.warning(f"Retraining failed at {rebal_date}: {e}, using existing model")
+            elif self.retrain_each_rebalance and hasattr(strategy, 'fit'):
+                logger.info(f"Retraining model at {rebal_date} (using strategy.fit)")
+                try:
+                    # Strategy should implement fit() that trains on data up to date
+                    strategy.fit(data_slice, as_of_date=rebal_date)
+                except Exception as e:
+                    logger.warning(f"Retraining failed at {rebal_date}: {e}")
+
+            # Generate signals using only data available at rebalance date
             try:
                 signals = strategy.compute_signals(data_slice)
             except Exception as e:
                 logger.warning(f"Signal generation failed at {rebal_date}: {e}")
                 continue
 
-            # Compute target weights
-            targets = self._compute_target_weights(signals, data_slice, rebal_date)
+            if signals.empty:
+                logger.warning(f"No signals generated at {rebal_date}")
+                continue
 
-            # Apply regime filter
-            if self.regime_filter:
-                spy_regime = self._get_spy_regime(data_slice, rebal_date)
-                if spy_regime == 'bearish':
-                    # Scale down equity exposure
-                    targets = {k: v * 0.5 for k, v in targets.items()}
-                    logger.info(f"{rebal_date}: Bearish regime - scaling exposure to 50%")
+            # Get current weights for turnover buffer
+            current_portfolio_value = self._mark_to_market(portfolio, data, rebal_date)
+            current_weights = self._get_current_weights(portfolio, data, rebal_date, current_portfolio_value)
+
+            # Compute target weights using shared PortfolioConstructor
+            targets, metadata = self.portfolio_constructor.compute_target_weights(
+                signals,
+                data_slice,
+                rebal_date,
+                current_weights=current_weights,
+                spy_data=spy_data
+            )
+
+            if not targets:
+                logger.warning(f"No target weights computed at {rebal_date}")
+                continue
 
             # Execute rebalance
             portfolio = self._execute_rebalance(portfolio, targets, data_slice, rebal_date)
@@ -146,21 +204,30 @@ class WalkForwardBacktest:
 
         return {}
 
-    def _get_spy_regime(self, data: pd.DataFrame, as_of_date) -> str:
-        """Determine market regime from SPY 200d SMA."""
-        try:
-            spy_data = data.xs('SPY', level=1)
-            spy_data = spy_data[spy_data.index <= as_of_date]
+    def _get_current_weights(
+        self,
+        portfolio: Dict,
+        data: pd.DataFrame,
+        as_of_date,
+        portfolio_value: float
+    ) -> Dict[str, float]:
+        """Get current portfolio weights."""
+        if portfolio_value <= 0:
+            return {}
 
-            if len(spy_data) < 200:
-                return 'bullish'  # Default
+        weights = {}
+        for symbol, qty in portfolio.get('holdings', {}).items():
+            try:
+                symbol_data = data.xs(symbol, level=1)
+                symbol_data = symbol_data[symbol_data.index <= as_of_date]
+                if len(symbol_data) > 0:
+                    price = symbol_data['close'].iloc[-1]
+                    dollar_value = qty * price
+                    weights[symbol] = dollar_value / portfolio_value
+            except:
+                continue
 
-            sma_200 = spy_data['close'].tail(200).mean()
-            current_price = spy_data['close'].iloc[-1]
-
-            return 'bearish' if current_price < sma_200 else 'bullish'
-        except:
-            return 'bullish'
+        return weights
 
     def _execute_rebalance(
         self,
@@ -346,8 +413,8 @@ def check_promotion_gate(
     baseline_maxdds = [m['max_drawdown'] for m in baseline_metrics.values() if 'max_drawdown' in m]
 
     if not baseline_sharpes:
-        logger.warning("No baseline Sharpe ratios available, skipping gate")
-        return True, {'reason': 'no_baselines'}
+        logger.error("No baseline Sharpe ratios available - gate FAILED")
+        return False, {'reason': 'no_baselines', 'error': 'Baselines required for promotion gate'}
 
     best_baseline_sharpe = max(baseline_sharpes)
     best_baseline_maxdd = max(baseline_maxdds)  # Least negative
@@ -360,7 +427,10 @@ def check_promotion_gate(
     sharpe_pass = sharpe_achieved >= sharpe_margin
 
     # Check MaxDD tolerance
-    maxdd_diff = candidate_maxdd - best_baseline_maxdd
+    # max_drawdown is negative (e.g., -0.20 == -20%). "Worse" means more negative.
+    # Define "worsening" as how much *more negative* the candidate is vs baseline.
+    # Example: baseline -0.10, candidate -0.20 => worsening = +0.10 (worse by 10%).
+    maxdd_diff = best_baseline_maxdd - candidate_maxdd
     maxdd_pass = maxdd_diff <= maxdd_tolerance
 
     passed = sharpe_pass and maxdd_pass
@@ -379,7 +449,7 @@ def check_promotion_gate(
 
     logger.info(f"Promotion Gate: {'PASS' if passed else 'FAIL'}")
     logger.info(f"  Sharpe: {candidate_sharpe:.3f} vs {best_baseline_sharpe:.3f} (margin: {sharpe_achieved:+.3f}, req: {sharpe_margin:+.3f})")
-    logger.info(f"  MaxDD: {candidate_maxdd:.3f} vs {best_baseline_maxdd:.3f} (diff: {maxdd_diff:+.3f}, tol: {maxdd_tolerance:+.3f})")
+    logger.info(f"  MaxDD: {candidate_maxdd:.3f} vs {best_baseline_maxdd:.3f} (worsening: {maxdd_diff:+.3f}, tol: {maxdd_tolerance:+.3f})")
 
     return passed, details
 

@@ -11,6 +11,8 @@ from src.trading_calendar import TradingCalendar
 from src.state_manager import StateManager
 from src.discord_prod import DiscordProductionNotifier
 from src.execution_safe import check_kill_switch
+# Fix alpaca import issue
+from src import alpaca_fix
 import alpaca_trade_api as tradeapi
 
 
@@ -41,9 +43,9 @@ def main():
         issues.append(f"Kill switch ENABLED: {kill_reason}")
         logger.warning(issues[-1])
 
-    # Check state
+    # Check state (from workspace, not state-repo - workflow copies it)
     try:
-        state_manager = StateManager(state_file_path="state-repo/latest_state.json")
+        state_manager = StateManager(state_file_path="./latest_state.json")
         state = state_manager.load_state()
 
         # Check if active model exists

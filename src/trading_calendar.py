@@ -6,6 +6,8 @@ Prevents lookahead bias by enforcing strict "as-of" semantics:
 - Market data freshness checks prevent trading on stale data.
 """
 
+# Fix alpaca import issue
+from . import alpaca_fix
 import alpaca_trade_api as tradeapi
 from datetime import date, datetime, timedelta
 from loguru import logger
@@ -63,10 +65,12 @@ class TradingCalendar:
                     # Today is a trading day and market is closed
                     # Check if we're AFTER market close
                     today_calendar = calendar[0]
-                    market_close = datetime.combine(
-                        reference_date,
-                        datetime.strptime(today_calendar.close, '%H:%M').time()
-                    )
+                    # Handle both string and time object formats
+                    if isinstance(today_calendar.close, str):
+                        close_time = datetime.strptime(today_calendar.close, '%H:%M').time()
+                    else:
+                        close_time = today_calendar.close
+                    market_close = datetime.combine(reference_date, close_time)
 
                     if datetime.now() >= market_close:
                         # We're after market close - today is completed
@@ -104,7 +108,14 @@ class TradingCalendar:
             if calendar and len(calendar) > 0:
                 # Return the last trading day in the range
                 last_day = calendar[-1].date
-                return datetime.strptime(last_day, '%Y-%m-%d').date()
+                # Handle both string and date/Timestamp formats
+                if isinstance(last_day, str):
+                    return datetime.strptime(last_day, '%Y-%m-%d').date()
+                elif isinstance(last_day, date):
+                    return last_day
+                else:
+                    # Assume it's a Timestamp or similar - convert to date
+                    return pd.to_datetime(last_day).date()
             else:
                 # Fallback: subtract days until we hit a weekday
                 candidate = end_date
@@ -148,6 +159,12 @@ class TradingCalendar:
         }
 
         try:
+            # Normalize expected_date to a plain date to avoid Timestamp/date arithmetic errors
+            if isinstance(expected_date, pd.Timestamp):
+                expected_date = expected_date.date()
+            else:
+                expected_date = pd.to_datetime(expected_date).date()
+
             # Get last date in data
             if isinstance(data_df.index, pd.MultiIndex):
                 # Extract timestamp level
