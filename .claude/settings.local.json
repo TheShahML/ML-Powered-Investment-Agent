@@ -5,7 +5,8 @@
       "Bash(cd:*)",
       "Bash(gh api:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(gh repo view:*)"
+      "Bash(gh repo view:*)",
+      "Bash(grep:*)"
     ]
   }
 }

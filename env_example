@@ -1,0 +1,18 @@
+# Alpaca API Credentials
+ALPACA_API_KEY=your_api_key
+ALPACA_SECRET_KEY=your_secret_key
+ALPACA_BASE_URL=https://paper-api.alpaca.markets
+
+# Database Configuration
+DATABASE_URL=postgresql://bot_user:bot_password@localhost:5432/investment_bot
+
+# Safety Switches
+BROKER_MODE=paper # paper or live
+I_ACKNOWLEDGE_LIVE_TRADING=false
+
+# Notifications (Optional)
+DISCORD_WEBHOOK_URL=
+SLACK_WEBHOOK_URL=
+
+
+

@@ -21,38 +21,81 @@ wheels/
 .installed.cfg
 *.egg
 .pytest_cache/
+*.pyc
 
 # Environment & Secrets
 .env
-env_example
-# (Keep env_example tracked as a template, but ignore the real .env)
+.env.local
+*.env
+# Keep template tracked
 !.env.example
 
-# Database & Local Data
+# Runtime outputs - Models (stored in GitHub Actions artifacts only)
+models/
+models/**
+*.pkl
+*.joblib
+*.h5
+*.hdf5
+*.pth
+*.ckpt
+
+# Runtime outputs - Data (stored on state branch, not main)
+data/
+data/**
+*.csv
+*.parquet
+*.feather
+
+# Runtime outputs - Backtests (stored in artifacts)
+backtests/
+backtests/**
+
+# Runtime outputs - Logs
+logs/
+logs/**
+*.log
+
+# Runtime outputs - Temporary files
+*.tmp
+*.bak
+.cache/
+
+# Database (not used in production, but good to ignore)
 postgres_data/
 *.db
 *.sqlite
+*.sqlite3
 
 # IDEs
 .vscode/
 .idea/
 .cursor/
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 
-# Qlib/LEAN temp
+# Qlib/LEAN temp (archived, but ignore if resurrected)
 external/
 research/models/
 ~/.qlib/
 
-# Keep models/ tracked for GitHub Actions
-!models/
-!models/*.pkl
+# Archive folder (explicitly track READMEs but ignore if accidentally recreated)
+archive/**
+!archive/*/README.md
 
-# Keep data/ tracked for GitHub Actions (state persistence)
-!data/
-!data/**/*.json
-!data/**/*.csv
+# Docker
+.dockerignore
 
+# Allow specific config files we want to track
+!config/*.yml
+!config/*.yaml

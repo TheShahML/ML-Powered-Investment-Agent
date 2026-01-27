@@ -11,11 +11,11 @@ Key differences from stacking approach:
 import numpy as np
 import pandas as pd
 import xgboost as xgb
-from sklearn.model_selection import TimeSeriesSplit
 import joblib
 import os
 from loguru import logger
 from typing import Dict, List, Tuple
+from .leakage_safe_cv import train_with_leakage_safe_cv
 
 
 class SimpleStrategy:
@@ -77,67 +77,68 @@ class SimpleStrategy:
 
         return df.dropna()
 
-    def train(self, df: pd.DataFrame, target_col: str = 'target') -> Dict:
+    def train(self, df: pd.DataFrame, target_col: str = 'target', embargo_days: int = None) -> Dict:
         """
-        Train with proper time-series cross-validation.
+        Train with leakage-safe cross-validation.
+
+        Args:
+            df: Training data with MultiIndex (timestamp, symbol)
+            target_col: Target column name
+            embargo_days: Embargo period (defaults to horizon-specific)
+
+        Returns:
+            Dict with CV metrics (IC-based)
         """
-        logger.info("Training simple XGBoost model...")
+        logger.info(f"Training simple XGBoost model (horizon: {self.horizon})...")
+
+        # Default embargo to horizon-specific
+        if embargo_days is None:
+            embargo_map = {'1d': 1, '5d': 5, '20d': 20}
+            embargo_days = embargo_map.get(self.horizon, 5)
+
+        logger.info(f"Using embargo period: {embargo_days} days")
 
         available_features = [c for c in self.feature_cols if c in df.columns]
         logger.info(f"Using {len(available_features)} features: {available_features}")
 
-        X = df[available_features].values
-        y = df[target_col].values
-
-        # Remove NaN/inf
-        mask = np.isfinite(X).all(axis=1) & np.isfinite(y)
-        X = X[mask]
-        y = y[mask]
+        # Prepare data (keep MultiIndex for CV)
+        X = df[available_features]
+        y = df[target_col]
 
         if len(X) < 500:
             raise ValueError(f"Insufficient data: {len(X)} samples")
 
-        # Time-series cross-validation (5 folds)
-        tscv = TimeSeriesSplit(n_splits=5)
-        cv_scores = []
-
-        for fold, (train_idx, val_idx) in enumerate(tscv.split(X)):
-            X_train, X_val = X[train_idx], X[val_idx]
-            y_train, y_val = y[train_idx], y[val_idx]
-
-            # Simple XGBoost - deliberately underfit to generalize
-            model = xgb.XGBRegressor(
-                n_estimators=50,      # Low to prevent overfitting
-                max_depth=3,          # Shallow trees
-                learning_rate=0.1,
-                subsample=0.8,
-                colsample_bytree=0.8,
-                reg_alpha=0.1,        # L1 regularization
-                reg_lambda=1.0,       # L2 regularization
-                random_state=42,
-                n_jobs=-1
-            )
-
-            model.fit(X_train, y_train)
-
-            val_pred = model.predict(X_val)
-            corr = np.corrcoef(val_pred, y_val)[0, 1]
-            cv_scores.append(corr)
-            logger.info(f"Fold {fold+1} correlation: {corr:.4f}")
-
-        # Final model on all data
+        # Create model instance
         self.model = xgb.XGBRegressor(
-            n_estimators=50,
-            max_depth=3,
+            n_estimators=50,      # Low to prevent overfitting
+            max_depth=3,          # Shallow trees
             learning_rate=0.1,
             subsample=0.8,
             colsample_bytree=0.8,
-            reg_alpha=0.1,
-            reg_lambda=1.0,
+            reg_alpha=0.1,        # L1 regularization
+            reg_lambda=1.0,       # L2 regularization
             random_state=42,
             n_jobs=-1
         )
-        self.model.fit(X, y)
+
+        # Train with leakage-safe CV
+        cv_metrics = train_with_leakage_safe_cv(
+            self.model,
+            X,
+            y,
+            embargo_days=embargo_days,
+            n_splits=5
+        )
+
+        # Final model on all data
+        logger.info("Training final model on full dataset...")
+        X_clean = X.values
+        y_clean = y.values
+        mask = np.isfinite(X_clean).all(axis=1) & np.isfinite(y_clean)
+        X_clean = X_clean[mask]
+        y_clean = y_clean[mask]
+
+        self.model.fit(X_clean, y_clean)
 
         # Save with horizon suffix
         os.makedirs(self.model_dir, exist_ok=True)
@@ -147,16 +148,13 @@ class SimpleStrategy:
         joblib.dump(available_features, features_path)
         logger.info(f"Model saved: {model_path}")
 
+        # Combine metrics
         metrics = {
-            'cv_mean_corr': np.mean(cv_scores),
-            'cv_std_corr': np.std(cv_scores),
-            'cv_min_corr': np.min(cv_scores),
-            'cv_max_corr': np.max(cv_scores),
-            'n_samples': len(X),
-            'n_features': len(available_features)
+            **cv_metrics,
+            'n_samples': len(X_clean),
+            'n_features': len(available_features),
+            'embargo_days': embargo_days
         }
-
-        logger.info(f"CV Mean Correlation: {metrics['cv_mean_corr']:.4f} ± {metrics['cv_std_corr']:.4f}")
 
         return metrics
 

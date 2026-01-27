@@ -1,21 +1,19 @@
+# Core ML & Data
 pandas
 numpy
-alpaca-trade-api
-sqlalchemy
-psycopg2-binary
-pyyaml
-lightgbm
 xgboost
 scikit-learn
-pyqlib
-streamlit
-matplotlib
-plotly
-python-dotenv
-pydantic
-pytest
-schedule
-requests
-loguru
 joblib
 
+# Trading API
+alpaca-trade-api
+
+# Configuration
+pyyaml
+python-dotenv
+
+# Notifications
+requests
+
+# Logging
+loguru
