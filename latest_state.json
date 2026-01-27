@@ -1,11 +1,11 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-01-27T18:37:44.852286Z",
+  "last_updated_utc": "2026-01-27T18:43:28.086663Z",
   "rebalance": {
     "last_rebalance_date": null,
     "next_rebalance_date": null,
-    "days_since_rebalance": 0,
-    "days_until_rebalance": 20
+    "days_since_rebalance": 1,
+    "days_until_rebalance": 19
   },
   "models": {
     "active_model": null,
@@ -65,5 +65,46 @@
       }
     },
     "last_comparison_date": "2026-01-26T00:00:00"
+  },
+  "shadow_portfolios": {
+    "ml": {
+      "holdings": {},
+      "weights": {},
+      "equity_curve": [
+        100000.0
+      ],
+      "dates": [
+        "2026-01-26T00:00:00"
+      ],
+      "last_rebalance_date": null,
+      "initial_value": 100000.0
+    },
+    "canary": {
+      "holdings": {},
+      "weights": {},
+      "equity_curve": [
+        100000.0
+      ],
+      "dates": [
+        "2026-01-26T00:00:00"
+      ],
+      "last_rebalance_date": null,
+      "initial_value": 100000.0
+    },
+    "benchmarks": {
+      "spy": {
+        "equity_curve": [
+          1.0
+        ],
+        "dates": [
+          "2026-01-26T00:00:00"
+        ],
+        "initial_value": 692.755
+      },
+      "btc": {
+        "equity_curve": [],
+        "dates": []
+      }
+    }
   }
 }
