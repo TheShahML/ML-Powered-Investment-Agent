@@ -52,3 +52,5 @@ def configure_tensorflow(tf) -> TensorFlowRuntimeInfo:
     return TensorFlowRuntimeInfo(device="gpu", gpus=gpu_names)
 
 
+
+

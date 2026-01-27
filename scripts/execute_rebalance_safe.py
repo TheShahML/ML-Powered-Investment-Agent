@@ -81,18 +81,20 @@ def main():
         else:
             logger.error("Market is CLOSED - cannot rebalance")
             discord = DiscordProductionNotifier()
-        discord.send_monthly_rebalance_execution(
+            discord.send_monthly_rebalance_execution(
                 broker_mode=os.environ.get('BROKER_MODE', 'paper'),
                 as_of_date=as_of_date.isoformat(),
                 model_promoted=None,
-            strategy_type=(state.get('models', {}).get('active_model', {}) or {}).get('strategy_type') if 'state' in locals() else None,
+                strategy_type=(state.get('models', {}).get('active_model', {}) or {}).get('strategy_type')
+                if 'state' in locals()
+                else None,
                 equity_allocation=0,
                 btc_allocation=0,
                 portfolio_value=0,
                 orders=[],
                 kill_switch=False,
                 market_closed=True,
-                dry_run=args.dry_run
+                dry_run=args.dry_run,
             )
             sys.exit(1)
 

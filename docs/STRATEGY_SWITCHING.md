@@ -182,3 +182,5 @@ class YourStrategy(BaseStrategy):
 - LSTM architecture based on: https://github.com/pranityadav19/Stock-Prediction-Models
 - Original repo: https://github.com/huseinzol05/Stock-Prediction-Models
 
+
+
