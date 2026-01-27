@@ -1,0 +1,72 @@
+name: Daily Signal and Summary
+
+on:
+  schedule:
+    # Run at 9:00 AM ET (14:00 UTC) before market opens
+    # Uses previous day's closing data for predictions
+    - cron: "0 14 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+  ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+  ALPACA_BASE_URL: ${{ secrets.ALPACA_BASE_URL }}
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  BROKER_MODE: paper
+
+jobs:
+  generate-signals:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pull latest
+        run: git pull origin main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check if market opens today
+        id: market-check
+        run: |
+          python -c "
+          from alpaca_trade_api import REST
+          import os
+          from datetime import date
+          api = REST(os.environ['ALPACA_API_KEY'], os.environ['ALPACA_SECRET_KEY'], os.environ['ALPACA_BASE_URL'])
+          calendar = api.get_calendar(start=date.today().isoformat(), end=date.today().isoformat())
+          is_trading_day = len(calendar) > 0 and calendar[0].date.date() == date.today()
+          print(f'market_open={str(is_trading_day).lower()}')
+          " >> $GITHUB_OUTPUT
+
+      - name: Generate ML signals
+        if: steps.market-check.outputs.market_open == 'true' || github.event_name == 'workflow_dispatch'
+        run: python scripts/generate_daily_signals.py
+
+      - name: Send daily portfolio summary to Discord
+        if: steps.market-check.outputs.market_open == 'true' || github.event_name == 'workflow_dispatch'
+        run: python scripts/send_portfolio_update.py
+
+      - name: Commit signals and data to repo
+        if: steps.market-check.outputs.market_open == 'true' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/
+          git diff --staged --quiet || git commit -m "Daily signals $(date +%Y-%m-%d)"
+          git push

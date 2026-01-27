@@ -1,0 +1,57 @@
+name: Monthly Rebalance Execute
+
+on:
+  schedule:
+    - cron: '35 14 * * 1-5'  # Weekdays 2:35PM UTC (30 min after US market open)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rebalance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Checkout state branch
+        uses: actions/checkout@v3
+        with:
+          ref: state
+          path: state-repo
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          tags: investment-bot:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Execute rebalance (containerized, if due)
+        run: |
+          docker run --rm \
+            -e ALPACA_API_KEY="${{ secrets.ALPACA_API_KEY }}" \
+            -e ALPACA_SECRET_KEY="${{ secrets.ALPACA_SECRET_KEY }}" \
+            -e ALPACA_BASE_URL="${{ secrets.ALPACA_BASE_URL }}" \
+            -e DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            -e KILL_SWITCH_ENABLED="${{ vars.KILL_SWITCH_ENABLED }}" \
+            -e BROKER_MODE="${{ secrets.BROKER_MODE }}" \
+            -v "${{ github.workspace }}:/app" \
+            -w /app \
+            investment-bot:latest \
+            python scripts/execute_rebalance_safe.py
+
+      - name: Push state update
+        working-directory: state-repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add latest_state.json
+          git commit -m "Update state after rebalance check (${{ github.run_number }})" || echo "No changes"
+          git push

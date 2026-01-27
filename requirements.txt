@@ -1,0 +1,19 @@
+# Core ML & Data
+pandas
+numpy
+xgboost
+scikit-learn
+joblib
+
+# Trading API
+alpaca-trade-api
+
+# Configuration
+pyyaml
+python-dotenv
+
+# Notifications
+requests
+
+# Logging
+loguru

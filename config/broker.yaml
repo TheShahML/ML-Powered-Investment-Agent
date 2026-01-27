@@ -1,0 +1,10 @@
+# Broker configuration
+broker:
+  name: "alpaca"
+  mode: "paper" # paper or live
+  fractional_shares: true
+  order_type: "market" # market or limit
+  limit_offset_bps: 10 # 0.1% buffer for limit orders
+
+
+

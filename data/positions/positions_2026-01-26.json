@@ -1,0 +1,117 @@
+{
+  "timestamp": "2026-01-26T19:40:22.892144",
+  "positions": [
+    {
+      "symbol": "ACVA",
+      "qty": 464.3899
+    },
+    {
+      "symbol": "AGIO",
+      "qty": 1.0821
+    },
+    {
+      "symbol": "AIP",
+      "qty": 251.7653
+    },
+    {
+      "symbol": "ALXO",
+      "qty": 99.7778
+    },
+    {
+      "symbol": "ARCT",
+      "qty": 540.1572
+    },
+    {
+      "symbol": "CGEM",
+      "qty": 329.7609
+    },
+    {
+      "symbol": "CRBP",
+      "qty": 446.1377
+    },
+    {
+      "symbol": "CRNC",
+      "qty": 340.1361
+    },
+    {
+      "symbol": "CSTE",
+      "qty": 1582.8112
+    },
+    {
+      "symbol": "DLTH",
+      "qty": 1645.0749
+    },
+    {
+      "symbol": "FLUX",
+      "qty": 2684.5638
+    },
+    {
+      "symbol": "FLWS",
+      "qty": 834.0
+    },
+    {
+      "symbol": "FRGE",
+      "qty": 89.1274
+    },
+    {
+      "symbol": "FULC",
+      "qty": 366.3004
+    },
+    {
+      "symbol": "GGAL",
+      "qty": 73.1178
+    },
+    {
+      "symbol": "GRWG",
+      "qty": 2758.9278
+    },
+    {
+      "symbol": "IHRT",
+      "qty": 1095.9603
+    },
+    {
+      "symbol": "INBX",
+      "qty": 11.7201
+    },
+    {
+      "symbol": "INNV",
+      "qty": 666.5866
+    },
+    {
+      "symbol": "KRRO",
+      "qty": 376.0394
+    },
+    {
+      "symbol": "METCB",
+      "qty": 315.6818
+    },
+    {
+      "symbol": "MNOV",
+      "qty": 2090.976800001
+    },
+    {
+      "symbol": "PETS",
+      "qty": 1222.417200001
+    },
+    {
+      "symbol": "PUMP",
+      "qty": 351.5802
+    },
+    {
+      "symbol": "QRHC",
+      "qty": 1814.0895
+    },
+    {
+      "symbol": "REFR",
+      "qty": 3056.0431
+    },
+    {
+      "symbol": "RLMD",
+      "qty": 994.4571
+    },
+    {
+      "symbol": "YSG",
+      "qty": 939.2095
+    }
+  ]
+}

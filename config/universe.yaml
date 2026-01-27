@@ -1,0 +1,48 @@
+# Universe configuration
+universe:
+  # Universe type: 'sp500', 'all', or 'custom'
+  universe_type: "all"  # All US equities from NYSE, NASDAQ, AMEX
+  target_size: 1500  # Limit to top 1,500 most liquid stocks (3x more than before)
+                     # null = no limit (will hit rate limits with 3,000+ stocks)
+
+  # Filters (used when universe_type is 'all')
+  min_market_cap: 10000000000  # $10B
+  min_avg_dollar_volume: 50000000  # $50M
+  min_price: 5.0
+  exclude_otc: true
+
+  # Custom tickers (used when universe_type is 'custom')
+  # custom_tickers: ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"]
+
+# Crypto configuration
+crypto:
+  trade_crypto: true  # Enable Bitcoin trading
+  crypto_tickers:
+    - "BTC/USD"
+    # - "ETH/USD"  # Uncomment to add Ethereum
+    # - "LTC/USD"  # Uncomment to add Litecoin
+
+  # Crypto allocation (percentage of portfolio)
+  crypto_allocation: 0.10  # 10% of portfolio in crypto
+
+# Combined settings
+trade_equities: true  # Trade S&P 500 stocks
+trade_crypto: true    # Trade Bitcoin
+
+# Universe Options:
+#
+# 1. sp500
+#    - S&P 500 companies only
+#    - ~500 large-cap US stocks
+#    - Most liquid, well-researched
+#
+# 2. all (CURRENT SETTING)
+#    - All tradeable US equities from major exchanges
+#    - NYSE, NASDAQ, AMEX, ARCA, BATS
+#    - Typically 3,000-5,000+ stocks (depending on filters)
+#    - More opportunities but higher computational load
+#    - Set target_size to limit if needed
+#
+# 3. custom
+#    - Your own list of tickers
+#    - Use custom_tickers list

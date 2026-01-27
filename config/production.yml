@@ -1,0 +1,76 @@
+# Production Configuration - Set-and-Forget Trading System
+
+universe:
+  type: "sp500_ndx100_union"  # S&P 500 ∪ NASDAQ-100
+  min_price: 5.0  # Minimum stock price
+  min_adv: 20000000  # Minimum $20M average daily volume
+
+model:
+  horizons: [1, 5, 20]  # Train 3 models for different timeframes
+  primary_horizon: 20  # Use 20-day model for rebalancing (matches rebalance frequency)
+
+  # Cross-validation settings
+  cv_n_splits: 5
+  cv_embargo_days:
+    "1d": 1
+    "5d": 5
+    "20d": 20
+
+  # Features (academically-backed only)
+  features:
+    - momentum_12_1  # 12-month minus 1-month momentum
+    - momentum_6m    # 6-month momentum
+    - volatility_3m  # 3-month realized volatility
+    - volume_trend   # Volume trend (liquidity signal)
+    - mean_reversion # Short-term mean reversion
+
+  # XGBoost parameters (deliberately simple to avoid overfitting)
+  xgb_params:
+    n_estimators: 50
+    max_depth: 3
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1  # L1 regularization
+    reg_lambda: 1.0  # L2 regularization
+    random_state: 42
+
+portfolio:
+  top_n: 25  # Number of stocks to hold (increased from 20 for better diversification)
+  max_weight: 0.10  # Max 10% per position (reduced from 8% due to more holdings)
+  weight_method: "inverse_vol"  # Options: "inverse_vol", "equal_weight"
+  turnover_buffer_pct: 1.0  # Ignore changes < 1%
+  rebalance_freq_days: 20  # Rebalance every 20 trading days
+
+regime_filter:
+  enabled: true
+  indicator: "spy_sma_200"  # SPY 200-day SMA
+  scale_factor_bearish: 0.5  # 50% exposure if bearish
+
+btc_sleeve:
+  enabled: false  # Bitcoin sleeve (disabled for now)
+  weight_bullish: 0.15
+  weight_bearish: 0.05
+  momentum_lookback_days: 60
+  sma_filter: 200
+
+execution:
+  cost_bps: 15  # Transaction cost (basis points)
+  slippage_bps: 5  # Slippage estimate
+  max_orders_per_rebalance: 100
+  max_daily_notional: 1000000  # $1M cap
+  min_trade_notional: 10.0  # $10 minimum
+
+# Promotion gate thresholds
+gates:
+  sharpe_margin: 0.2  # Candidate must beat best baseline by 0.2
+  maxdd_tolerance: 0.05  # MaxDD can be 5% worse than best baseline
+  turnover_cap: 0.80  # Max 80% average turnover
+
+# Discord notifications
+discord:
+  daily_heartbeat: false  # Only alert on anomalies
+
+# Data freshness
+data:
+  freshness_tolerance_days: 0  # Must be current day

@@ -1,0 +1,37 @@
+# Strategy configuration
+strategy:
+  name: "multi_horizon_momentum"
+  strategy_type: "simple" # Options: simple (recommended), stacking, pure_momentum
+  n_holdings: 25 # UPDATED: Increased from 20 to capture more opportunities
+  rebalance_frequency: 20 # Every 20 trading days (~monthly)
+  min_hold_days: 20
+  turnover_threshold: 0.05 # Only replace if score gap > 5%
+  benchmark_tickers: ["SPY", "QQQ", "VTI"]
+
+# Model configuration
+model:
+  type: "multi_horizon_xgboost" # UPDATED: Multi-horizon XGBoost
+  retrain_frequency: "weekly"
+  training_lookback_days: 730 # 2 years
+  horizons: [1, 5, 20] # Train 3 models for different time horizons
+  primary_horizon: 20 # Use 20-day model for rebalancing decisions
+
+
+# Strategy Options:
+#
+# 1. simple (RECOMMENDED - less overfitting)
+#    - Single XGBoost model
+#    - 5 academically-backed features only
+#    - Time-series cross-validation
+#    - Based on Jegadeesh & Titman momentum research
+#
+# 2. stacking (more complex, higher overfitting risk)
+#    - 5 models: XGBoost, LightGBM, RF, GradientBoosting, ExtraTrees
+#    - 20+ features including RSI, MACD, Bollinger
+#    - Ridge meta-learner
+#
+# 3. pure_momentum (no ML, baseline)
+#    - Just ranks by 12-1 momentum
+#    - No model training needed
+#    - Zero overfitting risk
+#    - Academic baseline that's hard to beat
