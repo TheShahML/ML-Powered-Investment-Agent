@@ -28,11 +28,36 @@ class StateManager:
             logger.error(f"Error loading state: {e}")
             return self._empty_state()
 
+    def _convert_numpy_types(self, obj):
+        """Convert NumPy types to Python native types for JSON serialization."""
+        import numpy as np
+
+        if isinstance(obj, dict):
+            return {key: self._convert_numpy_types(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self._convert_numpy_types(item) for item in obj]
+        elif isinstance(obj, np.bool_):
+            return bool(obj)
+        elif isinstance(obj, (np.integer, np.int64, np.int32)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64, np.float32)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return obj
+
     def save_state(self, state: Dict):
         """Save state to file."""
         try:
-            os.makedirs(os.path.dirname(self.state_file), exist_ok=True)
+            # Handle case where state_file is just a filename (no directory)
+            state_dir = os.path.dirname(self.state_file)
+            if state_dir:
+                os.makedirs(state_dir, exist_ok=True)
             state['last_updated_utc'] = datetime.utcnow().isoformat() + 'Z'
+
+            # Convert NumPy types to Python native types
+            state = self._convert_numpy_types(state)
 
             with open(self.state_file, 'w') as f:
                 json.dump(state, f, indent=2)
@@ -96,6 +121,12 @@ class StateManager:
     def increment_day_counter(self):
         """Increment days since last rebalance (call daily)."""
         state = self.load_state()
+        
+        # Only increment if a rebalance has actually occurred
+        last_rebalance_date = state.get('rebalance', {}).get('last_rebalance_date')
+        if last_rebalance_date is None:
+            logger.debug("No previous rebalance - skipping day counter increment")
+            return
 
         state['rebalance']['days_since_rebalance'] += 1
         state['rebalance']['days_until_rebalance'] = max(
@@ -107,6 +138,13 @@ class StateManager:
     def check_rebalance_due(self, threshold: int = 20) -> bool:
         """Check if rebalance is due."""
         state = self.load_state()
+        last_rebalance_date = state.get('rebalance', {}).get('last_rebalance_date')
+        
+        # If never rebalanced, allow first investment immediately
+        if last_rebalance_date is None:
+            logger.info("No previous rebalance found - allowing initial investment")
+            return True
+        
         days_since = state.get('rebalance', {}).get('days_since_rebalance', 0)
         return days_since >= threshold
 
