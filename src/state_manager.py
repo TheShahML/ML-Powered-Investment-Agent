@@ -121,6 +121,12 @@ class StateManager:
     def increment_day_counter(self):
         """Increment days since last rebalance (call daily)."""
         state = self.load_state()
+        
+        # Only increment if a rebalance has actually occurred
+        last_rebalance_date = state.get('rebalance', {}).get('last_rebalance_date')
+        if last_rebalance_date is None:
+            logger.debug("No previous rebalance - skipping day counter increment")
+            return
 
         state['rebalance']['days_since_rebalance'] += 1
         state['rebalance']['days_until_rebalance'] = max(
@@ -132,6 +138,13 @@ class StateManager:
     def check_rebalance_due(self, threshold: int = 20) -> bool:
         """Check if rebalance is due."""
         state = self.load_state()
+        last_rebalance_date = state.get('rebalance', {}).get('last_rebalance_date')
+        
+        # If never rebalanced, allow first investment immediately
+        if last_rebalance_date is None:
+            logger.info("No previous rebalance found - allowing initial investment")
+            return True
+        
         days_since = state.get('rebalance', {}).get('days_since_rebalance', 0)
         return days_since >= threshold
 
