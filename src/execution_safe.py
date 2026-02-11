@@ -1,12 +1,13 @@
 """Safe, idempotent order execution with multiple safety controls."""
 import os
+import re
 # Fix alpaca import issue
 from . import alpaca_fix
 import alpaca_trade_api as tradeapi
 import pandas as pd
 import numpy as np
 from loguru import logger
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 
 def check_market_open(api: tradeapi.REST) -> bool:
@@ -113,7 +114,9 @@ def execute_orders_safe(
     current_positions: Dict[str, float],
     portfolio_value: float,
     config: Dict,
-    dry_run: bool = False
+    dry_run: bool = False,
+    open_orders_by_symbol: Optional[Dict[str, List[Dict]]] = None,
+    client_order_prefix: Optional[str] = None
 ) -> List[Dict]:
     """
     Execute orders safely with caps and checks.
@@ -133,6 +136,8 @@ def execute_orders_safe(
     max_notional = config.get('max_daily_notional', 1_000_000)
     min_notional = config.get('min_trade_notional', 10.0)
     turnover_buffer = config.get('turnover_buffer_pct', 1.0) / 100.0
+
+    open_orders_by_symbol = open_orders_by_symbol or {}
 
     # Get current prices
     prices = {}
@@ -178,13 +183,21 @@ def execute_orders_safe(
         side = 'buy' if shares > 0 else 'sell'
         qty = abs(shares)
 
-        trades.append({
+        trade_info = {
             'symbol': symbol,
             'side': side,
             'qty': round(qty, 4),
             'notional': abs(diff),
             'price': price
-        })
+        }
+
+        if open_orders_by_symbol.get(symbol):
+            trade_info['status'] = 'skipped_existing_open_order'
+            trade_info['error'] = f"{len(open_orders_by_symbol[symbol])} open order(s) already exist for {symbol}"
+            trades.append(trade_info)
+            continue
+
+        trades.append(trade_info)
 
         total_notional += abs(diff)
 
@@ -202,28 +215,54 @@ def execute_orders_safe(
             trade['qty'] *= scale
             trade['notional'] *= scale
 
-    logger.info(f"Executing {len(trades)} orders, total notional: ${total_notional:,.2f}")
+    logger.info(f"Computed {len(trades)} target trade(s), executable notional: ${total_notional:,.2f}")
 
     # Execute
     orders = []
     for trade in trades:
         order_info = trade.copy()
+        if order_info.get('status') == 'skipped_existing_open_order':
+            logger.warning(
+                f"Skipping {trade['symbol']} due to existing open orders: "
+                f"{order_info.get('error', 'unknown')}"
+            )
+            orders.append(order_info)
+            continue
 
         if dry_run:
             logger.info(f"[DRY RUN] Would {trade['side']} {trade['qty']:.4f} {trade['symbol']} @ ${trade['price']:.2f}")
             order_info['status'] = 'dry_run'
         else:
             try:
+                client_order_id = None
+                if client_order_prefix:
+                    notional_cents = int(round(float(trade['notional']) * 100))
+                    raw = f"{client_order_prefix}-{trade['symbol']}-{trade['side']}-{notional_cents}"
+                    raw = re.sub(r'[^A-Za-z0-9_-]', '', raw)
+                    client_order_id = raw[:48]
+
                 order = api.submit_order(
                     symbol=trade['symbol'],
                     qty=trade['qty'],
                     side=trade['side'],
                     type='market',
-                    time_in_force='day'
+                    time_in_force='day',
+                    client_order_id=client_order_id
                 )
+                order_id = getattr(order, 'id', None)
+                order_status = getattr(order, 'status', 'unknown')
+                if not order_id:
+                    raise RuntimeError(f"Order submitted but missing order id (status={order_status})")
+
                 order_info['status'] = 'submitted'
-                order_info['order_id'] = order.id
-                logger.info(f"Submitted: {trade['side']} {trade['qty']:.4f} {trade['symbol']}")
+                order_info['order_id'] = order_id
+                order_info['alpaca_status'] = order_status
+                if client_order_id:
+                    order_info['client_order_id'] = client_order_id
+                logger.info(
+                    f"Submitted: {trade['side']} {trade['qty']:.4f} {trade['symbol']} "
+                    f"(order_id={order_id}, status={order_status})"
+                )
 
             except Exception as e:
                 order_info['status'] = 'failed'
@@ -243,6 +282,54 @@ def get_current_positions(api: tradeapi.REST) -> Dict[str, float]:
     except Exception as e:
         logger.error(f"Error getting positions: {e}")
         return {}
+
+
+def get_open_orders(api: tradeapi.REST) -> List[Dict]:
+    """Get currently open orders."""
+    try:
+        orders = api.list_orders(status='open', nested=False)
+        serialized = []
+        for o in orders:
+            serialized.append({
+                'id': getattr(o, 'id', None),
+                'client_order_id': getattr(o, 'client_order_id', None),
+                'symbol': getattr(o, 'symbol', None),
+                'side': getattr(o, 'side', None),
+                'qty': getattr(o, 'qty', None),
+                'notional': getattr(o, 'notional', None),
+                'status': getattr(o, 'status', None)
+            })
+        return serialized
+    except Exception as e:
+        logger.error(f"Error getting open orders: {e}")
+        return []
+
+
+def cancel_open_orders(api: tradeapi.REST, open_orders: List[Dict]) -> List[Dict]:
+    """Cancel provided open orders and return cancellation results."""
+    results: List[Dict] = []
+    for order in open_orders:
+        order_id = order.get('id')
+        symbol = order.get('symbol')
+        try:
+            if not order_id:
+                raise RuntimeError("Missing order id")
+            api.cancel_order(order_id)
+            results.append({
+                'id': order_id,
+                'symbol': symbol,
+                'status': 'cancelled'
+            })
+            logger.info(f"Cancelled open order {order_id} ({symbol})")
+        except Exception as e:
+            results.append({
+                'id': order_id,
+                'symbol': symbol,
+                'status': 'cancel_failed',
+                'error': str(e)
+            })
+            logger.error(f"Failed to cancel open order {order_id} ({symbol}): {e}")
+    return results
 
 
 def get_account_equity(api: tradeapi.REST) -> float:

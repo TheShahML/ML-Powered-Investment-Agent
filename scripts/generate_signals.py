@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate daily signals from active ML model + canary baseline."""
+"""Generate daily signals from configured trading strategy + canary baseline."""
 import os
 import sys
 from datetime import timedelta
@@ -11,13 +11,13 @@ from src.config import load_config
 from src.trading_calendar import TradingCalendar
 from src.universe import Universe
 from src.data_service import DataService
-from src.strategy_simple import SimpleStrategy
 from src.canary_tracker import CanaryTracker
 from src.shadow_tracker import ShadowPortfolioTracker
 from src.state_manager import StateManager
 from src.file_storage import FileStorage
 from src.discord_prod import DiscordProductionNotifier
 from src.reporting.dashboard import DashboardGenerator
+from src.strategies.lc_reversal import LCReversalStrategy
 # Fix alpaca import issue
 from src import alpaca_fix
 import alpaca_trade_api as tradeapi
@@ -90,33 +90,40 @@ def main():
         logger.warning("No active model, using fallback")
         active_model = {'version': 'fallback', 'strategy_type': 'simple'}
     
-    # Get strategy type from state or config
-    strategy_type = active_model.get('strategy_type') or state.get('strategies', {}).get('best') or config.get('strategy', {}).get('strategy_type', 'simple')
-    active_model['strategy_type'] = strategy_type
+    strategy_name = config.get('strategy_name', 'lc_reversal')
+    logger.info(f"Configured strategy_name={strategy_name}")
 
-    # Generate multi-horizon ML signals
-    logger.info(f"Generating multi-horizon signals (active: {active_model.get('version')}, strategy: {strategy_type})")
-    
-    # Use strategy selector to get the correct strategy
-    from src.strategy_selector import StrategySelector
-    selector = StrategySelector(config)
-    strategy = selector.get_strategy(strategy_type, horizon='20d')
-
-    # Compute features once
-    df_features = strategy.compute_features(df)
-
-    # Generate signals from all 3 horizons
-    # Check if strategy supports multi-horizon, otherwise use single horizon
-    if hasattr(strategy, 'compute_multi_horizon_signals'):
-        multi_signals = strategy.compute_multi_horizon_signals(df_features)
-        signals_1d = multi_signals.get('1d')
-        signals_5d = multi_signals.get('5d')
-        signals_20d = multi_signals.get('20d')  # PRIMARY for rebalancing
-    else:
-        # Fallback: use single horizon for all
+    if strategy_name == 'lc_reversal':
+        active_model = {'version': 'lc_reversal', 'strategy_type': 'lc_reversal'}
+        strategy = LCReversalStrategy(config)
+        df_features = strategy.compute_features(df)
         signals_20d = strategy.compute_signals(df_features)
-        signals_1d = signals_20d  # Use same signals
-        signals_5d = signals_20d  # Use same signals
+        signals_1d = signals_20d
+        signals_5d = signals_20d
+        strategy_type = 'lc_reversal'
+        logger.info(f"Generated LC-Reversal signals: {len(signals_20d)} rows")
+    else:
+        # Legacy ML momentum path
+        strategy_type = active_model.get('strategy_type') or state.get('strategies', {}).get('best') or config.get('strategy', {}).get('strategy_type', 'simple')
+        if strategy_name == 'ml_momentum':
+            strategy_type = 'simple'
+        active_model['strategy_type'] = strategy_type
+
+        logger.info(f"Generating multi-horizon signals (active: {active_model.get('version')}, strategy: {strategy_type})")
+        from src.strategy_selector import StrategySelector
+        selector = StrategySelector(config)
+        strategy = selector.get_strategy(strategy_type, horizon='20d')
+        df_features = strategy.compute_features(df)
+
+        if hasattr(strategy, 'compute_multi_horizon_signals'):
+            multi_signals = strategy.compute_multi_horizon_signals(df_features)
+            signals_1d = multi_signals.get('1d')
+            signals_5d = multi_signals.get('5d')
+            signals_20d = multi_signals.get('20d')  # PRIMARY for rebalancing
+        else:
+            signals_20d = strategy.compute_signals(df_features)
+            signals_1d = signals_20d
+            signals_5d = signals_20d
 
     if signals_20d is None or signals_20d.empty:
         logger.error("20-day model (primary) missing or failed!")

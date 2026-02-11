@@ -8,7 +8,13 @@ DATABASE_URL=postgresql://bot_user:bot_password@localhost:5432/investment_bot
 
 # Safety Switches
 BROKER_MODE=paper # paper or live
+STRATEGY_NAME=lc_reversal # lc_reversal or ml_momentum
 I_ACKNOWLEDGE_LIVE_TRADING=false
+DRY_RUN=true
+SMOKE_TEST=false
+SMOKE_TEST_SYMBOL=SPY
+SMOKE_TEST_NOTIONAL=50
+OPEN_ORDERS_ACTION=leave # leave or cancel
 
 # Notifications (Optional)
 # Single webhook (backward compatible):
@@ -18,6 +24,4 @@ DISCORD_WEBHOOK_URL=
 # DISCORD_WEBHOOK_URLS=https://discord.com/api/webhooks/...,https://discord.com/api/webhooks/...
 
 SLACK_WEBHOOK_URL=
-
-
 

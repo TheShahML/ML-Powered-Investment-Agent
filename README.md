@@ -1,6 +1,6 @@
 # ML-Powered Investment Bot
 
-A fully automated, production-grade investment system that uses machine learning to select and trade stocks from the S&P 500 and NASDAQ-100. The system runs autonomously on GitHub Actions, making data-driven investment decisions every trading day and rebalancing the portfolio monthly.
+A fully automated, production-grade investment system that supports both ML-momentum and LC-Reversal (Liquidity-Conditioned Reversal) trading on a liquid US equity universe. The system runs autonomously on GitHub Actions with stateful execution and Discord reporting.
 
 ## What This System Does
 
@@ -320,6 +320,33 @@ The system tracks several metrics to ensure it's working:
 
 The system is fully containerized for consistent execution across environments. All scripts run inside Docker containers both locally and in GitHub Actions.
 
+**Production trade entrypoint (GitHub Actions):**
+- Workflow: `.github/workflows/monthly_rebalance_execute.yml`
+- Script: `python scripts/execute_rebalance_safe.py`
+
+**Required environment variables:**
+- `ALPACA_API_KEY`
+- `ALPACA_SECRET_KEY`
+- `ALPACA_BASE_URL` (`https://paper-api.alpaca.markets` for paper)
+- `BROKER_MODE` (`paper` or `live`)
+- `STRATEGY_NAME` (`lc_reversal` default on paper, or `ml_momentum`)
+- `I_ACKNOWLEDGE_LIVE_TRADING` (`true` required for live order submission)
+- `DISCORD_WEBHOOK_URL` or `DISCORD_WEBHOOK_URLS`
+
+**Execution control variables:**
+- `DRY_RUN` (`true`/`false`): full pipeline with no order submission
+- `SMOKE_TEST` (`true`/`false`): bypass strategy and place one tiny trade
+- `SMOKE_TEST_SYMBOL` (default `SPY`)
+- `SMOKE_TEST_NOTIONAL` (default `50`)
+- `OPEN_ORDERS_ACTION` (`leave` or `cancel`): how to handle existing open orders at run start
+
+**LC-Reversal parameters (in `config/strategy.yaml`):**
+- `lc_reversal.n_universe`, `pct_tail`, `vol_z_min`, `impact_z_min`
+- `n_long`, `n_short`, `enable_shorts`, `gross_exposure`
+- `weight_method` (`equal_weight` or `inverse_vol`)
+- `adv_pct` (ADV participation cap), `hold_days`, `enable_stop_loss`, `stop_atr_mult`
+- `bear_gross_mult` (SPY < 200D gross scaling), `earnings_filter_enabled` (placeholder off by default)
+
 **Quick Start:**
 ```bash
 # Build the Docker image
@@ -336,13 +363,34 @@ make health
 
 # Dry-run rebalance (no actual orders)
 make rebalance-dry-run
+
+# Direct rebalance run
+python scripts/execute_rebalance_safe.py
+
+# CLI override dry run
+python scripts/execute_rebalance_safe.py --dry-run
+
+# LC-Reversal backtest
+python scripts/backtest_lc_reversal.py --days 365 --tx-cost-bps 20
+
+# LC-Reversal smoke test
+python scripts/tests/test_lc_reversal_smoke.py
 ```
+
+**Automation note:**
+- `.github/workflows/weekly_lc_reversal_backtest.yml` runs weekly and uploads JSON backtest metrics artifacts from `reports/lc_reversal_backtest_*.json`.
+- The same workflow also posts a Discord markdown summary of key LC-Reversal backtest metrics.
 
 **Requirements:**
 - Docker installed and running
-- `.env` file with API credentials (copy from `.env.example`)
+- `.env` file with credentials and execution flags (copy from `env_example` or `.env.template`)
 
 All development workflows use the same Docker image as production, ensuring reproducibility and eliminating "works on my machine" issues.
+
+**State and idempotency notes:**
+- Rebalance run state is stored in `latest_state.json` under `execution`.
+- Key fields: `last_successful_trade_date`, `last_run.target_portfolio_snapshot`, and `last_run.order_results`.
+- Same-day reruns are skipped after a successful run; partial failures can rerun and reconcile.
 
 ## Why This Project Matters
 

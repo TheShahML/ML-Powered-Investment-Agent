@@ -27,8 +27,15 @@ def load_config():
     flat_config['DATABASE_URL'] = os.getenv('DATABASE_URL')
     flat_config['BROKER_MODE'] = os.getenv('BROKER_MODE', 'paper')
     flat_config['I_ACKNOWLEDGE_LIVE_TRADING'] = os.getenv('I_ACKNOWLEDGE_LIVE_TRADING', 'false').lower() == 'true'
+
+    # Strategy selection (default lc_reversal for paper mode)
+    configured_strategy = flat_config.get('strategy_name') or flat_config.get('STRATEGY_NAME')
+    env_strategy = os.getenv('STRATEGY_NAME')
+    default_strategy = 'lc_reversal' if flat_config['BROKER_MODE'] == 'paper' else 'ml_momentum'
+    strategy_name = (env_strategy or configured_strategy or default_strategy).strip().lower()
+    flat_config['strategy_name'] = strategy_name
+    flat_config['STRATEGY_NAME'] = strategy_name
     
     return flat_config
-
 
 

@@ -55,6 +55,7 @@ jobs:
             -e ALPACA_BASE_URL="${{ secrets.ALPACA_BASE_URL }}" \
             -e DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
             -e DISCORD_WEBHOOK_URLS="${{ secrets.DISCORD_WEBHOOK_URLS }}" \
+            -e STRATEGY_NAME="${{ vars.STRATEGY_NAME }}" \
             -v "${{ github.workspace }}:/app" \
             -w /app \
             investment-bot:latest \

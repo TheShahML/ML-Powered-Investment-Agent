@@ -9,6 +9,7 @@ from typing import Dict, Optional, List
 from .strategy_base import BaseStrategy
 from .strategy_simple import SimpleStrategy
 from .strategy_simple import PureMomentumStrategy
+from .strategies.lc_reversal import LCReversalStrategy
 
 
 class StrategySelector:
@@ -49,20 +50,34 @@ class StrategySelector:
             'name': 'Pure Momentum',
             'description': 'Baseline momentum strategy (no ML)'
         }
+
+        # Liquidity-conditioned reversal
+        self.available_strategies['lc_reversal'] = {
+            'class': LCReversalStrategy,
+            'name': 'LC-Reversal',
+            'description': 'Liquidity-conditioned cross-sectional mean reversion'
+        }
+
+        # Alias for existing ML momentum flow
+        self.available_strategies['ml_momentum'] = {
+            'class': SimpleStrategy,
+            'name': 'ML Momentum (XGBoost)',
+            'description': 'Alias to simple multi-horizon XGBoost strategy'
+        }
     
     def get_strategy(self, strategy_type: str = None, horizon: str = '20d') -> BaseStrategy:
         """
         Get a strategy instance.
         
         Args:
-            strategy_type: 'simple' or 'pure_momentum'. If None, uses config default.
+            strategy_type: 'simple', 'ml_momentum', 'pure_momentum', or 'lc_reversal'. If None, uses config default.
             horizon: '1d', '5d', or '20d'
             
         Returns:
             Strategy instance
         """
         if strategy_type is None:
-            strategy_type = self.config.get('strategy', {}).get('strategy_type', 'simple')
+            strategy_type = self.config.get('strategy_name') or self.config.get('STRATEGY_NAME') or self.config.get('strategy', {}).get('strategy_type', 'simple')
         
         if strategy_type not in self.available_strategies:
             logger.warning(f"Strategy '{strategy_type}' not available, defaulting to 'simple'")
@@ -154,4 +169,3 @@ class StrategySelector:
             })
         
         return pd.DataFrame(summaries).sort_values('sharpe', ascending=False)
-

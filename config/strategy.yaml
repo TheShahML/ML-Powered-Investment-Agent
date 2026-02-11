@@ -1,4 +1,6 @@
 # Strategy configuration
+strategy_name: "lc_reversal"  # Options: lc_reversal (default), ml_momentum, simple, pure_momentum
+
 strategy:
   name: "multi_horizon_momentum"
   strategy_type: "simple" # Options: simple (recommended), pure_momentum
@@ -39,3 +41,24 @@ model:
 #    - No model training needed
 #    - Zero overfitting risk
 #    - Academic baseline that's hard to beat
+
+lc_reversal:
+  n_universe: 500
+  pct_tail: 0.10
+  vol_z_min: 1.0
+  impact_z_min: 1.0
+  n_long: 10
+  n_short: 10
+  enable_shorts: true
+  gross_exposure: 1.0
+  weight_method: "equal_weight"  # equal_weight | inverse_vol
+  adv_pct: 0.005
+  hold_days: 2
+  enable_stop_loss: false
+  stop_atr_mult: 1.5
+  bear_gross_mult: 0.5
+  earnings_filter_enabled: false
+
+lc_backtest:
+  tx_cost_bps: 20
+  impact_slippage_mult: 0.0

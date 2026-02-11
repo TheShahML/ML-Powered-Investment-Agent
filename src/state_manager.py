@@ -85,7 +85,11 @@ class StateManager:
             'performance': {},
             'data_freshness': {'is_fresh': True},
             'kill_switch': {'enabled': False},
-            'last_workflow_runs': {}
+            'last_workflow_runs': {},
+            'execution': {
+                'last_successful_trade_date': None,
+                'last_run': {}
+            }
         }
 
     def promote_candidate_to_active(self):

@@ -57,6 +57,11 @@ jobs:
             -e DISCORD_WEBHOOK_URLS="${{ secrets.DISCORD_WEBHOOK_URLS }}" \
             -e KILL_SWITCH_ENABLED="${{ vars.KILL_SWITCH_ENABLED }}" \
             -e BROKER_MODE="${{ secrets.BROKER_MODE }}" \
+            -e DRY_RUN="${{ vars.DRY_RUN }}" \
+            -e SMOKE_TEST="${{ vars.SMOKE_TEST }}" \
+            -e OPEN_ORDERS_ACTION="${{ vars.OPEN_ORDERS_ACTION }}" \
+            -e I_ACKNOWLEDGE_LIVE_TRADING="${{ vars.I_ACKNOWLEDGE_LIVE_TRADING }}" \
+            -e STRATEGY_NAME="${{ vars.STRATEGY_NAME }}" \
             -v "${{ github.workspace }}:/app" \
             -w /app \
             investment-bot:latest \

@@ -60,6 +60,150 @@ class DiscordProductionNotifier:
             return True
         return False
 
+    def send_markdown(self, message: str) -> bool:
+        """Send plain markdown message to Discord webhook(s)."""
+        if not self.webhook_urls:
+            logger.warning("Discord webhook not configured")
+            return False
+
+        content = (message or "").strip()
+        if not content:
+            logger.warning("Empty Discord markdown payload")
+            return False
+
+        # Discord content hard limit is 2000 chars.
+        if len(content) > 2000:
+            content = content[:1900] + "\n\n... (truncated)"
+
+        success_count = 0
+        for webhook_url in self.webhook_urls:
+            try:
+                response = requests.post(
+                    webhook_url,
+                    json={"content": content},
+                    headers={"Content-Type": "application/json"}
+                )
+                response.raise_for_status()
+                success_count += 1
+            except Exception as e:
+                logger.error(f"Discord markdown send failed to {webhook_url[:50]}...: {e}")
+
+        if success_count > 0:
+            logger.info(f"Discord markdown notification sent to {success_count}/{len(self.webhook_urls)} webhook(s)")
+            return True
+        return False
+
+    def send_rebalance_markdown_summary(self, payload: Dict) -> bool:
+        """Send a single structured markdown summary for rebalance execution."""
+        run_ts = payload.get("run_timestamp_utc", "N/A")
+        broker_mode = payload.get("broker_mode", "paper")
+        dry_run = bool(payload.get("dry_run", False))
+        smoke_test = bool(payload.get("smoke_test", False))
+        strategy = payload.get("strategy_name", "N/A")
+        universe_size = payload.get("universe_size")
+        status = payload.get("status", "unknown")
+
+        portfolio = payload.get("portfolio", {}) or {}
+        cash = float(portfolio.get("cash", 0.0) or 0.0)
+        equity = float(portfolio.get("equity", 0.0) or 0.0)
+        gross_exposure = portfolio.get("gross_exposure")
+        net_exposure = portfolio.get("net_exposure")
+
+        positions = payload.get("positions_top10", []) or []
+        target_trades = payload.get("target_trades", []) or []
+        results = payload.get("execution_results", []) or []
+        errors = payload.get("errors", []) or []
+        stack_snippet = payload.get("stack_snippet")
+
+        result_counts = {"submitted": 0, "filled": 0, "rejected": 0, "failed": 0, "dry_run": 0, "other": 0}
+        for r in results:
+            rs = str(r.get("status", "other")).lower()
+            if rs in result_counts:
+                result_counts[rs] += 1
+            else:
+                result_counts["other"] += 1
+
+        lines = []
+        lines.append(f"## Rebalance Run ({status.upper()})")
+        lines.append("")
+        lines.append("### Run Context")
+        lines.append(f"- timestamp_utc: `{run_ts}`")
+        lines.append(f"- mode: `{broker_mode}`")
+        lines.append(f"- dry_run: `{dry_run}`")
+        lines.append(f"- smoke_test: `{smoke_test}`")
+        lines.append(f"- strategy: `{strategy}`")
+        if universe_size is not None:
+            lines.append(f"- universe_size: `{universe_size}`")
+
+        lines.append("")
+        lines.append("### Portfolio Summary")
+        lines.append(f"- cash: `${cash:,.2f}`")
+        lines.append(f"- equity: `${equity:,.2f}`")
+        if gross_exposure is not None:
+            lines.append(f"- gross_exposure: `{gross_exposure}`")
+        if net_exposure is not None:
+            lines.append(f"- net_exposure: `{net_exposure}`")
+
+        lines.append("")
+        lines.append("### Current Positions (Top 10 by Notional)")
+        if positions:
+            for p in positions[:10]:
+                lines.append(
+                    f"- `{p.get('symbol', 'N/A')}` qty={p.get('qty', 'N/A')} "
+                    f"notional=${float(p.get('notional', 0.0) or 0.0):,.2f}"
+                )
+        else:
+            lines.append("- none")
+
+        lines.append("")
+        lines.append("### Target Trades")
+        if target_trades:
+            for t in target_trades[:20]:
+                qty = t.get("qty")
+                qty_text = "N/A" if qty is None else f"{float(qty):.6f}"
+                notional_text = float(t.get("notional", 0.0) or 0.0)
+                lp = t.get("limit_price")
+                lp_text = f"{lp}" if lp is not None else "market"
+                lines.append(
+                    f"- `{t.get('symbol', 'N/A')}` {t.get('side', 'N/A')} "
+                    f"qty={qty_text} notional=${notional_text:,.2f} limit={lp_text}"
+                )
+        else:
+            lines.append("- none")
+
+        lines.append("")
+        lines.append("### Execution Results")
+        lines.append(
+            "- counts: "
+            f"submitted={result_counts['submitted']}, "
+            f"filled={result_counts['filled']}, "
+            f"rejected={result_counts['rejected']}, "
+            f"failed={result_counts['failed']}, "
+            f"dry_run={result_counts['dry_run']}, "
+            f"other={result_counts['other']}"
+        )
+        if results:
+            for r in results[:25]:
+                reason = r.get("error") or r.get("reason") or r.get("alpaca_status") or "ok"
+                lines.append(
+                    f"- `{r.get('symbol', 'N/A')}` status={r.get('status', 'N/A')} "
+                    f"side={r.get('side', 'N/A')} order_id={r.get('order_id', 'N/A')} reason={reason}"
+                )
+        else:
+            lines.append("- none")
+
+        if errors or stack_snippet:
+            lines.append("")
+            lines.append("### Errors")
+            for err in errors[:10]:
+                lines.append(f"- {err}")
+            if stack_snippet:
+                lines.append("```")
+                lines.append(str(stack_snippet)[:600])
+                lines.append("```")
+
+        return self.send_markdown("\n".join(lines))
+
     def send_image(self, text: str, image_path: str) -> bool:
         """
         Send image to Discord via webhook(s).
@@ -171,7 +315,8 @@ class DiscordProductionNotifier:
         strategy_names = {
             'simple': 'XGBoost Multi-Horizon',
             'lstm': 'LSTM Neural Network',
-            'pure_momentum': 'Pure Momentum'
+            'pure_momentum': 'Pure Momentum',
+            'lc_reversal': 'LC-Reversal'
         }
         strategy_name = strategy_names.get(strategy_type, strategy_type)
         
@@ -356,7 +501,8 @@ class DiscordProductionNotifier:
         strategy_names = {
             'simple': 'XGBoost Multi-Horizon',
             'lstm': 'LSTM Neural Network',
-            'pure_momentum': 'Pure Momentum'
+            'pure_momentum': 'Pure Momentum',
+            'lc_reversal': 'LC-Reversal'
         }
         strategy_name = strategy_names.get(strategy_type, strategy_type.upper())
         
