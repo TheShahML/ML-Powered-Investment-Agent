@@ -1,0 +1,582 @@
+{
+  "run_timestamp_utc": "2026-02-12T20:33:34.263490+00:00",
+  "broker_mode": "paper",
+  "dry_run": true,
+  "smoke_test": false,
+  "strategy_name": "lc_reversal",
+  "universe_size": 1186,
+  "portfolio": {
+    "cash": -213.9,
+    "equity": 94578.44,
+    "gross_exposure": 94792.34,
+    "net_exposure": 94792.34
+  },
+  "positions_top10": [
+    {
+      "symbol": "BTCUSD",
+      "qty": 0.109581287,
+      "notional": 7173.261837
+    },
+    {
+      "symbol": "GNRC",
+      "qty": 20.8726,
+      "notional": 4534.989802
+    },
+    {
+      "symbol": "TPL",
+      "qty": 10.4409,
+      "notional": 4308.437385
+    },
+    {
+      "symbol": "DECK",
+      "qty": 35.3817,
+      "notional": 4109.05373
+    },
+    {
+      "symbol": "TXN",
+      "qty": 17.9945,
+      "notional": 4014.752895
+    },
+    {
+      "symbol": "ON",
+      "qty": 56.7717,
+      "notional": 3998.71469
+    },
+    {
+      "symbol": "EME",
+      "qty": 4.9493,
+      "notional": 3893.910773
+    },
+    {
+      "symbol": "PWR",
+      "qty": 7.3568,
+      "notional": 3795.74096
+    },
+    {
+      "symbol": "CI",
+      "qty": 13.1353,
+      "notional": 3795.576288
+    },
+    {
+      "symbol": "KEYS",
+      "qty": 16.2992,
+      "notional": 3748.490016
+    }
+  ],
+  "target_trades": [
+    {
+      "symbol": "SCHW",
+      "side": "buy",
+      "qty": 29.6825,
+      "notional": 2837.3532,
+      "limit_price": null
+    },
+    {
+      "symbol": "HPE",
+      "side": "sell",
+      "qty": 163.6545,
+      "notional": 3664.2242550000005,
+      "limit_price": null
+    },
+    {
+      "symbol": "MSCI",
+      "side": "buy",
+      "qty": 5.4142,
+      "notional": 2837.3532,
+      "limit_price": null
+    },
+    {
+      "symbol": "GNRC",
+      "side": "sell",
+      "qty": 20.8726,
+      "notional": 4532.48509,
+      "limit_price": null
+    },
+    {
+      "symbol": "TSLA",
+      "side": "sell",
+      "qty": 8.1857,
+      "notional": 3403.532203,
+      "limit_price": null
+    },
+    {
+      "symbol": "CI",
+      "side": "sell",
+      "qty": 13.1353,
+      "notional": 3790.0594620000006,
+      "limit_price": null
+    },
+    {
+      "symbol": "BP",
+      "side": "buy",
+      "qty": 76.2115,
+      "notional": 2837.3532,
+      "limit_price": null
+    },
+    {
+      "symbol": "MRVL",
+      "side": "sell",
+      "qty": 42.5779,
+      "notional": 3331.294896,
+      "limit_price": null
+    },
+    {
+      "symbol": "OMC",
+      "side": "sell",
+      "qty": 45.647,
+      "notional": 3087.56308,
+      "limit_price": null
+    },
+    {
+      "symbol": "ROK",
+      "side": "sell",
+      "qty": 8.4244,
+      "notional": 3224.4391,
+      "limit_price": null
+    },
+    {
+      "symbol": "CVNA",
+      "side": "sell",
+      "qty": 7.376,
+      "notional": 2543.9455199999998,
+      "limit_price": null
+    },
+    {
+      "symbol": "DDOG",
+      "side": "sell",
+      "qty": 22.6012,
+      "notional": 2837.3532,
+      "limit_price": null
+    },
+    {
+      "symbol": "CMG",
+      "side": "sell",
+      "qty": 89.5972,
+      "notional": 3209.371704,
+      "limit_price": null
+    },
+    {
+      "symbol": "FISV",
+      "side": "sell",
+      "qty": 53.6796,
+      "notional": 3171.3907679999998,
+      "limit_price": null
+    },
+    {
+      "symbol": "PWR",
+      "side": "sell",
+      "qty": 7.3568,
+      "notional": 3798.3894079999995,
+      "limit_price": null
+    },
+    {
+      "symbol": "TXN",
+      "side": "sell",
+      "qty": 17.9945,
+      "notional": 4020.8710249999995,
+      "limit_price": null
+    },
+    {
+      "symbol": "META",
+      "side": "sell",
+      "qty": 5.2916,
+      "notional": 3440.06916,
+      "limit_price": null
+    },
+    {
+      "symbol": "BDX",
+      "side": "sell",
+      "qty": 15.9089,
+      "notional": 2837.3532,
+      "limit_price": null
+    },
+    {
+      "symbol": "TPL",
+      "side": "sell",
+      "qty": 10.4409,
+      "notional": 4308.437384999999,
+      "limit_price": null
+    },
+    {
+      "symbol": "SBUX",
+      "side": "sell",
+      "qty": 37.0232,
+      "notional": 3584.0308760000007,
+      "limit_price": null
+    },
+    {
+      "symbol": "ON",
+      "side": "sell",
+      "qty": 56.7717,
+      "notional": 4004.6757180000004,
+      "limit_price": null
+    },
+    {
+      "symbol": "EBAY",
+      "side": "sell",
+      "qty": 37.2842,
+      "notional": 2974.9063180000003,
+      "limit_price": null
+    },
+    {
+      "symbol": "LLY",
+      "side": "sell",
+      "qty": 3.3754,
+      "notional": 3541.1658939999998,
+      "limit_price": null
+    },
+    {
+      "symbol": "DECK",
+      "side": "sell",
+      "qty": 35.3817,
+      "notional": 4106.4001020000005,
+      "limit_price": null
+    },
+    {
+      "symbol": "EME",
+      "side": "sell",
+      "qty": 4.9493,
+      "notional": 3893.317352,
+      "limit_price": null
+    },
+    {
+      "symbol": "MPWR",
+      "side": "sell",
+      "qty": 3.1943,
+      "notional": 3686.318029,
+      "limit_price": null
+    },
+    {
+      "symbol": "WYNN",
+      "side": "sell",
+      "qty": 31.1182,
+      "notional": 3360.7656,
+      "limit_price": null
+    },
+    {
+      "symbol": "MOH",
+      "side": "sell",
+      "qty": 19.1365,
+      "notional": 2415.0263000000004,
+      "limit_price": null
+    },
+    {
+      "symbol": "DASH",
+      "side": "sell",
+      "qty": 17.1256,
+      "notional": 2780.6836719999997,
+      "limit_price": null
+    },
+    {
+      "symbol": "KEYS",
+      "side": "sell",
+      "qty": 16.2992,
+      "notional": 3750.7719039999997,
+      "limit_price": null
+    }
+  ],
+  "execution_results": [
+    {
+      "symbol": "SCHW",
+      "side": "buy",
+      "qty": 29.6825,
+      "notional": 2837.3532,
+      "price": 95.59,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "HPE",
+      "side": "sell",
+      "qty": 163.6545,
+      "notional": 3664.2242550000005,
+      "price": 22.39,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "MSCI",
+      "side": "buy",
+      "qty": 5.4142,
+      "notional": 2837.3532,
+      "price": 524.06,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "GNRC",
+      "side": "sell",
+      "qty": 20.8726,
+      "notional": 4532.48509,
+      "price": 217.15,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "sell",
+      "qty": 8.1857,
+      "notional": 3403.532203,
+      "price": 415.79,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "CI",
+      "side": "sell",
+      "qty": 13.1353,
+      "notional": 3790.0594620000006,
+      "price": 288.54,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "BP",
+      "side": "buy",
+      "qty": 76.2115,
+      "notional": 2837.3532,
+      "price": 37.23,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "MRVL",
+      "side": "sell",
+      "qty": 42.5779,
+      "notional": 3331.294896,
+      "price": 78.24,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "OMC",
+      "side": "sell",
+      "qty": 45.647,
+      "notional": 3087.56308,
+      "price": 67.64,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "ROK",
+      "side": "sell",
+      "qty": 8.4244,
+      "notional": 3224.4391,
+      "price": 382.75,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "CVNA",
+      "side": "sell",
+      "qty": 7.376,
+      "notional": 2543.9455199999998,
+      "price": 344.895,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "DDOG",
+      "side": "sell",
+      "qty": 22.6012,
+      "notional": 2837.3532,
+      "price": 125.54,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "CMG",
+      "side": "sell",
+      "qty": 89.5972,
+      "notional": 3209.371704,
+      "price": 35.82,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "FISV",
+      "side": "sell",
+      "qty": 53.6796,
+      "notional": 3171.3907679999998,
+      "price": 59.08,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "PWR",
+      "side": "sell",
+      "qty": 7.3568,
+      "notional": 3798.3894079999995,
+      "price": 516.31,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "TXN",
+      "side": "sell",
+      "qty": 17.9945,
+      "notional": 4020.8710249999995,
+      "price": 223.45,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "META",
+      "side": "sell",
+      "qty": 5.2916,
+      "notional": 3440.06916,
+      "price": 650.1,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "BDX",
+      "side": "sell",
+      "qty": 15.9089,
+      "notional": 2837.3532,
+      "price": 178.35,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "TPL",
+      "side": "sell",
+      "qty": 10.4409,
+      "notional": 4308.437384999999,
+      "price": 412.65,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "SBUX",
+      "side": "sell",
+      "qty": 37.0232,
+      "notional": 3584.0308760000007,
+      "price": 96.805,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "ON",
+      "side": "sell",
+      "qty": 56.7717,
+      "notional": 4004.6757180000004,
+      "price": 70.54,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "EBAY",
+      "side": "sell",
+      "qty": 37.2842,
+      "notional": 2974.9063180000003,
+      "price": 79.79,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "LLY",
+      "side": "sell",
+      "qty": 3.3754,
+      "notional": 3541.1658939999998,
+      "price": 1049.11,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "DECK",
+      "side": "sell",
+      "qty": 35.3817,
+      "notional": 4106.4001020000005,
+      "price": 116.06,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "EME",
+      "side": "sell",
+      "qty": 4.9493,
+      "notional": 3893.317352,
+      "price": 786.64,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "MPWR",
+      "side": "sell",
+      "qty": 3.1943,
+      "notional": 3686.318029,
+      "price": 1154.03,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "WYNN",
+      "side": "sell",
+      "qty": 31.1182,
+      "notional": 3360.7656,
+      "price": 108.0,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "MOH",
+      "side": "sell",
+      "qty": 19.1365,
+      "notional": 2415.0263000000004,
+      "price": 126.2,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "DASH",
+      "side": "sell",
+      "qty": 17.1256,
+      "notional": 2780.6836719999997,
+      "price": 162.37,
+      "status": "dry_run"
+    },
+    {
+      "symbol": "KEYS",
+      "side": "sell",
+      "qty": 16.2992,
+      "notional": 3750.7719039999997,
+      "price": 230.12,
+      "status": "dry_run"
+    }
+  ],
+  "target_diff": {
+    "added_symbols": [
+      "BDX",
+      "BP",
+      "DDOG",
+      "MSCI",
+      "SCHW"
+    ],
+    "removed_symbols": [],
+    "increased_symbols": [
+      "BDX",
+      "BP",
+      "DDOG",
+      "MSCI",
+      "SCHW"
+    ],
+    "decreased_symbols": [],
+    "changed_weights_top": [
+      {
+        "symbol": "BDX",
+        "prev_weight": 0.0,
+        "new_weight": -0.03,
+        "delta_weight": -0.03,
+        "abs_delta_weight": 0.03
+      },
+      {
+        "symbol": "BP",
+        "prev_weight": 0.0,
+        "new_weight": 0.03,
+        "delta_weight": 0.03,
+        "abs_delta_weight": 0.03
+      },
+      {
+        "symbol": "DDOG",
+        "prev_weight": 0.0,
+        "new_weight": -0.03,
+        "delta_weight": -0.03,
+        "abs_delta_weight": 0.03
+      },
+      {
+        "symbol": "MSCI",
+        "prev_weight": 0.0,
+        "new_weight": 0.03,
+        "delta_weight": 0.03,
+        "abs_delta_weight": 0.03
+      },
+      {
+        "symbol": "SCHW",
+        "prev_weight": 0.0,
+        "new_weight": 0.03,
+        "delta_weight": 0.03,
+        "abs_delta_weight": 0.03
+      }
+    ],
+    "num_added": 5,
+    "num_removed": 0,
+    "num_increased": 5,
+    "num_decreased": 0
+  },
+  "status": "success",
+  "errors": [],
+  "stack_snippet": null
+}
