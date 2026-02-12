@@ -136,17 +136,49 @@ def execute_orders_safe(
     max_notional = config.get('max_daily_notional', 1_000_000)
     min_notional = config.get('min_trade_notional', 10.0)
     turnover_buffer = config.get('turnover_buffer_pct', 1.0) / 100.0
+    order_type = str(config.get('order_type', 'market') or 'market').lower()
+    limit_offset_bps = float(config.get('limit_offset_bps', 10.0) or 10.0)
+    if order_type not in {'market', 'limit'}:
+        logger.warning(f"Invalid order_type={order_type}; defaulting to market")
+        order_type = 'market'
 
     open_orders_by_symbol = open_orders_by_symbol or {}
+
+    def _latest_price(symbol: str) -> Optional[float]:
+        # Primary path: equities trade feed
+        try:
+            quote = api.get_latest_trade(symbol, feed='iex')
+            return float(quote.price)
+        except Exception:
+            pass
+
+        # Fallback path: crypto pairs (e.g., BTCUSD -> BTC/USD)
+        crypto_symbol = None
+        if '/' in symbol:
+            crypto_symbol = symbol
+        elif symbol.endswith('USD') and symbol.isalpha() and len(symbol) > 3:
+            crypto_symbol = f"{symbol[:-3]}/USD"
+
+        if crypto_symbol:
+            try:
+                q = api.get_latest_crypto_quote(crypto_symbol)
+                ask = float(getattr(q, 'ap', 0.0) or 0.0)
+                bid = float(getattr(q, 'bp', 0.0) or 0.0)
+                px = ask if ask > 0 else bid
+                if px > 0:
+                    return px
+            except Exception:
+                pass
+        return None
 
     # Get current prices
     prices = {}
     for symbol in set(list(target_weights.keys()) + list(current_positions.keys())):
-        try:
-            quote = api.get_latest_trade(symbol, feed='iex')
-            prices[symbol] = float(quote.price)
-        except Exception as e:
-            logger.warning(f"Could not get price for {symbol}: {e}")
+        px = _latest_price(symbol)
+        if px is not None and px > 0:
+            prices[symbol] = float(px)
+        else:
+            logger.warning(f"Could not get price for {symbol}")
 
     # Compute target dollar amounts
     target_dollars = {s: w * portfolio_value for s, w in target_weights.items()}
@@ -245,9 +277,20 @@ def execute_orders_safe(
                     symbol=trade['symbol'],
                     qty=trade['qty'],
                     side=trade['side'],
-                    type='market',
+                    type=order_type,
                     time_in_force='day',
-                    client_order_id=client_order_id
+                    client_order_id=client_order_id,
+                    **(
+                        {
+                            'limit_price': round(
+                                trade['price'] * (1.0 + (limit_offset_bps / 10000.0))
+                                if trade['side'] == 'buy'
+                                else trade['price'] * (1.0 - (limit_offset_bps / 10000.0)),
+                                2
+                            )
+                        }
+                        if order_type == 'limit' else {}
+                    )
                 )
                 order_id = getattr(order, 'id', None)
                 order_status = getattr(order, 'status', 'unknown')
@@ -259,6 +302,14 @@ def execute_orders_safe(
                 order_info['alpaca_status'] = order_status
                 if client_order_id:
                     order_info['client_order_id'] = client_order_id
+                if order_type == 'limit':
+                    order_info['limit_price'] = round(
+                        trade['price'] * (1.0 + (limit_offset_bps / 10000.0))
+                        if trade['side'] == 'buy'
+                        else trade['price'] * (1.0 - (limit_offset_bps / 10000.0)),
+                        2
+                    )
+                order_info['order_type'] = order_type
                 logger.info(
                     f"Submitted: {trade['side']} {trade['qty']:.4f} {trade['symbol']} "
                     f"(order_id={order_id}, status={order_status})"

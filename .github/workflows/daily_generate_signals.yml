@@ -2,7 +2,7 @@ name: Daily Generate Signals
 
 on:
   schedule:
-    - cron: '30 21 * * 1-5'  # Weekdays 9:30PM UTC (after US market close)
+    - cron: "30 21 * * 1-5" # Weekdays 9:30PM UTC (after US market close)
   workflow_dispatch:
 
 concurrency:
@@ -49,6 +49,8 @@ jobs:
 
       - name: Generate signals (containerized)
         run: |
+          set -o pipefail
+          mkdir -p reports/run_logs
           docker run --rm \
             -e ALPACA_API_KEY="${{ secrets.ALPACA_API_KEY }}" \
             -e ALPACA_SECRET_KEY="${{ secrets.ALPACA_SECRET_KEY }}" \
@@ -59,11 +61,14 @@ jobs:
             -v "${{ github.workspace }}:/app" \
             -w /app \
             investment-bot:latest \
-            python scripts/generate_signals.py
+            python scripts/generate_signals.py 2>&1 | tee "reports/run_logs/daily_generate_signals_${{ github.run_number }}.log"
 
       - name: Save updated state back to state branch
         run: |
           cp ./latest_state.json state-repo/latest_state.json
+          mkdir -p state-repo/run_logs/signals
+          cp -f reports/run_logs/* state-repo/run_logs/signals/ || true
+          cp -f "reports/run_logs/daily_generate_signals_${{ github.run_number }}.log" state-repo/run_logs/signals/latest.log || true
 
       - name: Upload reports artifacts
         if: always()
@@ -77,6 +82,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add latest_state.json
+          git add latest_state.json run_logs
           git commit -m "Update state after signals generation (${{ github.run_number }})" || echo "No changes"
           git push origin state

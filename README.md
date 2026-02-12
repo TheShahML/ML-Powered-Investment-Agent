@@ -181,6 +181,7 @@ System state (rebalance schedule, active/candidate models, performance) is store
 - Repository variable `KILL_SWITCH_ENABLED` blocks all trading instantly
 - Useful for market emergencies or system maintenance
 - Doesn't stop signal generation (observation only)
+- Manual procedure: `docs/KILL_SWITCH_RUNBOOK.md`
 
 **Idempotency:**
 - Tracks last rebalance date to prevent double-execution

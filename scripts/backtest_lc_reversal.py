@@ -20,6 +20,21 @@ from src import alpaca_fix
 import alpaca_trade_api as tradeapi
 
 
+def _write_run_log(payload: dict, as_of_date: str) -> str:
+    logs_dir = os.path.join("reports", "run_logs")
+    os.makedirs(logs_dir, exist_ok=True)
+    stamp = as_of_date.replace("-", "")
+    filename = f"backtest_lc_reversal_{stamp}.json"
+    path = os.path.join(logs_dir, filename)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, default=str)
+    latest_path = os.path.join(logs_dir, "latest_backtest_lc_reversal.json")
+    with open(latest_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, default=str)
+    logger.info(f"Saved LC-Reversal run log: {path}")
+    return path
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--days", type=int, default=365, help="Backtest window length in calendar days")
@@ -102,6 +117,7 @@ def main() -> None:
     with open(output_path, "w") as f:
         json.dump(output_payload, f, indent=2)
     logger.info(f"Saved LC-Reversal backtest summary: {output_path}")
+    _write_run_log(output_payload, as_of_date=as_of_date.isoformat())
 
 
 if __name__ == "__main__":

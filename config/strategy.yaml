@@ -51,6 +51,7 @@ lc_reversal:
   n_short: 10
   enable_shorts: true
   gross_exposure: 1.0
+  max_position_weight: 0.03
   weight_method: "equal_weight"  # equal_weight | inverse_vol
   adv_pct: 0.005
   hold_days: 2

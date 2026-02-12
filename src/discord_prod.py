@@ -17,24 +17,36 @@ class DiscordProductionNotifier:
             webhook_url: Single webhook URL (for backward compatibility)
             webhook_urls: List of webhook URLs (takes precedence over webhook_url)
         """
-        # Support multiple webhooks via comma-separated env var or list
+        # Build from explicit args first, then env vars.
+        raw_urls: List[str] = []
         if webhook_urls:
-            self.webhook_urls = webhook_urls
-        elif webhook_url:
-            self.webhook_urls = [webhook_url]
-        else:
-            # Check for multiple webhooks in env (comma-separated)
-            env_urls = os.environ.get('DISCORD_WEBHOOK_URLS', '')
-            if env_urls:
-                self.webhook_urls = [url.strip() for url in env_urls.split(',') if url.strip()]
-            else:
-                # Fall back to single webhook for backward compatibility
-                single_url = os.environ.get('DISCORD_WEBHOOK_URL')
-                self.webhook_urls = [single_url] if single_url else []
-        
+            raw_urls.extend(webhook_urls)
+        if webhook_url:
+            raw_urls.append(webhook_url)
+        raw_urls.append(os.environ.get('DISCORD_WEBHOOK_URLS', ''))
+        raw_urls.append(os.environ.get('DISCORD_WEBHOOK_URL', ''))
+
+        self.webhook_urls = self._parse_webhook_urls(raw_urls)
+
+    @staticmethod
+    def _parse_webhook_urls(values: List[str]) -> List[str]:
+        """Parse webhook strings/lists, allowing comma-separated values in either env var."""
+        urls: List[str] = []
+        for value in values:
+            if not value:
+                continue
+            parts = [p.strip() for p in str(value).split(",") if p.strip()]
+            urls.extend(parts)
+
         # Remove duplicates while preserving order
         seen = set()
-        self.webhook_urls = [url for url in self.webhook_urls if url and url not in seen and not seen.add(url)]
+        deduped = []
+        for url in urls:
+            if url in seen:
+                continue
+            seen.add(url)
+            deduped.append(url)
+        return deduped
 
     def _send(self, embed: Dict) -> bool:
         """Send embed to Discord (all configured webhooks)."""
@@ -112,6 +124,7 @@ class DiscordProductionNotifier:
         positions = payload.get("positions_top10", []) or []
         target_trades = payload.get("target_trades", []) or []
         results = payload.get("execution_results", []) or []
+        target_diff = payload.get("target_diff", {}) or {}
         errors = payload.get("errors", []) or []
         stack_snippet = payload.get("stack_snippet")
 
@@ -123,8 +136,17 @@ class DiscordProductionNotifier:
             else:
                 result_counts["other"] += 1
 
+        status_emoji = {
+            "success": "✅",
+            "partial_failure": "⚠️",
+            "failed": "❌",
+            "skipped_not_due": "⏭️",
+            "skipped_already_rebalanced": "⏭️",
+            "skipped_already_successful": "⏭️",
+        }.get(str(status).lower(), "ℹ️")
+
         lines = []
-        lines.append(f"## Rebalance Run ({status.upper()})")
+        lines.append(f"## {status_emoji} Rebalance Run ({status.upper()})")
         lines.append("")
         lines.append("### Run Context")
         lines.append(f"- timestamp_utc: `{run_ts}`")
@@ -136,7 +158,7 @@ class DiscordProductionNotifier:
             lines.append(f"- universe_size: `{universe_size}`")
 
         lines.append("")
-        lines.append("### Portfolio Summary")
+        lines.append("### 💼 Portfolio Summary")
         lines.append(f"- cash: `${cash:,.2f}`")
         lines.append(f"- equity: `${equity:,.2f}`")
         if gross_exposure is not None:
@@ -145,7 +167,7 @@ class DiscordProductionNotifier:
             lines.append(f"- net_exposure: `{net_exposure}`")
 
         lines.append("")
-        lines.append("### Current Positions (Top 10 by Notional)")
+        lines.append("### 📦 Current Positions (Top 10 by Notional)")
         if positions:
             for p in positions[:10]:
                 lines.append(
@@ -156,7 +178,7 @@ class DiscordProductionNotifier:
             lines.append("- none")
 
         lines.append("")
-        lines.append("### Target Trades")
+        lines.append("### 🎯 Target Trades")
         if target_trades:
             for t in target_trades[:20]:
                 qty = t.get("qty")
@@ -172,7 +194,37 @@ class DiscordProductionNotifier:
             lines.append("- none")
 
         lines.append("")
-        lines.append("### Execution Results")
+        lines.append("### 🔄 What Changed Today (Targets vs Prior Run)")
+        if target_diff:
+            lines.append(
+                "- counts: "
+                f"added={int(target_diff.get('num_added', 0) or 0)}, "
+                f"removed={int(target_diff.get('num_removed', 0) or 0)}, "
+                f"increased={int(target_diff.get('num_increased', 0) or 0)}, "
+                f"decreased={int(target_diff.get('num_decreased', 0) or 0)}"
+            )
+            added = target_diff.get("added_symbols", []) or []
+            removed = target_diff.get("removed_symbols", []) or []
+            if added:
+                lines.append(f"- added: `{', '.join(added[:15])}`")
+            if removed:
+                lines.append(f"- removed: `{', '.join(removed[:15])}`")
+            changed = target_diff.get("changed_weights_top", []) or []
+            for c in changed[:10]:
+                try:
+                    lines.append(
+                        f"- `{c.get('symbol', 'N/A')}` "
+                        f"{float(c.get('prev_weight', 0.0))*100:+.2f}% -> "
+                        f"{float(c.get('new_weight', 0.0))*100:+.2f}% "
+                        f"(delta {float(c.get('delta_weight', 0.0))*100:+.2f}%)"
+                    )
+                except Exception:
+                    continue
+        else:
+            lines.append("- no prior target snapshot available")
+
+        lines.append("")
+        lines.append("### 🧾 Execution Results")
         lines.append(
             "- counts: "
             f"submitted={result_counts['submitted']}, "
@@ -194,7 +246,7 @@ class DiscordProductionNotifier:
 
         if errors or stack_snippet:
             lines.append("")
-            lines.append("### Errors")
+            lines.append("### 🚨 Errors")
             for err in errors[:10]:
                 lines.append(f"- {err}")
             if stack_snippet:
@@ -203,6 +255,96 @@ class DiscordProductionNotifier:
                 lines.append("```")
 
         return self.send_markdown("\n".join(lines))
+
+    def send_lc_reversal_signals(
+        self,
+        as_of_date: str,
+        universe_size: int,
+        long_candidates: List[tuple],
+        short_candidates: List[tuple],
+        canary_top10: List[tuple],
+        performance_since_rebal: Dict,
+        performance_rolling: Dict,
+        data_fresh: bool,
+        days_until_rebal: int,
+        next_rebal_date: str
+    ) -> bool:
+        """Daily LC-Reversal signal summary optimized for readability."""
+        long_text = "\n".join(
+            [
+                f"{i}. **{sym}** ret={ret:+.2%} | vol_z={vol_z:+.2f} | impact_z={impact_z:+.2f}"
+                for i, (sym, ret, vol_z, impact_z) in enumerate(long_candidates[:8], 1)
+            ]
+        )
+        short_text = "\n".join(
+            [
+                f"{i}. **{sym}** ret={ret:+.2%} | vol_z={vol_z:+.2f} | impact_z={impact_z:+.2f}"
+                for i, (sym, ret, vol_z, impact_z) in enumerate(short_candidates[:8], 1)
+            ]
+        )
+        canary_text = "\n".join([f"{i}. **{sym}** ({score:+.1f}%)" for i, (sym, score) in enumerate(canary_top10[:5], 1)])
+
+        # Accept both old/new metric key styles.
+        ml_since = performance_since_rebal.get('ml', performance_since_rebal.get('actual', 0.0))
+        canary_since = performance_since_rebal.get('canary', 0.0)
+        spy_since = performance_since_rebal.get('spy', 0.0)
+        ml_30d = performance_rolling.get('ml', performance_rolling.get('actual_30d', 0.0))
+        canary_30d = performance_rolling.get('canary', performance_rolling.get('canary_30d', 0.0))
+        spy_30d = performance_rolling.get('spy', performance_rolling.get('spy_30d', 0.0))
+
+        embed = {
+            "title": f"💧 LC-Reversal Daily Signals | {as_of_date}",
+            "description": "Liquidity-conditioned reversal scan with tail + impact gating",
+            "color": 2003199,
+            "fields": [
+                {
+                    "name": "🗓️ Session",
+                    "value": (
+                        f"**As-of:** {as_of_date}\n"
+                        f"**Universe:** {universe_size} symbols\n"
+                        f"**Data:** {'✅ Fresh' if data_fresh else '❌ Stale'}"
+                    ),
+                    "inline": True
+                },
+                {
+                    "name": "⏭️ Next Rebalance",
+                    "value": f"**{next_rebal_date}** ({days_until_rebal} trading days)",
+                    "inline": True
+                },
+                {
+                    "name": "📊 Since Last Rebalance",
+                    "value": (
+                        f"**LC:** {ml_since:+.2f}%\n"
+                        f"**Canary:** {canary_since:+.2f}%\n"
+                        f"**SPY:** {spy_since:+.2f}%"
+                    ),
+                    "inline": True
+                },
+                {
+                    "name": "🟢 Long Candidates",
+                    "value": long_text or "None",
+                    "inline": False
+                },
+                {
+                    "name": "🔴 Short Candidates",
+                    "value": short_text or "None",
+                    "inline": False
+                },
+                {
+                    "name": "📈 Canary Top 5",
+                    "value": canary_text or "None",
+                    "inline": True
+                },
+                {
+                    "name": "📅 Rolling 30D",
+                    "value": f"LC: {ml_30d:+.2f}% | Canary: {canary_30d:+.2f}% | SPY: {spy_30d:+.2f}%",
+                    "inline": True
+                }
+            ],
+            "footer": {"text": "Investment Bot • LC-Reversal"},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        return self._send(embed)
 
     def send_image(self, text: str, image_path: str) -> bool:
         """

@@ -1,9 +1,9 @@
 # Universe configuration
 universe:
   # Universe type: 'sp500', 'all', 'sp500_ndx100_union', or 'custom'
-  universe_type: "sp500_ndx100_union"  # S&P 500 + NASDAQ-100 union
-  type: "sp500_ndx100_union"  # Alias for universe_type
-  target_size: null  # No limit for S&P 500 + NDX100 union (~700 stocks)
+  universe_type: "all"  # All active US equities (ranked down by LC strategy ADV top-N)
+  type: "all"  # Alias for universe_type
+  target_size: null  # No limit at source; LC strategy applies n_universe cap
 
   # Filters
   min_market_cap: null  # Not used for predefined universes
@@ -17,7 +17,7 @@ universe:
 
 # Crypto configuration
 crypto:
-  trade_crypto: true  # Enable Bitcoin trading
+  trade_crypto: false  # v1 default: equities-only
   crypto_tickers:
     - "BTC/USD"
     # - "ETH/USD"  # Uncomment to add Ethereum
@@ -31,7 +31,7 @@ crypto:
 
 # Combined settings
 trade_equities: true  # Trade S&P 500 stocks
-trade_crypto: true    # Trade Bitcoin
+trade_crypto: false   # v1 default: equities-only
 
 # Universe Options:
 #

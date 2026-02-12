@@ -48,6 +48,8 @@ jobs:
 
       - name: Run LC-Reversal backtest
         run: |
+          set -o pipefail
+          mkdir -p reports/run_logs
           DAYS="${{ github.event.inputs.days || '365' }}"
           TX_COST="${{ github.event.inputs.tx_cost_bps || '20' }}"
           IMPACT_MULT="${{ github.event.inputs.impact_slippage_mult || '0.0' }}"
@@ -64,7 +66,7 @@ jobs:
               --days "$DAYS" \
               --tx-cost-bps "$TX_COST" \
               --impact-slippage-mult "$IMPACT_MULT" \
-              --output reports/lc_reversal_backtest_${{ github.run_number }}.json
+              --output reports/lc_reversal_backtest_${{ github.run_number }}.json 2>&1 | tee "reports/run_logs/weekly_lc_reversal_backtest_${{ github.run_number }}.log"
 
       - name: Send LC-Reversal backtest Discord summary
         if: always()
@@ -83,5 +85,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lc-reversal-backtest-${{ github.run_number }}
-          path: reports/lc_reversal_backtest_*.json
+          path: |
+            reports/lc_reversal_backtest_*.json
+            reports/run_logs/*
           if-no-files-found: error

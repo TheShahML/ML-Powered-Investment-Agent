@@ -2,8 +2,11 @@
 """Generate daily signals from configured trading strategy + canary baseline."""
 import os
 import sys
+import json
+import re
 from datetime import timedelta
 from loguru import logger
+from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -21,6 +24,25 @@ from src.strategies.lc_reversal import LCReversalStrategy
 # Fix alpaca import issue
 from src import alpaca_fix
 import alpaca_trade_api as tradeapi
+
+
+def _write_run_log(kind: str, payload: dict, as_of_date: str | None = None) -> str:
+    logs_dir = os.path.join("reports", "run_logs")
+    os.makedirs(logs_dir, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    if as_of_date:
+        safe_as_of = re.sub(r"[^0-9A-Za-z_-]", "_", str(as_of_date))
+        name = f"{kind}_{safe_as_of}_{stamp}.json"
+    else:
+        name = f"{kind}_{stamp}.json"
+    path = os.path.join(logs_dir, name)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, default=str)
+    latest_path = os.path.join(logs_dir, f"latest_{kind}.json")
+    with open(latest_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, default=str)
+    logger.info(f"Run log saved: {path}")
+    return path
 
 
 def main():
@@ -60,25 +82,72 @@ def main():
 
     if df.empty:
         logger.error("No data!")
+        _write_run_log("signals", {
+            "run_timestamp_utc": datetime.now(timezone.utc).isoformat(),
+            "status": "failed",
+            "reason": "no_data",
+            "as_of_date": str(as_of_date),
+            "universe_size": len(symbols),
+        }, as_of_date=str(as_of_date))
         sys.exit(1)
 
     # Verify freshness
+    freshness_tolerance_days = int(config.get('freshness_tolerance_days', 0) or 0)
+    max_stale_symbols = int(config.get('max_stale_symbols', 3) or 3)
+    max_stale_pct = float(config.get('max_stale_pct', 0.002) or 0.002)  # 0.2% default
     is_fresh, freshness_details = calendar.verify_data_freshness(
         df,
         expected_date=as_of_date,
         symbols=symbols,
-        tolerance_days=0
+        tolerance_days=freshness_tolerance_days
     )
 
     if not is_fresh:
-        logger.error("Data is STALE - blocking signal generation")
-        discord = DiscordProductionNotifier()
-        discord.send_health_alert([
-            "Stale data detected",
-            f"Stale symbols: {len(freshness_details.get('stale_symbols', []))}",
-            f"Missing symbols: {len(freshness_details.get('missing_symbols', []))}"
-        ], severity="error")
-        sys.exit(1)
+        stale_symbols = [x.get('symbol') for x in freshness_details.get('stale_symbols', []) if isinstance(x, dict) and x.get('symbol')]
+        missing_symbols = list(freshness_details.get('missing_symbols', []))
+        broken_symbols = sorted(set(stale_symbols + missing_symbols))
+        broken_count = len(broken_symbols)
+        total_count = max(1, len(symbols))
+        stale_ratio = broken_count / total_count
+
+        allow_degraded = (broken_count <= max_stale_symbols) or (stale_ratio <= max_stale_pct)
+
+        if allow_degraded:
+            logger.warning(
+                f"Data freshness degraded but within tolerance; excluding {broken_count}/{total_count} symbols "
+                f"(max_stale_symbols={max_stale_symbols}, max_stale_pct={max_stale_pct:.4f})"
+            )
+            # Drop stale/missing symbols from downstream processing
+            symbols = [s for s in symbols if s not in set(broken_symbols)]
+            if symbols:
+                df = df[df.index.get_level_values(1).isin(symbols + ['SPY'])]
+
+            discord = DiscordProductionNotifier()
+            discord.send_health_alert([
+                "Data freshness degraded (continuing with reduced universe)",
+                f"Excluded symbols: {broken_count}",
+                f"Remaining symbols: {len(symbols)}",
+                f"Sample excluded: {', '.join(broken_symbols[:10]) if broken_symbols else 'N/A'}"
+            ], severity="warning")
+            is_fresh = True
+        else:
+            logger.error("Data is STALE - blocking signal generation")
+            discord = DiscordProductionNotifier()
+            discord.send_health_alert([
+                "Stale data detected",
+                f"Stale symbols: {len(freshness_details.get('stale_symbols', []))}",
+                f"Missing symbols: {len(freshness_details.get('missing_symbols', []))}",
+                f"Thresholds: max_stale_symbols={max_stale_symbols}, max_stale_pct={max_stale_pct:.4f}"
+            ], severity="error")
+            _write_run_log("signals", {
+                "run_timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                "status": "failed",
+                "reason": "stale_data_block",
+                "as_of_date": str(as_of_date),
+                "universe_size": len(symbols),
+                "freshness_details": freshness_details,
+            }, as_of_date=str(as_of_date))
+            sys.exit(1)
 
     # Load state (from workspace, not state-repo - workflow copies it)
     state_manager = StateManager(state_file_path="./latest_state.json")
@@ -127,6 +196,14 @@ def main():
 
     if signals_20d is None or signals_20d.empty:
         logger.error("20-day model (primary) missing or failed!")
+        _write_run_log("signals", {
+            "run_timestamp_utc": datetime.now(timezone.utc).isoformat(),
+            "status": "failed",
+            "reason": "no_primary_signals",
+            "as_of_date": str(as_of_date),
+            "strategy_name": strategy_name,
+            "universe_size": len(symbols),
+        }, as_of_date=str(as_of_date))
         sys.exit(1)
 
     logger.info(f"✓ 1d signals: {len(signals_1d) if signals_1d is not None else 0} stocks")
@@ -228,7 +305,7 @@ def main():
         kill_switch=kill_switch_enabled
     )
 
-    # Send Discord summary (multi-horizon)
+    # Send Discord summary
     discord = DiscordProductionNotifier()
 
     # Prepare top 10 for each horizon
@@ -239,25 +316,69 @@ def main():
 
     candidate_approved = state.get('models', {}).get('candidate_model', {}).get('approved_for_next_rebalance', False)
 
-    # Send Discord message with dashboard image
-    discord.send_multi_horizon_signals(
-        as_of_date=as_of_date.isoformat(),
-        active_model=active_model,
-        candidate_approved=candidate_approved,
-        universe_size=len(symbols),
-        ml_top10_1d=ml_top10_1d,
-        ml_top10_5d=ml_top10_5d,
-        ml_top10_20d=ml_top10_20d,
-        canary_top10=canary_top10,
-        performance_since_rebal=perf_since_rebal,
-        performance_rolling=perf_rolling,
-        data_fresh=is_fresh,
-        days_until_rebal=state.get('rebalance', {}).get('days_until_rebalance', 20),
-        next_rebal_date=state.get('rebalance', {}).get('next_rebalance_date', 'TBD')
-    )
+    if strategy_name == 'lc_reversal' and {'side', 'ret_1d', 'vol_z', 'impact_z'}.issubset(set(signals_20d.columns)):
+        long_candidates = []
+        short_candidates = []
+        for sym, row in signals_20d.iterrows():
+            item = (
+                sym,
+                float(row.get('ret_1d', 0.0)),
+                float(row.get('vol_z', 0.0)),
+                float(row.get('impact_z', 0.0)),
+            )
+            side = str(row.get('side', '')).lower()
+            if side == 'buy':
+                long_candidates.append(item)
+            elif side == 'sell':
+                short_candidates.append(item)
+
+        discord.send_lc_reversal_signals(
+            as_of_date=as_of_date.isoformat(),
+            universe_size=len(symbols),
+            long_candidates=long_candidates,
+            short_candidates=short_candidates,
+            canary_top10=canary_top10,
+            performance_since_rebal=perf_since_rebal,
+            performance_rolling=perf_rolling,
+            data_fresh=is_fresh,
+            days_until_rebal=state.get('rebalance', {}).get('days_until_rebalance', 20),
+            next_rebal_date=state.get('rebalance', {}).get('next_rebalance_date', 'TBD')
+        )
+    else:
+        discord.send_multi_horizon_signals(
+            as_of_date=as_of_date.isoformat(),
+            active_model=active_model,
+            candidate_approved=candidate_approved,
+            universe_size=len(symbols),
+            ml_top10_1d=ml_top10_1d,
+            ml_top10_5d=ml_top10_5d,
+            ml_top10_20d=ml_top10_20d,
+            canary_top10=canary_top10,
+            performance_since_rebal=perf_since_rebal,
+            performance_rolling=perf_rolling,
+            data_fresh=is_fresh,
+            days_until_rebal=state.get('rebalance', {}).get('days_until_rebalance', 20),
+            next_rebal_date=state.get('rebalance', {}).get('next_rebalance_date', 'TBD')
+        )
     
     # Send dashboard image
     discord.send_image("📊 Daily Dashboard", dashboard_path)
+
+    _write_run_log("signals", {
+        "run_timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "status": "success",
+        "as_of_date": str(as_of_date),
+        "strategy_name": strategy_name,
+        "universe_size": len(symbols),
+        "signals_count": {
+            "1d": len(signals_1d) if signals_1d is not None else 0,
+            "5d": len(signals_5d) if signals_5d is not None else 0,
+            "20d": len(signals_20d) if signals_20d is not None else 0,
+        },
+        "canary_count": len(canary_signals) if canary_signals is not None else 0,
+        "data_fresh": bool(is_fresh),
+        "dashboard_path": dashboard_path,
+    }, as_of_date=str(as_of_date))
 
     logger.info("=" * 60)
     logger.info("SIGNAL GENERATION COMPLETE")

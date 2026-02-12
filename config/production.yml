@@ -74,3 +74,5 @@ discord:
 # Data freshness
 data:
   freshness_tolerance_days: 0  # Must be current day
+  max_stale_symbols: 3  # Allow small number of stale symbols without blocking run
+  max_stale_pct: 0.002  # Or <=0.2% of universe stale/missing

@@ -214,6 +214,21 @@ class Universe:
 
         return sorted(list(union))
 
+    def get_all_tradeable_us_equities(self) -> List[str]:
+        """
+        Fetch all active US equities from Alpaca, then normalize symbols.
+        This is the broadest available universe from the broker metadata.
+        """
+        try:
+            assets = self.api.list_assets(status='active', asset_class='us_equity')
+            symbols = [self.normalize_symbol_for_alpaca(a.symbol) for a in assets]
+            unique = sorted(set(symbols))
+            logger.info(f"Fetched all active US equities from Alpaca: {len(unique)} symbols")
+            return unique
+        except Exception as e:
+            logger.error(f"Failed fetching all US equities: {e}")
+            return self.get_union_universe()
+
     def filter_tradeable(self, symbols: List[str]) -> tuple[List[str], Dict]:
         """
         Filter to Alpaca-tradeable assets.
@@ -380,8 +395,14 @@ class Universe:
 
         all_stats = {}
 
-        # Step 1: Get union
-        raw_symbols = self.get_union_universe()
+        # Step 1: Choose raw universe source
+        universe_type = str(self.config.get('universe_type') or self.config.get('type') or 'sp500_ndx100_union').lower()
+        if universe_type == 'all':
+            raw_symbols = self.get_all_tradeable_us_equities()
+            all_stats['universe_type'] = 'all'
+        else:
+            raw_symbols = self.get_union_universe()
+            all_stats['universe_type'] = 'sp500_ndx100_union'
         all_stats['raw_count'] = len(raw_symbols)
 
         # Step 2: Filter tradeable

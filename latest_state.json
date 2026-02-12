@@ -1,11 +1,11 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-01-27T18:49:20.206866Z",
+  "last_updated_utc": "2026-02-12T15:04:51.035616Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-26T00:00:00",
     "next_rebalance_date": "2026-02-15T00:00:00",
-    "days_since_rebalance": 0,
-    "days_until_rebalance": 20
+    "days_since_rebalance": 3,
+    "days_until_rebalance": 17
   },
   "models": {
     "active_model": null,
@@ -123,10 +123,16 @@
         "EME": 0.04
       },
       "equity_curve": [
-        100000.0
+        100000.0,
+        31417640.0,
+        9870681031.696,
+        3101135032086.535
       ],
       "dates": [
-        "2026-01-26T00:00:00"
+        "2026-01-26T00:00:00",
+        "2026-02-11T00:00:00",
+        "2026-02-11T00:00:00",
+        "2026-02-11T00:00:00"
       ],
       "last_rebalance_date": "2026-01-26T00:00:00",
       "initial_value": 100000.0,
@@ -141,10 +147,16 @@
         "BTC/USD": 1.0
       },
       "equity_curve": [
+        100000.0,
+        100000.0,
+        100000.0,
         100000.0
       ],
       "dates": [
-        "2026-01-26T00:00:00"
+        "2026-01-26T00:00:00",
+        "2026-02-11T00:00:00",
+        "2026-02-11T00:00:00",
+        "2026-02-11T00:00:00"
       ],
       "last_rebalance_date": "2026-01-26T00:00:00",
       "initial_value": 100000.0,
@@ -154,10 +166,16 @@
     "benchmarks": {
       "spy": {
         "equity_curve": [
-          1.0
+          1.0,
+          0.9986358813722023,
+          0.9986358813722023,
+          0.9986358813722023
         ],
         "dates": [
-          "2026-01-26T00:00:00"
+          "2026-01-26T00:00:00",
+          "2026-02-11T00:00:00",
+          "2026-02-11T00:00:00",
+          "2026-02-11T00:00:00"
         ],
         "initial_value": 692.755
       },
@@ -165,6 +183,95 @@
         "equity_curve": [],
         "dates": []
       }
+    }
+  },
+  "execution": {
+    "last_run": {
+      "trade_date": "2026-02-11T00:00:00",
+      "run_timestamp_utc": "2026-02-12T15:04:51.035112+00:00",
+      "status": "success",
+      "dry_run": true,
+      "smoke_test": true,
+      "open_orders_action": "leave",
+      "target_portfolio_snapshot": {
+        "target_weights": {},
+        "btc_allocation": 0.0
+      },
+      "orders_attempted": [
+        {
+          "symbol": "SPY",
+          "side": "buy",
+          "qty": 0.072165,
+          "notional": 50.0,
+          "limit_price": null
+        }
+      ],
+      "order_results": [
+        {
+          "symbol": "SPY",
+          "side": "buy",
+          "qty": 0.072165,
+          "notional": 50.0,
+          "price": 692.86,
+          "status": "dry_run"
+        }
+      ]
+    }
+  },
+  "lc_reversal": {
+    "open_positions": {
+      "MSCI": {
+        "entry_date": "2026-02-11",
+        "entry_price": 516.13,
+        "entry_atr": 22.119642857142853,
+        "side": "long"
+      },
+      "SCHW": {
+        "entry_date": "2026-02-11",
+        "entry_price": 99.24,
+        "entry_atr": 2.935,
+        "side": "long"
+      },
+      "BP": {
+        "entry_date": "2026-02-11",
+        "entry_price": 36.97,
+        "entry_atr": 1.032857142857144,
+        "side": "long"
+      },
+      "DDOG": {
+        "entry_date": "2026-02-11",
+        "entry_price": 129.65,
+        "entry_atr": 7.849999999999997,
+        "side": "short"
+      },
+      "BDX": {
+        "entry_date": "2026-02-11",
+        "entry_price": 171.63,
+        "entry_atr": 4.578214285714283,
+        "side": "short"
+      }
+    },
+    "last_trade_date": "2026-02-11T00:00:00",
+    "last_metadata": {
+      "universe_size": 500,
+      "long_pool": 3,
+      "short_pool": 2,
+      "long_selected": 3,
+      "short_selected": 2,
+      "ret_tail_low_cut": -0.027370199820702254,
+      "ret_tail_high_cut": 0.023030376022685976,
+      "bearish_regime": false,
+      "gross_exposure_target": 1.0,
+      "strategy": "lc_reversal",
+      "long_symbols": [
+        "MSCI",
+        "SCHW",
+        "BP"
+      ],
+      "short_symbols": [
+        "DDOG",
+        "BDX"
+      ]
     }
   }
 }

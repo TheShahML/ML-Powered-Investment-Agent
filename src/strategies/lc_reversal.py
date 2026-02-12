@@ -27,6 +27,7 @@ class LCParams:
     n_short: int = 10
     enable_shorts: bool = True
     gross_exposure: float = 1.0
+    max_position_weight: float = 0.03
     weight_method: str = "equal_weight"  # equal_weight | inverse_vol
     adv_pct: float = 0.005
     hold_days: int = 2
@@ -70,6 +71,7 @@ class LCReversalStrategy(BaseStrategy):
             n_short=int(_get("n_short", 10)),
             enable_shorts=bool(_get("enable_shorts", True)),
             gross_exposure=float(_get("gross_exposure", 1.0)),
+            max_position_weight=float(_get("max_position_weight", 0.03)),
             weight_method=str(_get("weight_method", "equal_weight")),
             adv_pct=float(_get("adv_pct", 0.005)),
             hold_days=int(_get("hold_days", 2)),
@@ -134,6 +136,10 @@ class LCReversalStrategy(BaseStrategy):
         as_of_ts = pd.Timestamp(as_of_date) if as_of_date is not None else None
         snap = df_features
         if as_of_ts is not None:
+            idx = snap.index.get_level_values(0)
+            idx_tz = getattr(idx, "tz", None)
+            if idx_tz is not None and as_of_ts.tzinfo is None:
+                as_of_ts = as_of_ts.tz_localize(idx_tz)
             snap = snap[snap.index.get_level_values(0) <= as_of_ts]
         latest = snap.groupby(level=1).tail(1).copy()
         latest.index = latest.index.get_level_values(1)
@@ -303,7 +309,9 @@ class LCReversalStrategy(BaseStrategy):
                 continue
             max_notional = params.adv_pct * adv20
             max_weight = max_notional / portfolio_value
-            target_weights[sym] = float(np.sign(target_weights[sym]) * min(abs(target_weights[sym]), max_weight))
+            target_weights[sym] = float(
+                np.sign(target_weights[sym]) * min(abs(target_weights[sym]), max_weight, params.max_position_weight)
+            )
 
         # Holding period + stop-loss enforcement for open positions
         lc_state = lc_state or {}
@@ -384,7 +392,13 @@ class LCReversalStrategy(BaseStrategy):
     ) -> Dict[str, Any]:
         """Lightweight no-lookahead daily rebalancing backtest for LC-Reversal."""
         data = df_features.sort_index().copy()
-        all_dates = sorted(pd.to_datetime(data.index.get_level_values(0)).date)
+        start_date = pd.Timestamp(start_date).date()
+        end_date = pd.Timestamp(end_date).date()
+
+        def _to_date(value: Any) -> date:
+            return pd.Timestamp(value).date()
+
+        all_dates = sorted({_to_date(ts) for ts in data.index.get_level_values(0)})
         trade_dates = [d for d in all_dates if start_date <= d <= end_date]
         if len(trade_dates) < 10:
             return {}
@@ -403,6 +417,8 @@ class LCReversalStrategy(BaseStrategy):
         for i in range(len(trade_dates) - 1):
             d = trade_dates[i]
             d_next = trade_dates[i + 1]
+            if i % 25 == 0:
+                logger.info(f"LC backtest progress: {i + 1}/{len(trade_dates) - 1} days ({d} -> {d_next})")
 
             history = data[data.index.get_level_values(0).date <= d]
             tw, meta, lc_state = self.build_targets(

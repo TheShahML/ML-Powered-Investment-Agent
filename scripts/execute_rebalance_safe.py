@@ -4,6 +4,8 @@ import os
 import sys
 import argparse
 import traceback
+import json
+import re
 from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any
 from loguru import logger
@@ -148,6 +150,7 @@ def _build_run_payload(
     positions_top10: List[Dict[str, Any]],
     target_trades: List[Dict[str, Any]],
     execution_results: List[Dict[str, Any]],
+    target_diff: Dict[str, Any] | None,
     status: str,
     errors: List[str],
     stack_snippet: str | None = None,
@@ -163,10 +166,77 @@ def _build_run_payload(
         "positions_top10": positions_top10,
         "target_trades": target_trades,
         "execution_results": execution_results,
+        "target_diff": target_diff or {},
         "status": status,
         "errors": errors,
         "stack_snippet": stack_snippet,
     }
+
+
+def _compute_target_diff(previous_weights: Dict[str, Any], current_weights: Dict[str, Any]) -> Dict[str, Any]:
+    prev = {str(k): float(v) for k, v in (previous_weights or {}).items() if v is not None}
+    curr = {str(k): float(v) for k, v in (current_weights or {}).items() if v is not None}
+    tol = 1e-6
+
+    prev_syms = {s for s, w in prev.items() if abs(w) > tol}
+    curr_syms = {s for s, w in curr.items() if abs(w) > tol}
+    all_syms = sorted(prev_syms | curr_syms)
+
+    added = sorted(curr_syms - prev_syms)
+    removed = sorted(prev_syms - curr_syms)
+    increased: List[str] = []
+    decreased: List[str] = []
+    changed: List[Dict[str, Any]] = []
+
+    for sym in all_syms:
+        pw = prev.get(sym, 0.0)
+        cw = curr.get(sym, 0.0)
+        delta = cw - pw
+        if abs(delta) <= tol:
+            continue
+        if abs(cw) > abs(pw):
+            increased.append(sym)
+        else:
+            decreased.append(sym)
+        changed.append({
+            "symbol": sym,
+            "prev_weight": pw,
+            "new_weight": cw,
+            "delta_weight": delta,
+            "abs_delta_weight": abs(delta),
+        })
+
+    changed = sorted(changed, key=lambda x: x["abs_delta_weight"], reverse=True)
+    return {
+        "added_symbols": added,
+        "removed_symbols": removed,
+        "increased_symbols": sorted(increased),
+        "decreased_symbols": sorted(decreased),
+        "changed_weights_top": changed[:10],
+        "num_added": len(added),
+        "num_removed": len(removed),
+        "num_increased": len(increased),
+        "num_decreased": len(decreased),
+    }
+
+
+def _write_run_log(kind: str, payload: Dict[str, Any], as_of_date: str | None = None) -> str:
+    logs_dir = os.path.join("reports", "run_logs")
+    os.makedirs(logs_dir, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    if as_of_date:
+        safe_as_of = re.sub(r"[^0-9A-Za-z_-]", "_", str(as_of_date))
+        filename = f"{kind}_{safe_as_of}_{stamp}.json"
+    else:
+        filename = f"{kind}_{stamp}.json"
+    path = os.path.join(logs_dir, filename)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, default=str)
+    latest_path = os.path.join(logs_dir, f"latest_{kind}.json")
+    with open(latest_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, default=str)
+    logger.info(f"Run log saved: {path}")
+    return path
 
 
 def main():
@@ -229,6 +299,7 @@ def main():
                     positions_top10=positions_top10,
                     target_trades=[],
                     execution_results=[],
+                    target_diff=None,
                     status="skipped_already_successful",
                     errors=[f"Already executed successfully on {as_of_date_str}"]
                 )
@@ -251,6 +322,7 @@ def main():
                     positions_top10=positions_top10,
                     target_trades=[],
                     execution_results=[],
+                    target_diff=None,
                     status="skipped_not_due",
                     errors=[f"Rebalance not due. days_until_rebalance={days_until}"]
                 )
@@ -275,6 +347,7 @@ def main():
                         positions_top10=positions_top10,
                         target_trades=[],
                         execution_results=[],
+                        target_diff=None,
                         status="skipped_already_rebalanced",
                         errors=[f"State indicates rebalance already executed on {as_of_date_str}"]
                     )
@@ -408,7 +481,12 @@ def main():
                 raise RuntimeError("SPY not found in historical data (required for regime filter).")
 
             current_weights = {}
+            trade_crypto_enabled = bool(config.get('trade_crypto', False))
             crypto_alpaca_symbols = {t.replace('/', '') for t in crypto_tickers}
+            if not trade_crypto_enabled:
+                for sym in current_positions.keys():
+                    if '/' in sym or (sym.endswith('USD') and sym.isalpha() and len(sym) > 3):
+                        crypto_alpaca_symbols.add(sym)
             for symbol, qty in current_positions.items():
                 if symbol in crypto_alpaca_symbols:
                     continue
@@ -500,10 +578,16 @@ def main():
                 'max_orders_per_rebalance': 100,
                 'max_daily_notional': 1_000_000,
                 'min_trade_notional': 10,
-                'turnover_buffer_pct': 1.0
+                'turnover_buffer_pct': 1.0,
+                'order_type': config.get('order_type', 'market'),
+                'limit_offset_bps': config.get('limit_offset_bps', 10),
             }
 
             crypto_alpaca_symbols = {t.replace('/', '') for t in (config.get('crypto_tickers', ['BTC/USD']) if config.get('trade_crypto', False) else [])}
+            if not config.get('trade_crypto', False):
+                for sym in current_positions.keys():
+                    if '/' in sym or (sym.endswith('USD') and sym.isalpha() and len(sym) > 3):
+                        crypto_alpaca_symbols.add(sym)
             order_prefix = f"rebal-{as_of_date_str.replace('-', '')}"
 
             orders = execute_orders_safe(
@@ -534,7 +618,7 @@ def main():
                     "side": o.get("side"),
                     "qty": o.get("qty"),
                     "notional": o.get("notional"),
-                    "limit_price": None,
+                    "limit_price": o.get("limit_price"),
                 }
                 for o in orders
                 if o.get("symbol")
@@ -578,6 +662,13 @@ def main():
         run_status = "success" if not failures else "partial_failure"
 
         execution_state = state.setdefault("execution", {})
+        previous_target_weights = (
+            (execution_state.get("last_run") or {})
+            .get("target_portfolio_snapshot", {})
+            .get("target_weights", {})
+        )
+        target_diff = _compute_target_diff(previous_target_weights, target_weights)
+
         execution_state["last_run"] = {
             "trade_date": as_of_date_str,
             "run_timestamp_utc": datetime.now(timezone.utc).isoformat(),
@@ -614,9 +705,11 @@ def main():
             positions_top10=positions_top10,
             target_trades=target_trades,
             execution_results=orders,
+            target_diff=target_diff,
             status=run_status,
             errors=[o.get("error") for o in failures if o.get("error")],
         )
+        _write_run_log("rebalance", run_payload, as_of_date=as_of_date_str)
         discord.send_rebalance_markdown_summary(run_payload)
 
         if failures:
@@ -642,10 +735,12 @@ def main():
                 positions_top10=[],
                 target_trades=[],
                 execution_results=[],
+                target_diff=None,
                 status="failed",
                 errors=[f"{type(e).__name__}: {e}", f"trade_date={err_date}"],
                 stack_snippet=stack,
             )
+            _write_run_log("rebalance", failure_payload, as_of_date=err_date)
             discord.send_rebalance_markdown_summary(failure_payload)
         except Exception as notify_err:
             logger.error(f"Failed to send failure webhook: {notify_err}")
