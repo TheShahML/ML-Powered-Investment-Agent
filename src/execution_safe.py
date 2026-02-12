@@ -192,6 +192,7 @@ def execute_orders_safe(
     # Compute trades
     trades = []
     total_notional = 0.0
+    skip_statuses = {'skipped_existing_open_order', 'skipped_infeasible_short_qty'}
 
     for symbol in set(list(current_dollars.keys()) + list(target_dollars.keys())):
         current = current_dollars.get(symbol, 0)
@@ -215,6 +216,29 @@ def execute_orders_safe(
         side = 'buy' if shares > 0 else 'sell'
         qty = abs(shares)
 
+        # Alpaca does not support fractional short sell opens/increases.
+        # If we're selling without an existing long to close, force whole-share sizing.
+        current_qty = float(current_positions.get(symbol, 0.0) or 0.0)
+        is_short_open_or_increase = (side == 'sell' and current_qty <= 0)
+        if is_short_open_or_increase:
+            whole_qty = float(int(np.floor(qty)))
+            if whole_qty < 1:
+                logger.warning(
+                    f"Skipping {symbol}: short qty {qty:.4f} < 1 share "
+                    "(fractional short not supported by broker)"
+                )
+                trades.append({
+                    'symbol': symbol,
+                    'side': side,
+                    'qty': round(qty, 4),
+                    'notional': abs(diff),
+                    'price': price,
+                    'status': 'skipped_infeasible_short_qty',
+                    'error': 'fractional short not supported'
+                })
+                continue
+            qty = whole_qty
+
         trade_info = {
             'symbol': symbol,
             'side': side,
@@ -234,18 +258,42 @@ def execute_orders_safe(
         total_notional += abs(diff)
 
     # Check max_orders cap
-    if len(trades) > max_orders:
-        logger.warning(f"Too many trades ({len(trades)}), capping at {max_orders}")
-        trades = sorted(trades, key=lambda x: x['notional'], reverse=True)[:max_orders]
-        total_notional = sum(t['notional'] for t in trades)
+    executable_trades = [t for t in trades if t.get('status') not in skip_statuses]
+    skipped_trades = [t for t in trades if t.get('status') in skip_statuses]
+    if len(executable_trades) > max_orders:
+        logger.warning(f"Too many executable trades ({len(executable_trades)}), capping at {max_orders}")
+        executable_trades = sorted(executable_trades, key=lambda x: x['notional'], reverse=True)[:max_orders]
+    trades = skipped_trades + executable_trades
+    total_notional = sum(t['notional'] for t in executable_trades)
 
     # Check max_notional cap
     if total_notional > max_notional:
         logger.warning(f"Total notional ${total_notional:.0f} exceeds cap ${max_notional:.0f}")
         scale = max_notional / total_notional
         for trade in trades:
+            if trade.get('status') in skip_statuses:
+                continue
             trade['qty'] *= scale
             trade['notional'] *= scale
+        total_notional = sum(
+            t['notional'] for t in trades if t.get('status') not in skip_statuses
+        )
+
+        # Re-apply short whole-share constraint after scaling.
+        for trade in trades:
+            if trade.get('status') in skip_statuses:
+                continue
+            symbol = trade['symbol']
+            current_qty = float(current_positions.get(symbol, 0.0) or 0.0)
+            is_short_open_or_increase = (trade.get('side') == 'sell' and current_qty <= 0)
+            if is_short_open_or_increase:
+                whole_qty = float(int(np.floor(float(trade.get('qty', 0.0) or 0.0))))
+                if whole_qty < 1:
+                    trade['status'] = 'skipped_infeasible_short_qty'
+                    trade['error'] = 'fractional short not supported'
+                    total_notional -= float(trade.get('notional', 0.0) or 0.0)
+                else:
+                    trade['qty'] = whole_qty
 
     logger.info(f"Computed {len(trades)} target trade(s), executable notional: ${total_notional:,.2f}")
 
@@ -257,6 +305,12 @@ def execute_orders_safe(
             logger.warning(
                 f"Skipping {trade['symbol']} due to existing open orders: "
                 f"{order_info.get('error', 'unknown')}"
+            )
+            orders.append(order_info)
+            continue
+        if order_info.get('status') == 'skipped_infeasible_short_qty':
+            logger.warning(
+                f"Skipping {trade['symbol']}: {order_info.get('error', 'infeasible order size')}"
             )
             orders.append(order_info)
             continue

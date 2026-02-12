@@ -664,7 +664,17 @@ def main():
         orders = _enrich_order_statuses(api, orders, dry_run=dry_run)
         orders = (open_order_results or []) + (orders or [])
 
-        submitted_like_statuses = {"submitted", "new", "accepted", "partially_filled", "filled", "dry_run", "cancelled"}
+        submitted_like_statuses = {
+            "submitted",
+            "new",
+            "accepted",
+            "partially_filled",
+            "filled",
+            "dry_run",
+            "cancelled",
+            "skipped_existing_open_order",
+            "skipped_infeasible_short_qty",
+        }
         failures = [o for o in orders if str(o.get("status", "")).lower() not in submitted_like_statuses]
         run_status = "success" if not failures else "partial_failure"
 
