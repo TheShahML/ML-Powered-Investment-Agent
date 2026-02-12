@@ -4,6 +4,19 @@ on:
   schedule:
     - cron: "35 14 * * 1-5" # Weekdays 2:35PM UTC (30 min after US market open)
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run in dry-run mode (no order submission)"
+        required: false
+        default: "false"
+      smoke_test:
+        description: "Run single tiny smoke trade instead of full strategy"
+        required: false
+        default: "false"
+      open_orders_action:
+        description: "How to handle existing open orders: leave or cancel"
+        required: false
+        default: "leave"
 
 concurrency:
   group: investment-bot-rebalance
@@ -51,6 +64,10 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p reports/run_logs
+          EFFECTIVE_DRY_RUN="${{ github.event.inputs.dry_run || vars.DRY_RUN || 'false' }}"
+          EFFECTIVE_SMOKE_TEST="${{ github.event.inputs.smoke_test || vars.SMOKE_TEST || 'false' }}"
+          EFFECTIVE_OPEN_ORDERS_ACTION="${{ github.event.inputs.open_orders_action || vars.OPEN_ORDERS_ACTION || 'leave' }}"
+          echo "Effective flags: DRY_RUN=${EFFECTIVE_DRY_RUN}, SMOKE_TEST=${EFFECTIVE_SMOKE_TEST}, OPEN_ORDERS_ACTION=${EFFECTIVE_OPEN_ORDERS_ACTION}, STRATEGY_NAME=${{ vars.STRATEGY_NAME }}"
           docker run --rm \
             -e ALPACA_API_KEY="${{ secrets.ALPACA_API_KEY }}" \
             -e ALPACA_SECRET_KEY="${{ secrets.ALPACA_SECRET_KEY }}" \
@@ -59,9 +76,9 @@ jobs:
             -e DISCORD_WEBHOOK_URLS="${{ secrets.DISCORD_WEBHOOK_URLS }}" \
             -e KILL_SWITCH_ENABLED="${{ vars.KILL_SWITCH_ENABLED }}" \
             -e BROKER_MODE="${{ secrets.BROKER_MODE }}" \
-            -e DRY_RUN="${{ vars.DRY_RUN }}" \
-            -e SMOKE_TEST="${{ vars.SMOKE_TEST }}" \
-            -e OPEN_ORDERS_ACTION="${{ vars.OPEN_ORDERS_ACTION }}" \
+            -e DRY_RUN="${EFFECTIVE_DRY_RUN}" \
+            -e SMOKE_TEST="${EFFECTIVE_SMOKE_TEST}" \
+            -e OPEN_ORDERS_ACTION="${EFFECTIVE_OPEN_ORDERS_ACTION}" \
             -e I_ACKNOWLEDGE_LIVE_TRADING="${{ vars.I_ACKNOWLEDGE_LIVE_TRADING }}" \
             -e STRATEGY_NAME="${{ vars.STRATEGY_NAME }}" \
             -v "${{ github.workspace }}:/app" \

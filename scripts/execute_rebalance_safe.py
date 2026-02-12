@@ -266,6 +266,12 @@ def main():
     logger.info(f"Strategy: {strategy_name}")
     logger.info(f"Mode: {'DRY RUN' if dry_run else 'LIVE'}")
     logger.info(f"Smoke test: {smoke_test}")
+    logger.info(
+        "Runtime flags raw env: "
+        f"DRY_RUN={os.getenv('DRY_RUN')}, "
+        f"SMOKE_TEST={os.getenv('SMOKE_TEST')}, "
+        f"OPEN_ORDERS_ACTION={os.getenv('OPEN_ORDERS_ACTION')}"
+    )
     logger.info("=" * 60)
 
     try:
