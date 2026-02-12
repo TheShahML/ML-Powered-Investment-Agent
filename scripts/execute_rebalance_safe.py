@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Safe monthly rebalance execution with explicit observability and idempotency."""
+"""Safe strategy execution with explicit observability and idempotency."""
 import os
 import sys
 import argparse
@@ -252,12 +252,6 @@ def main():
     if open_orders_action not in {"leave", "cancel"}:
         raise RuntimeError(f"Invalid OPEN_ORDERS_ACTION={open_orders_action}. Expected 'leave' or 'cancel'.")
 
-    logger.info("=" * 60)
-    logger.info("MONTHLY REBALANCE CHECK")
-    logger.info(f"Mode: {'DRY RUN' if dry_run else 'LIVE'}")
-    logger.info(f"Smoke test: {smoke_test}")
-    logger.info("=" * 60)
-
     config = load_config()
     state_manager = StateManager(state_file_path="./latest_state.json")
     state = state_manager.load_state()
@@ -266,6 +260,13 @@ def main():
     as_of_date = None
     strategy_name = config.get("strategy_name", "lc_reversal")
     is_lc_reversal = strategy_name == "lc_reversal"
+
+    logger.info("=" * 60)
+    logger.info("DAILY LC-REVERSAL EXECUTION CHECK" if is_lc_reversal else "REBALANCE EXECUTION CHECK")
+    logger.info(f"Strategy: {strategy_name}")
+    logger.info(f"Mode: {'DRY RUN' if dry_run else 'LIVE'}")
+    logger.info(f"Smoke test: {smoke_test}")
+    logger.info("=" * 60)
 
     try:
         broker_mode = _validate_execution_env(config, dry_run=dry_run)

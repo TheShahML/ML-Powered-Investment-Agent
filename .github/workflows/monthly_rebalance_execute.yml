@@ -1,4 +1,4 @@
-name: Monthly Rebalance Executution Script
+name: Daily Strategy Execution
 
 on:
   schedule:
@@ -47,7 +47,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Execute rebalance (containerized, if due)
+      - name: Execute strategy (containerized, if due)
         run: |
           set -o pipefail
           mkdir -p reports/run_logs
@@ -67,14 +67,14 @@ jobs:
             -v "${{ github.workspace }}:/app" \
             -w /app \
             investment-bot:latest \
-            python scripts/execute_rebalance_safe.py 2>&1 | tee "reports/run_logs/monthly_rebalance_execute_${{ github.run_number }}.log"
+            python scripts/execute_rebalance_safe.py 2>&1 | tee "reports/run_logs/daily_strategy_execute_${{ github.run_number }}.log"
 
       - name: Save updated state back to state branch
         run: |
           cp ./latest_state.json state-repo/latest_state.json
           mkdir -p state-repo/run_logs/rebalance
           cp -f reports/run_logs/* state-repo/run_logs/rebalance/ || true
-          cp -f "reports/run_logs/monthly_rebalance_execute_${{ github.run_number }}.log" state-repo/run_logs/rebalance/latest.log || true
+          cp -f "reports/run_logs/daily_strategy_execute_${{ github.run_number }}.log" state-repo/run_logs/rebalance/latest.log || true
 
       - name: Upload reports artifacts
         if: always()
@@ -90,5 +90,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add latest_state.json run_logs
-          git commit -m "Update state after rebalance check (${{ github.run_number }})" || echo "No changes"
+          git commit -m "Update state after strategy execution (${{ github.run_number }})" || echo "No changes"
           git push origin state
