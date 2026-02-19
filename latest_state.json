@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-02-18T22:04:04.145833Z",
+  "last_updated_utc": "2026-02-19T15:29:22.016067Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -283,140 +283,165 @@
   },
   "execution": {
     "last_run": {
-      "trade_date": "2026-02-12T00:00:00",
-      "run_timestamp_utc": "2026-02-13T15:28:36.341375+00:00",
+      "trade_date": "2026-02-18T00:00:00",
+      "run_timestamp_utc": "2026-02-19T15:29:22.016007+00:00",
       "status": "success",
       "dry_run": false,
       "smoke_test": false,
       "open_orders_action": "leave",
       "target_portfolio_snapshot": {
         "target_weights": {
-          "U": 0.03,
-          "ALAB": 0.03,
-          "ICE": 0.03,
-          "EBAY": 0.03,
-          "VRT": -0.03,
-          "HCA": -0.03,
-          "MSCI": 0.030289293822320453,
-          "SCHW": 0.029467786456510218,
-          "BP": 0.03023425376791447
+          "GIS": 0.03,
+          "MDT": 0.03,
+          "MSCI": 0.030954542971911476,
+          "SCHW": 0.029463522659000294,
+          "BP": 0.03133595102259693,
+          "U": 0.027543960496328186,
+          "ALAB": 0.030507829731031437,
+          "ICE": 0.03030878157289758,
+          "EBAY": 0.031386095263630905
         },
         "btc_allocation": 0.0
       },
       "orders_attempted": [
         {
-          "symbol": "HCA",
+          "symbol": "MDT",
+          "side": "buy",
+          "qty": 0.6155,
+          "notional": 60.4197,
+          "limit_price": null
+        },
+        {
+          "symbol": "FLUT",
           "side": "sell",
-          "qty": 0.111,
-          "notional": 59.993399999999994,
+          "qty": 0.4739,
+          "notional": 58.071706,
           "limit_price": null
         },
         {
-          "symbol": "VRT",
+          "symbol": "V",
           "side": "sell",
-          "qty": 0.257,
-          "notional": 59.993399999999994,
+          "qty": 0.1889,
+          "notional": 60.198652,
           "limit_price": null
         },
         {
-          "symbol": "ICE",
+          "symbol": "GIS",
           "side": "buy",
-          "qty": 0.3943,
-          "notional": 59.993399999999994,
+          "qty": 1.3382,
+          "notional": 60.4197,
           "limit_price": null
         },
         {
-          "symbol": "EBAY",
-          "side": "buy",
-          "qty": 0.7369,
-          "notional": 59.993399999999994,
+          "symbol": "DKNG",
+          "side": "sell",
+          "qty": 2.5686,
+          "notional": 58.191633,
           "limit_price": null
         },
         {
-          "symbol": "U",
-          "side": "buy",
-          "qty": 2.9937,
-          "notional": 59.993399999999994,
+          "symbol": "STZ",
+          "side": "sell",
+          "qty": 0.3888,
+          "notional": 60.13180799999999,
           "limit_price": null
         },
         {
-          "symbol": "ALAB",
-          "side": "buy",
-          "qty": 0.4696,
-          "notional": 59.993399999999994,
+          "symbol": "PINS",
+          "side": "sell",
+          "qty": 3.691,
+          "notional": 60.440124999999995,
           "limit_price": null
         }
       ],
       "order_results": [
         {
-          "symbol": "HCA",
-          "side": "sell",
-          "qty": 0.111,
-          "notional": 59.993399999999994,
-          "price": 540.445,
-          "status": "skipped_infeasible_short_qty",
-          "error": "fractional short not supported"
-        },
-        {
-          "symbol": "VRT",
-          "side": "sell",
-          "qty": 0.257,
-          "notional": 59.993399999999994,
-          "price": 233.48,
-          "status": "skipped_infeasible_short_qty",
-          "error": "fractional short not supported"
-        },
-        {
-          "symbol": "ICE",
+          "symbol": "MDT",
           "side": "buy",
-          "qty": 0.3943,
-          "notional": 59.993399999999994,
-          "price": 152.16,
+          "qty": 0.6155,
+          "notional": 60.4197,
+          "price": 98.165,
           "status": "filled",
-          "order_id": "85d63dbd-8278-4183-b6b0-9abcce9d8749",
+          "order_id": "ce8cd320-15c8-4313-8911-b43e2c85ac28",
           "alpaca_status": "filled",
-          "client_order_id": "rebal-20260212T000000-ICE-buy-5999",
+          "client_order_id": "rebal-20260218T000000-MDT-buy-6042",
           "order_type": "market"
         },
         {
-          "symbol": "EBAY",
-          "side": "buy",
-          "qty": 0.7369,
-          "notional": 59.993399999999994,
-          "price": 81.41,
+          "symbol": "FLUT",
+          "side": "sell",
+          "qty": 0.4739,
+          "notional": 58.071706,
+          "price": 122.54,
           "status": "filled",
-          "order_id": "d02a93bb-45a2-4316-8b0d-cc26e73cc6b2",
+          "order_id": "77be7ae6-765c-4b4f-868e-8baf70a6053d",
           "alpaca_status": "filled",
-          "client_order_id": "rebal-20260212T000000-EBAY-buy-5999",
+          "client_order_id": "rebal-20260218T000000-FLUT-sell-5807",
           "order_type": "market"
         },
         {
-          "symbol": "U",
+          "symbol": "V",
+          "side": "sell",
+          "qty": 0.1889,
+          "notional": 60.198652,
+          "price": 318.68,
+          "status": "filled",
+          "order_id": "7c5cce08-93bc-49b4-9488-890cae261c0a",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260218T000000-V-sell-6020",
+          "order_type": "market"
+        },
+        {
+          "symbol": "GIS",
           "side": "buy",
-          "qty": 2.9937,
-          "notional": 59.993399999999994,
-          "price": 20.04,
+          "qty": 1.3382,
+          "notional": 60.4197,
+          "price": 45.15,
           "status": "new",
-          "order_id": "c801086f-562e-4012-81a7-eb2e189490f2",
+          "order_id": "52ffd6a3-e9b4-4103-b2fb-c1820ddb5740",
           "alpaca_status": "new",
-          "client_order_id": "rebal-20260212T000000-U-buy-5999",
+          "client_order_id": "rebal-20260218T000000-GIS-buy-6042",
           "order_type": "market"
         },
         {
-          "symbol": "ALAB",
-          "side": "buy",
-          "qty": 0.4696,
-          "notional": 59.993399999999994,
-          "price": 127.75,
+          "symbol": "DKNG",
+          "side": "sell",
+          "qty": 2.5686,
+          "notional": 58.191633,
+          "price": 22.655,
+          "status": "new",
+          "order_id": "b9ff82bc-56e4-4332-943a-7a40f81edbeb",
+          "alpaca_status": "new",
+          "client_order_id": "rebal-20260218T000000-DKNG-sell-5819",
+          "order_type": "market"
+        },
+        {
+          "symbol": "STZ",
+          "side": "sell",
+          "qty": 0.3888,
+          "notional": 60.13180799999999,
+          "price": 154.66,
           "status": "filled",
-          "order_id": "12e14d94-f084-4705-880a-a494a7c2fc06",
+          "order_id": "100aab41-6f8e-4a8e-adb6-fff1838d7f50",
           "alpaca_status": "filled",
-          "client_order_id": "rebal-20260212T000000-ALAB-buy-5999",
+          "client_order_id": "rebal-20260218T000000-STZ-sell-6013",
+          "order_type": "market"
+        },
+        {
+          "symbol": "PINS",
+          "side": "sell",
+          "qty": 3.691,
+          "notional": 60.440124999999995,
+          "price": 16.375,
+          "status": "new",
+          "order_id": "f05c14e6-6de6-4089-84fc-ed7c1cc0d34b",
+          "alpaca_status": "new",
+          "client_order_id": "rebal-20260218T000000-PINS-sell-6044",
           "order_type": "market"
         }
       ]
     },
-    "last_successful_trade_date": "2026-02-12T00:00:00"
+    "last_successful_trade_date": "2026-02-18T00:00:00"
   },
   "lc_reversal": {
     "open_positions": {
@@ -485,30 +510,37 @@
         "entry_price": 531.37,
         "entry_atr": 17.068214285714284,
         "side": "short"
+      },
+      "GIS": {
+        "entry_date": "2026-02-18T00:00:00",
+        "entry_price": 44.96,
+        "entry_atr": 1.6153571428571425,
+        "side": "long"
+      },
+      "MDT": {
+        "entry_date": "2026-02-18T00:00:00",
+        "entry_price": 96.27,
+        "entry_atr": 2.3360714285714264,
+        "side": "long"
       }
     },
-    "last_trade_date": "2026-02-12T00:00:00",
+    "last_trade_date": "2026-02-18T00:00:00",
     "last_metadata": {
       "universe_size": 500,
-      "long_pool": 4,
-      "short_pool": 2,
-      "long_selected": 4,
-      "short_selected": 2,
-      "ret_tail_low_cut": -0.03771670856789922,
-      "ret_tail_high_cut": 0.03234845752480953,
+      "long_pool": 2,
+      "short_pool": 0,
+      "long_selected": 2,
+      "short_selected": 0,
+      "ret_tail_low_cut": -0.030866699669272257,
+      "ret_tail_high_cut": 0.019190061223097816,
       "bearish_regime": false,
       "gross_exposure_target": 1.0,
       "strategy": "lc_reversal",
       "long_symbols": [
-        "U",
-        "ALAB",
-        "ICE",
-        "EBAY"
+        "GIS",
+        "MDT"
       ],
-      "short_symbols": [
-        "VRT",
-        "HCA"
-      ]
+      "short_symbols": []
     }
   }
 }
