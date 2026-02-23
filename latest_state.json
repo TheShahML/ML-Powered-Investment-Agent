@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-02-22T21:28:07.718274Z",
+  "last_updated_utc": "2026-02-23T15:36:26.167371Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -295,69 +295,113 @@
   },
   "execution": {
     "last_run": {
-      "trade_date": "2026-02-19T00:00:00",
-      "run_timestamp_utc": "2026-02-20T15:24:44.180110+00:00",
+      "trade_date": "2026-02-20T00:00:00",
+      "run_timestamp_utc": "2026-02-23T15:36:26.167320+00:00",
       "status": "success",
       "dry_run": false,
       "smoke_test": false,
       "open_orders_action": "leave",
       "target_portfolio_snapshot": {
         "target_weights": {
-          "GPN": -0.1,
-          "CDNS": -0.1,
-          "MSCI": 0.03101276303887558,
-          "SCHW": 0.02927853046131825,
-          "BP": 0.030527281244098085,
-          "U": 0.027674532568611278,
-          "ALAB": 0.030589606671769232,
-          "ICE": 0.03032217677405246,
-          "EBAY": 0.03201317505442184,
-          "GIS": 0.029899098933431408,
-          "MDT": 0.02975388780652665
+          "POOL": 0.1,
+          "OMC": -0.1,
+          "OXY": -0.1,
+          "INSM": -0.1,
+          "MSCI": 0.030857197480769708,
+          "SCHW": 0.02868881531453038,
+          "BP": 0.030841932737546988,
+          "U": 0.025815082522217522,
+          "ALAB": 0.0298446341888427,
+          "ICE": 0.029801938214134575,
+          "EBAY": 0.03103818177292076,
+          "GIS": 0.03016121779393095,
+          "MDT": 0.03008780836922158,
+          "GPN": -0.07914166936347117
         },
         "btc_allocation": 0.0
       },
       "orders_attempted": [
         {
-          "symbol": "CDNS",
+          "symbol": "OXY",
           "side": "sell",
-          "qty": 0.6679,
-          "notional": 201.20600000000002,
+          "qty": 3.0,
+          "notional": 200.85500000000002,
           "limit_price": null
         },
         {
-          "symbol": "GPN",
+          "symbol": "POOL",
+          "side": "buy",
+          "qty": 0.9246,
+          "notional": 200.85500000000002,
+          "limit_price": null
+        },
+        {
+          "symbol": "OMC",
           "side": "sell",
           "qty": 2.0,
-          "notional": 201.20600000000002,
+          "notional": 200.85500000000002,
+          "limit_price": null
+        },
+        {
+          "symbol": "INSM",
+          "side": "sell",
+          "qty": 1.0,
+          "notional": 200.85500000000002,
           "limit_price": null
         }
       ],
       "order_results": [
         {
-          "symbol": "CDNS",
+          "symbol": "OXY",
           "side": "sell",
-          "qty": 0.6679,
-          "notional": 201.20600000000002,
-          "price": 301.24,
-          "status": "skipped_infeasible_short_qty",
-          "error": "fractional short not supported"
+          "qty": 3.0,
+          "notional": 200.85500000000002,
+          "price": 52.71,
+          "status": "new",
+          "order_id": "95805758-c614-4de2-a0fc-f89bacd86416",
+          "alpaca_status": "new",
+          "client_order_id": "rebal-20260220T000000-OXY-sell-20086",
+          "order_type": "market"
         },
         {
-          "symbol": "GPN",
+          "symbol": "POOL",
+          "side": "buy",
+          "qty": 0.9246,
+          "notional": 200.85500000000002,
+          "price": 217.24,
+          "status": "filled",
+          "order_id": "a29fa8b4-7e83-49ea-8195-672c300d1343",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260220T000000-POOL-buy-20086",
+          "order_type": "market"
+        },
+        {
+          "symbol": "OMC",
           "side": "sell",
           "qty": 2.0,
-          "notional": 201.20600000000002,
-          "price": 82.37,
+          "notional": 200.85500000000002,
+          "price": 81.87,
           "status": "new",
-          "order_id": "c15bdf91-a8dd-446f-b4f0-58434de2c6e7",
+          "order_id": "5c913388-32ef-46c2-a1fa-b2ea27d4e2de",
           "alpaca_status": "new",
-          "client_order_id": "rebal-20260219T000000-GPN-sell-20121",
+          "client_order_id": "rebal-20260220T000000-OMC-sell-20086",
+          "order_type": "market"
+        },
+        {
+          "symbol": "INSM",
+          "side": "sell",
+          "qty": 1.0,
+          "notional": 200.85500000000002,
+          "price": 163.67,
+          "status": "new",
+          "order_id": "947108c8-f02d-4363-9966-aa1a5beae2a6",
+          "alpaca_status": "new",
+          "client_order_id": "rebal-20260220T000000-INSM-sell-20086",
           "order_type": "market"
         }
       ]
     },
-    "last_successful_trade_date": "2026-02-19T00:00:00"
+    "last_successful_trade_date": "2026-02-20T00:00:00"
   },
   "lc_reversal": {
     "open_positions": {
@@ -450,24 +494,51 @@
         "entry_price": 304.93,
         "entry_atr": 14.507857142857135,
         "side": "short"
+      },
+      "POOL": {
+        "entry_date": "2026-02-20T00:00:00",
+        "entry_price": 218.34,
+        "entry_atr": 9.64142857142858,
+        "side": "long"
+      },
+      "OMC": {
+        "entry_date": "2026-02-20T00:00:00",
+        "entry_price": 80.97,
+        "entry_atr": 3.5042857142857136,
+        "side": "short"
+      },
+      "OXY": {
+        "entry_date": "2026-02-20T00:00:00",
+        "entry_price": 51.52,
+        "entry_atr": 1.7560714285714276,
+        "side": "short"
+      },
+      "INSM": {
+        "entry_date": "2026-02-20T00:00:00",
+        "entry_price": 160.8,
+        "entry_atr": 5.819285714285714,
+        "side": "short"
       }
     },
-    "last_trade_date": "2026-02-19T00:00:00",
+    "last_trade_date": "2026-02-20T00:00:00",
     "last_metadata": {
       "universe_size": 500,
-      "long_pool": 0,
-      "short_pool": 2,
-      "long_selected": 0,
-      "short_selected": 2,
-      "ret_tail_low_cut": -0.017025739170418528,
-      "ret_tail_high_cut": 0.029452493772661913,
+      "long_pool": 1,
+      "short_pool": 3,
+      "long_selected": 1,
+      "short_selected": 3,
+      "ret_tail_low_cut": -0.021573250389979547,
+      "ret_tail_high_cut": 0.0164928082330605,
       "bearish_regime": false,
       "gross_exposure_target": 1.0,
       "strategy": "lc_reversal",
-      "long_symbols": [],
+      "long_symbols": [
+        "POOL"
+      ],
       "short_symbols": [
-        "GPN",
-        "CDNS"
+        "OMC",
+        "OXY",
+        "INSM"
       ]
     }
   }
