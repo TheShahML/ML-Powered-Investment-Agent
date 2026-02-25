@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-02-24T22:02:27.227374Z",
+  "last_updated_utc": "2026-02-25T15:41:06.694934Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -307,57 +307,238 @@
   },
   "execution": {
     "last_run": {
-      "trade_date": "2026-02-23T00:00:00",
-      "run_timestamp_utc": "2026-02-24T15:35:50.378904+00:00",
+      "trade_date": "2026-02-24T00:00:00",
+      "run_timestamp_utc": "2026-02-25T15:41:06.694860+00:00",
       "status": "success",
       "dry_run": false,
       "smoke_test": false,
       "open_orders_action": "leave",
       "target_portfolio_snapshot": {
         "target_weights": {
-          "EXR": -0.1,
-          "MSCI": 0.030807887207214318,
-          "SCHW": 0.029008667640152336,
-          "BP": 0.03038473370562583,
-          "U": 0.025593869506876886,
-          "ALAB": 0.03025522426347258,
-          "ICE": 0.03043498505239063,
-          "EBAY": 0.031097988485900903,
-          "GIS": 0.02993832014523354,
-          "MDT": 0.029774814018193662,
-          "GPN": -0.07852674783432327,
-          "POOL": 0.10187075201768062,
-          "OMC": -0.0814620044596168,
-          "OXY": -0.07590721629141425,
-          "INSM": -0.07775716794601102
+          "NVO": 0.03,
+          "IBM": 0.03,
+          "DDOG": 0.03,
+          "MDB": 0.03,
+          "ZS": 0.03,
+          "SNOW": 0.03,
+          "NU": 0.03,
+          "AXP": 0.03,
+          "MELI": 0.03,
+          "KEY": 0.03,
+          "MSCI": 0.03142176600267695,
+          "SCHW": 0.02935844126446736,
+          "BP": 0.03018560374183135,
+          "U": 0.026708419120541685,
+          "ALAB": 0.02855507046689237,
+          "ICE": 0.03072853072592709,
+          "EBAY": 0.030296824561058183,
+          "GIS": 0.02938935221636092,
+          "MDT": 0.02916125698763877,
+          "GPN": -0.0752499803165105,
+          "POOL": 0.09599249468545783,
+          "OMC": -0.08065309818124557,
+          "OXY": -0.07486123139910243,
+          "INSM": -0.07449708684355562,
+          "EXR": -0.07267144319344933
         },
         "btc_allocation": 0.0
       },
       "orders_attempted": [
         {
-          "symbol": "EXR",
-          "side": "sell",
-          "qty": 1.0,
-          "notional": 202.708,
+          "symbol": "AXP",
+          "side": "buy",
+          "qty": 0.1887,
+          "notional": 60.9648,
+          "limit_price": null
+        },
+        {
+          "symbol": "MDB",
+          "side": "buy",
+          "qty": 0.195,
+          "notional": 60.9648,
+          "limit_price": null
+        },
+        {
+          "symbol": "ZS",
+          "side": "buy",
+          "qty": 0.4036,
+          "notional": 60.9648,
+          "limit_price": null
+        },
+        {
+          "symbol": "DDOG",
+          "side": "buy",
+          "qty": 0.5627,
+          "notional": 60.9648,
+          "limit_price": null
+        },
+        {
+          "symbol": "IBM",
+          "side": "buy",
+          "qty": 0.2583,
+          "notional": 60.9648,
+          "limit_price": null
+        },
+        {
+          "symbol": "KEY",
+          "side": "buy",
+          "qty": 2.8873,
+          "notional": 60.9648,
+          "limit_price": null
+        },
+        {
+          "symbol": "MELI",
+          "side": "buy",
+          "qty": 0.0349,
+          "notional": 60.9648,
+          "limit_price": null
+        },
+        {
+          "symbol": "SNOW",
+          "side": "buy",
+          "qty": 0.3664,
+          "notional": 60.9648,
+          "limit_price": null
+        },
+        {
+          "symbol": "NVO",
+          "side": "buy",
+          "qty": 1.6137,
+          "notional": 60.9648,
+          "limit_price": null
+        },
+        {
+          "symbol": "NU",
+          "side": "buy",
+          "qty": 3.6462,
+          "notional": 60.9648,
           "limit_price": null
         }
       ],
       "order_results": [
         {
-          "symbol": "EXR",
-          "side": "sell",
-          "qty": 1.0,
-          "notional": 202.708,
-          "price": 148.995,
-          "status": "new",
-          "order_id": "d854fc08-0404-4bd7-b220-e6d11d06fbea",
-          "alpaca_status": "new",
-          "client_order_id": "rebal-20260223T000000-EXR-sell-20271",
+          "symbol": "AXP",
+          "side": "buy",
+          "qty": 0.1887,
+          "notional": 60.9648,
+          "price": 323.08,
+          "status": "filled",
+          "order_id": "2de762e5-4b50-4844-a8d1-a2fc4bccdb90",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260224T000000-AXP-buy-6096",
+          "order_type": "market"
+        },
+        {
+          "symbol": "MDB",
+          "side": "buy",
+          "qty": 0.195,
+          "notional": 60.9648,
+          "price": 312.655,
+          "status": "filled",
+          "order_id": "fd4f1f1e-e650-41d3-b631-bf1f62d82767",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260224T000000-MDB-buy-6096",
+          "order_type": "market"
+        },
+        {
+          "symbol": "ZS",
+          "side": "buy",
+          "qty": 0.4036,
+          "notional": 60.9648,
+          "price": 151.06,
+          "status": "filled",
+          "order_id": "960c7e16-cbf2-401c-a85b-1254bd0bcade",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260224T000000-ZS-buy-6096",
+          "order_type": "market"
+        },
+        {
+          "symbol": "DDOG",
+          "side": "buy",
+          "qty": 0.5627,
+          "notional": 60.9648,
+          "price": 108.34,
+          "status": "filled",
+          "order_id": "93f51fc3-2213-4627-999c-48f5bdeef68c",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260224T000000-DDOG-buy-6096",
+          "order_type": "market"
+        },
+        {
+          "symbol": "IBM",
+          "side": "buy",
+          "qty": 0.2583,
+          "notional": 60.9648,
+          "price": 236.0,
+          "status": "filled",
+          "order_id": "76c8208a-0229-478b-90cf-34b0baa19af6",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260224T000000-IBM-buy-6096",
+          "order_type": "market"
+        },
+        {
+          "symbol": "KEY",
+          "side": "buy",
+          "qty": 2.8873,
+          "notional": 60.9648,
+          "price": 21.115,
+          "status": "filled",
+          "order_id": "f0621006-cdc3-473e-b058-3af505414b0d",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260224T000000-KEY-buy-6096",
+          "order_type": "market"
+        },
+        {
+          "symbol": "MELI",
+          "side": "buy",
+          "qty": 0.0349,
+          "notional": 60.9648,
+          "price": 1744.81,
+          "status": "filled",
+          "order_id": "58505bc3-0bb8-4cbc-8023-4ef0365c4293",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260224T000000-MELI-buy-6096",
+          "order_type": "market"
+        },
+        {
+          "symbol": "SNOW",
+          "side": "buy",
+          "qty": 0.3664,
+          "notional": 60.9648,
+          "price": 166.38,
+          "status": "filled",
+          "order_id": "ec8e2b9a-2c7f-4c99-abd3-39bff73beef7",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260224T000000-SNOW-buy-6096",
+          "order_type": "market"
+        },
+        {
+          "symbol": "NVO",
+          "side": "buy",
+          "qty": 1.6137,
+          "notional": 60.9648,
+          "price": 37.78,
+          "status": "filled",
+          "order_id": "61f4a3d7-800d-4cd3-ae95-7a064b66fed5",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260224T000000-NVO-buy-6096",
+          "order_type": "market"
+        },
+        {
+          "symbol": "NU",
+          "side": "buy",
+          "qty": 3.6462,
+          "notional": 60.9648,
+          "price": 16.72,
+          "status": "filled",
+          "order_id": "6b53b9db-4594-46f2-9c4c-d46d1dd54c76",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260224T000000-NU-buy-6096",
           "order_type": "market"
         }
       ]
     },
-    "last_successful_trade_date": "2026-02-23T00:00:00"
+    "last_successful_trade_date": "2026-02-24T00:00:00"
   },
   "lc_reversal": {
     "open_positions": {
@@ -480,24 +661,87 @@
         "entry_price": 152.99,
         "entry_atr": 3.5196428571428635,
         "side": "short"
+      },
+      "NVO": {
+        "entry_date": "2026-02-24T00:00:00",
+        "entry_price": 39.62,
+        "entry_atr": 2.935357142857143,
+        "side": "long"
+      },
+      "IBM": {
+        "entry_date": "2026-02-24T00:00:00",
+        "entry_price": 223.4,
+        "entry_atr": 12.90392857142858,
+        "side": "long"
+      },
+      "MDB": {
+        "entry_date": "2026-02-24T00:00:00",
+        "entry_price": 305.275,
+        "entry_atr": 25.837857142857143,
+        "side": "long"
+      },
+      "ZS": {
+        "entry_date": "2026-02-24T00:00:00",
+        "entry_price": 143.29,
+        "entry_atr": 10.834999999999999,
+        "side": "long"
+      },
+      "SNOW": {
+        "entry_date": "2026-02-24T00:00:00",
+        "entry_price": 157.59,
+        "entry_atr": 12.09892857142857,
+        "side": "long"
+      },
+      "NU": {
+        "entry_date": "2026-02-24T00:00:00",
+        "entry_price": 16.205,
+        "entry_atr": 0.7242857142857139,
+        "side": "long"
+      },
+      "AXP": {
+        "entry_date": "2026-02-24T00:00:00",
+        "entry_price": 321.25,
+        "entry_atr": 10.714285714285706,
+        "side": "long"
+      },
+      "MELI": {
+        "entry_date": "2026-02-24T00:00:00",
+        "entry_price": 1863.895,
+        "entry_atr": 81.80214285714287,
+        "side": "long"
+      },
+      "KEY": {
+        "entry_date": "2026-02-24T00:00:00",
+        "entry_price": 21.02,
+        "entry_atr": 0.6789285714285711,
+        "side": "long"
       }
     },
-    "last_trade_date": "2026-02-23T00:00:00",
+    "last_trade_date": "2026-02-24T00:00:00",
     "last_metadata": {
       "universe_size": 500,
-      "long_pool": 0,
-      "short_pool": 1,
-      "long_selected": 0,
-      "short_selected": 1,
-      "ret_tail_low_cut": -0.013052330640344955,
-      "ret_tail_high_cut": 0.02222520452717687,
+      "long_pool": 10,
+      "short_pool": 0,
+      "long_selected": 10,
+      "short_selected": 0,
+      "ret_tail_low_cut": -0.05064557956842092,
+      "ret_tail_high_cut": 0.020739341506261895,
       "bearish_regime": false,
       "gross_exposure_target": 1.0,
       "strategy": "lc_reversal",
-      "long_symbols": [],
-      "short_symbols": [
-        "EXR"
-      ]
+      "long_symbols": [
+        "NVO",
+        "IBM",
+        "DDOG",
+        "MDB",
+        "ZS",
+        "SNOW",
+        "NU",
+        "AXP",
+        "MELI",
+        "KEY"
+      ],
+      "short_symbols": []
     }
   }
 }
