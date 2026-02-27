@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-02-26T22:02:30.438615Z",
+  "last_updated_utc": "2026-02-27T15:26:37.077887Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -319,99 +319,139 @@
   },
   "execution": {
     "last_run": {
-      "trade_date": "2026-02-25T00:00:00",
-      "run_timestamp_utc": "2026-02-26T15:36:27.052307+00:00",
+      "trade_date": "2026-02-26T00:00:00",
+      "run_timestamp_utc": "2026-02-27T15:26:37.077835+00:00",
       "status": "success",
       "dry_run": false,
       "smoke_test": false,
       "open_orders_action": "leave",
       "target_portfolio_snapshot": {
         "target_weights": {
-          "KEYS": -0.03,
-          "AMD": -0.03,
-          "IDXX": -0.03,
-          "MSCI": 0.031739702191085156,
-          "SCHW": 0.029615222531327225,
-          "BP": 0.029891617023755774,
-          "DDOG": 0.03159486286904467,
-          "U": 0.027964513450922702,
-          "ALAB": 0.02786989624752999,
-          "ICE": 0.03103348189793709,
-          "EBAY": 0.031633918367148774,
-          "GIS": 0.02915217870476912,
-          "MDT": 0.028866830767438137,
-          "GPN": -0.0763699744138738,
-          "POOL": 0.09899775259623926,
-          "OMC": -0.08284661432920168,
-          "OXY": -0.07457360502206622,
-          "INSM": -0.07155376242286535,
-          "EXR": -0.07137412548368459,
-          "NVO": 0.02932881789183914,
-          "IBM": 0.03067493554917925,
-          "MDB": 0.03126640400833127,
-          "ZS": 0.03214558360157498,
-          "SNOW": 0.03122487728855033,
-          "NU": 0.026934341727718948,
-          "AXP": 0.03063554408144836,
-          "MELI": 0.029587929611450157,
-          "KEY": 0.030601278335299627
+          "FSLR": 0.03,
+          "LOW": 0.03,
+          "CRCL": -0.03,
+          "AXON": -0.03,
+          "NFLX": -0.03,
+          "MSCI": 0.03217131657058752,
+          "SCHW": 0.02930477615601619,
+          "BP": 0.03049552361094076,
+          "DDOG": 0.031140713847663433,
+          "U": 0.027620031154176376,
+          "ALAB": 0.028161024408193305,
+          "ICE": 0.031432766098368696,
+          "EBAY": 0.031750059119342575,
+          "GIS": 0.029669205445848154,
+          "MDT": 0.029220585060713847,
+          "GPN": -0.07595731632527904,
+          "POOL": 0.10137145198086595,
+          "OMC": -0.0821096528885073,
+          "OXY": -0.07669814792101066,
+          "INSM": -0.07253771617809394,
+          "EXR": -0.07345516987611922,
+          "NVO": 0.029764283821906042,
+          "IBM": 0.029899183368085364,
+          "MDB": 0.03116651539310683,
+          "ZS": 0.028412885563596224,
+          "SNOW": 0.030431917576352264,
+          "NU": 0.02677964626517846,
+          "AXP": 0.02894217784864467,
+          "MELI": 0.029621808414080707,
+          "KEY": 0.029351088433705385
         },
         "btc_allocation": 0.0
       },
       "orders_attempted": [
         {
-          "symbol": "IDXX",
+          "symbol": "NFLX",
           "side": "sell",
-          "qty": 0.0938,
-          "notional": 61.7913,
+          "qty": 0.666,
+          "notional": 61.1475,
           "limit_price": null
         },
         {
-          "symbol": "KEYS",
+          "symbol": "CRCL",
           "side": "sell",
-          "qty": 0.2066,
-          "notional": 61.7913,
+          "qty": 0.7323,
+          "notional": 61.1475,
           "limit_price": null
         },
         {
-          "symbol": "AMD",
+          "symbol": "AXON",
           "side": "sell",
-          "qty": 0.3052,
-          "notional": 61.7913,
+          "qty": 0.1131,
+          "notional": 61.1475,
+          "limit_price": null
+        },
+        {
+          "symbol": "LOW",
+          "side": "buy",
+          "qty": 0.2339,
+          "notional": 61.1475,
+          "limit_price": null
+        },
+        {
+          "symbol": "FSLR",
+          "side": "buy",
+          "qty": 0.3136,
+          "notional": 61.1475,
           "limit_price": null
         }
       ],
       "order_results": [
         {
-          "symbol": "IDXX",
+          "symbol": "NFLX",
           "side": "sell",
-          "qty": 0.0938,
-          "notional": 61.7913,
-          "price": 658.795,
+          "qty": 0.666,
+          "notional": 61.1475,
+          "price": 91.815,
           "status": "skipped_infeasible_short_qty",
           "error": "fractional short not supported"
         },
         {
-          "symbol": "KEYS",
+          "symbol": "CRCL",
           "side": "sell",
-          "qty": 0.2066,
-          "notional": 61.7913,
-          "price": 299.07,
+          "qty": 0.7323,
+          "notional": 61.1475,
+          "price": 83.5,
           "status": "skipped_infeasible_short_qty",
           "error": "fractional short not supported"
         },
         {
-          "symbol": "AMD",
+          "symbol": "AXON",
           "side": "sell",
-          "qty": 0.3052,
-          "notional": 61.7913,
-          "price": 202.48,
+          "qty": 0.1131,
+          "notional": 61.1475,
+          "price": 540.63,
           "status": "skipped_infeasible_short_qty",
           "error": "fractional short not supported"
+        },
+        {
+          "symbol": "LOW",
+          "side": "buy",
+          "qty": 0.2339,
+          "notional": 61.1475,
+          "price": 261.4,
+          "status": "filled",
+          "order_id": "5e3926be-79ad-472e-89e3-522d859dbff3",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260226T000000-LOW-buy-6115",
+          "order_type": "market"
+        },
+        {
+          "symbol": "FSLR",
+          "side": "buy",
+          "qty": 0.3136,
+          "notional": 61.1475,
+          "price": 195.0,
+          "status": "filled",
+          "order_id": "cd33b732-1b4f-4403-adca-9736c709a6b3",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260226T000000-FSLR-buy-6115",
+          "order_type": "market"
         }
       ]
     },
-    "last_successful_trade_date": "2026-02-25T00:00:00"
+    "last_successful_trade_date": "2026-02-26T00:00:00"
   },
   "lc_reversal": {
     "open_positions": {
@@ -606,25 +646,58 @@
         "entry_price": 649.455,
         "entry_atr": 15.984642857142878,
         "side": "short"
+      },
+      "FSLR": {
+        "entry_date": "2026-02-26T00:00:00",
+        "entry_price": 210.52,
+        "entry_atr": 13.810714285714289,
+        "side": "long"
+      },
+      "LOW": {
+        "entry_date": "2026-02-26T00:00:00",
+        "entry_price": 263.05,
+        "entry_atr": 7.11321428571428,
+        "side": "long"
+      },
+      "CRCL": {
+        "entry_date": "2026-02-26T00:00:00",
+        "entry_price": 83.28,
+        "entry_atr": 5.6274999999999995,
+        "side": "short"
+      },
+      "AXON": {
+        "entry_date": "2026-02-26T00:00:00",
+        "entry_price": 520.15,
+        "entry_atr": 26.66821428571429,
+        "side": "short"
+      },
+      "NFLX": {
+        "entry_date": "2026-02-26T00:00:00",
+        "entry_price": 82.7,
+        "entry_atr": 2.874285714285713,
+        "side": "short"
       }
     },
-    "last_trade_date": "2026-02-25T00:00:00",
+    "last_trade_date": "2026-02-26T00:00:00",
     "last_metadata": {
       "universe_size": 500,
-      "long_pool": 0,
+      "long_pool": 2,
       "short_pool": 3,
-      "long_selected": 0,
+      "long_selected": 2,
       "short_selected": 3,
-      "ret_tail_low_cut": -0.009355349250916266,
-      "ret_tail_high_cut": 0.03506847055787554,
+      "ret_tail_low_cut": -0.019735057527085938,
+      "ret_tail_high_cut": 0.03599542617351931,
       "bearish_regime": false,
       "gross_exposure_target": 1.0,
       "strategy": "lc_reversal",
-      "long_symbols": [],
+      "long_symbols": [
+        "FSLR",
+        "LOW"
+      ],
       "short_symbols": [
-        "KEYS",
-        "AMD",
-        "IDXX"
+        "CRCL",
+        "AXON",
+        "NFLX"
       ]
     }
   }
