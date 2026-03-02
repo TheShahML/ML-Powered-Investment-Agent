@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-03-01T21:29:35.687470Z",
+  "last_updated_utc": "2026-03-02T15:27:39.340836Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -325,139 +325,127 @@
   },
   "execution": {
     "last_run": {
-      "trade_date": "2026-02-26T00:00:00",
-      "run_timestamp_utc": "2026-02-27T15:26:37.077835+00:00",
+      "trade_date": "2026-02-27T00:00:00",
+      "run_timestamp_utc": "2026-03-02T15:27:39.340776+00:00",
       "status": "success",
       "dry_run": false,
       "smoke_test": false,
       "open_orders_action": "leave",
       "target_portfolio_snapshot": {
         "target_weights": {
-          "FSLR": 0.03,
-          "LOW": 0.03,
-          "CRCL": -0.03,
-          "AXON": -0.03,
-          "NFLX": -0.03,
-          "MSCI": 0.03217131657058752,
-          "SCHW": 0.02930477615601619,
-          "BP": 0.03049552361094076,
-          "DDOG": 0.031140713847663433,
-          "U": 0.027620031154176376,
-          "ALAB": 0.028161024408193305,
-          "ICE": 0.031432766098368696,
-          "EBAY": 0.031750059119342575,
-          "GIS": 0.029669205445848154,
-          "MDT": 0.029220585060713847,
-          "GPN": -0.07595731632527904,
-          "POOL": 0.10137145198086595,
-          "OMC": -0.0821096528885073,
-          "OXY": -0.07669814792101066,
-          "INSM": -0.07253771617809394,
-          "EXR": -0.07345516987611922,
-          "NVO": 0.029764283821906042,
-          "IBM": 0.029899183368085364,
-          "MDB": 0.03116651539310683,
-          "ZS": 0.028412885563596224,
-          "SNOW": 0.030431917576352264,
-          "NU": 0.02677964626517846,
-          "AXP": 0.02894217784864467,
-          "MELI": 0.029621808414080707,
-          "KEY": 0.029351088433705385
+          "NVDA": 0.03,
+          "FXI": 0.03,
+          "IONQ": -0.03,
+          "LNG": -0.03,
+          "MSCI": 0.03224932099708682,
+          "SCHW": 0.029750506479486964,
+          "BP": 0.031124502762839443,
+          "DDOG": 0.030829495097870075,
+          "U": 0.027048972499765858,
+          "ALAB": 0.02681894208635044,
+          "ICE": 0.03216268663337786,
+          "EBAY": 0.03266942342670959,
+          "GIS": 0.029947247265503695,
+          "MDT": 0.029628016079183323,
+          "GPN": -0.07635393920274461,
+          "POOL": 0.10087282953206718,
+          "OMC": -0.08314643295493196,
+          "OXY": -0.07980194310670327,
+          "INSM": -0.07247462673324427,
+          "EXR": -0.07528182933982679,
+          "NVO": 0.02944687707952344,
+          "IBM": 0.03033708169230693,
+          "MDB": 0.0314313036363009,
+          "ZS": 0.030118155872450963,
+          "SNOW": 0.030589472127608187,
+          "NU": 0.026833685445430838,
+          "AXP": 0.02858157942732081,
+          "MELI": 0.029993346017912863,
+          "KEY": 0.029617201571441952,
+          "FSLR": 0.029959341650605556,
+          "LOW": 0.02991327247364088
         },
         "btc_allocation": 0.0
       },
       "orders_attempted": [
         {
-          "symbol": "NFLX",
+          "symbol": "LNG",
           "side": "sell",
-          "qty": 0.666,
-          "notional": 61.1475,
+          "qty": 0.2434,
+          "notional": 60.8613,
           "limit_price": null
         },
         {
-          "symbol": "CRCL",
-          "side": "sell",
-          "qty": 0.7323,
-          "notional": 61.1475,
-          "limit_price": null
-        },
-        {
-          "symbol": "AXON",
-          "side": "sell",
-          "qty": 0.1131,
-          "notional": 61.1475,
-          "limit_price": null
-        },
-        {
-          "symbol": "LOW",
+          "symbol": "FXI",
           "side": "buy",
-          "qty": 0.2339,
-          "notional": 61.1475,
+          "qty": 1.6565,
+          "notional": 60.8613,
           "limit_price": null
         },
         {
-          "symbol": "FSLR",
+          "symbol": "IONQ",
+          "side": "sell",
+          "qty": 1.0,
+          "notional": 60.8613,
+          "limit_price": null
+        },
+        {
+          "symbol": "NVDA",
           "side": "buy",
-          "qty": 0.3136,
-          "notional": 61.1475,
+          "qty": 0.3365,
+          "notional": 60.8613,
           "limit_price": null
         }
       ],
       "order_results": [
         {
-          "symbol": "NFLX",
+          "symbol": "LNG",
           "side": "sell",
-          "qty": 0.666,
-          "notional": 61.1475,
-          "price": 91.815,
+          "qty": 0.2434,
+          "notional": 60.8613,
+          "price": 250.045,
           "status": "skipped_infeasible_short_qty",
           "error": "fractional short not supported"
         },
         {
-          "symbol": "CRCL",
-          "side": "sell",
-          "qty": 0.7323,
-          "notional": 61.1475,
-          "price": 83.5,
-          "status": "skipped_infeasible_short_qty",
-          "error": "fractional short not supported"
-        },
-        {
-          "symbol": "AXON",
-          "side": "sell",
-          "qty": 0.1131,
-          "notional": 61.1475,
-          "price": 540.63,
-          "status": "skipped_infeasible_short_qty",
-          "error": "fractional short not supported"
-        },
-        {
-          "symbol": "LOW",
+          "symbol": "FXI",
           "side": "buy",
-          "qty": 0.2339,
-          "notional": 61.1475,
-          "price": 261.4,
-          "status": "filled",
-          "order_id": "5e3926be-79ad-472e-89e3-522d859dbff3",
-          "alpaca_status": "filled",
-          "client_order_id": "rebal-20260226T000000-LOW-buy-6115",
+          "qty": 1.6565,
+          "notional": 60.8613,
+          "price": 36.74,
+          "status": "new",
+          "order_id": "bf3c2188-3dd7-454d-aac3-3bad87bf85a1",
+          "alpaca_status": "new",
+          "client_order_id": "rebal-20260227T000000-FXI-buy-6086",
           "order_type": "market"
         },
         {
-          "symbol": "FSLR",
+          "symbol": "IONQ",
+          "side": "sell",
+          "qty": 1.0,
+          "notional": 60.8613,
+          "price": 37.71,
+          "status": "new",
+          "order_id": "ccbc76c8-a8dc-4d6a-a97b-e2dda27f2116",
+          "alpaca_status": "new",
+          "client_order_id": "rebal-20260227T000000-IONQ-sell-6086",
+          "order_type": "market"
+        },
+        {
+          "symbol": "NVDA",
           "side": "buy",
-          "qty": 0.3136,
-          "notional": 61.1475,
-          "price": 195.0,
+          "qty": 0.3365,
+          "notional": 60.8613,
+          "price": 180.89,
           "status": "filled",
-          "order_id": "cd33b732-1b4f-4403-adca-9736c709a6b3",
+          "order_id": "44c261a2-bfc5-455c-a6a2-e6346ef384c6",
           "alpaca_status": "filled",
-          "client_order_id": "rebal-20260226T000000-FSLR-buy-6115",
+          "client_order_id": "rebal-20260227T000000-NVDA-buy-6086",
           "order_type": "market"
         }
       ]
     },
-    "last_successful_trade_date": "2026-02-26T00:00:00"
+    "last_successful_trade_date": "2026-02-27T00:00:00"
   },
   "lc_reversal": {
     "open_positions": {
@@ -682,28 +670,51 @@
         "entry_price": 82.7,
         "entry_atr": 2.874285714285713,
         "side": "short"
+      },
+      "NVDA": {
+        "entry_date": "2026-02-27T00:00:00",
+        "entry_price": 184.86,
+        "entry_atr": 6.712142857142857,
+        "side": "long"
+      },
+      "FXI": {
+        "entry_date": "2026-02-27T00:00:00",
+        "entry_price": 37.395,
+        "entry_atr": 0.6174999999999997,
+        "side": "long"
+      },
+      "IONQ": {
+        "entry_date": "2026-02-27T00:00:00",
+        "entry_price": 40.78,
+        "entry_atr": 3.0050000000000003,
+        "side": "short"
+      },
+      "LNG": {
+        "entry_date": "2026-02-27T00:00:00",
+        "entry_price": 232.5,
+        "entry_atr": 5.442142857142855,
+        "side": "short"
       }
     },
-    "last_trade_date": "2026-02-26T00:00:00",
+    "last_trade_date": "2026-02-27T00:00:00",
     "last_metadata": {
       "universe_size": 500,
       "long_pool": 2,
-      "short_pool": 3,
+      "short_pool": 2,
       "long_selected": 2,
-      "short_selected": 3,
-      "ret_tail_low_cut": -0.019735057527085938,
-      "ret_tail_high_cut": 0.03599542617351931,
+      "short_selected": 2,
+      "ret_tail_low_cut": -0.02489516895791033,
+      "ret_tail_high_cut": 0.03792352925335283,
       "bearish_regime": false,
       "gross_exposure_target": 1.0,
       "strategy": "lc_reversal",
       "long_symbols": [
-        "FSLR",
-        "LOW"
+        "NVDA",
+        "FXI"
       ],
       "short_symbols": [
-        "CRCL",
-        "AXON",
-        "NFLX"
+        "IONQ",
+        "LNG"
       ]
     }
   }
