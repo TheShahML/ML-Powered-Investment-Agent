@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-03-02T22:04:24.641580Z",
+  "last_updated_utc": "2026-03-03T15:33:59.292569Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -331,127 +331,284 @@
   },
   "execution": {
     "last_run": {
-      "trade_date": "2026-02-27T00:00:00",
-      "run_timestamp_utc": "2026-03-02T15:27:39.340776+00:00",
+      "trade_date": "2026-03-02T00:00:00",
+      "run_timestamp_utc": "2026-03-03T15:33:59.292520+00:00",
       "status": "success",
       "dry_run": false,
       "smoke_test": false,
       "open_orders_action": "leave",
       "target_portfolio_snapshot": {
         "target_weights": {
-          "NVDA": 0.03,
-          "FXI": 0.03,
-          "IONQ": -0.03,
-          "LNG": -0.03,
-          "MSCI": 0.03224932099708682,
-          "SCHW": 0.029750506479486964,
-          "BP": 0.031124502762839443,
-          "DDOG": 0.030829495097870075,
-          "U": 0.027048972499765858,
-          "ALAB": 0.02681894208635044,
-          "ICE": 0.03216268663337786,
-          "EBAY": 0.03266942342670959,
-          "GIS": 0.029947247265503695,
-          "MDT": 0.029628016079183323,
-          "GPN": -0.07635393920274461,
-          "POOL": 0.10087282953206718,
-          "OMC": -0.08314643295493196,
-          "OXY": -0.07980194310670327,
-          "INSM": -0.07247462673324427,
-          "EXR": -0.07528182933982679,
-          "NVO": 0.02944687707952344,
-          "IBM": 0.03033708169230693,
-          "MDB": 0.0314313036363009,
-          "ZS": 0.030118155872450963,
-          "SNOW": 0.030589472127608187,
-          "NU": 0.026833685445430838,
-          "AXP": 0.02858157942732081,
-          "MELI": 0.029993346017912863,
-          "KEY": 0.029617201571441952,
-          "FSLR": 0.029959341650605556,
-          "LOW": 0.02991327247364088
+          "CRWV": 0.03,
+          "UAL": 0.03,
+          "APO": 0.03,
+          "AXP": 0.03,
+          "GS": 0.03,
+          "SOFI": 0.03,
+          "DAL": 0.03,
+          "AAL": 0.03,
+          "CFG": 0.03,
+          "WFC": 0.03,
+          "DELL": -0.03,
+          "XYZ": -0.03,
+          "SATS": -0.03,
+          "MSCI": 0.032576500313952025,
+          "SCHW": 0.03009591862363431,
+          "BP": 0.031612534471932685,
+          "DDOG": 0.029987111892502825,
+          "U": 0.027775280170789902,
+          "ALAB": 0.025479765917367826,
+          "ICE": 0.0327205123697099,
+          "EBAY": 0.03240398141403994,
+          "GIS": 0.030020852442546778,
+          "MDT": 0.02979721838503077,
+          "GPN": -0.07607685545648624,
+          "POOL": 0.10089669923395705,
+          "OMC": -0.08367700615345976,
+          "OXY": -0.0815572020595253,
+          "INSM": -0.07283938214240863,
+          "EXR": -0.07439156096948386,
+          "NVO": 0.029258571643852815,
+          "IBM": 0.030812403616727362,
+          "MDB": 0.024096935828205452,
+          "ZS": 0.029611862865754117,
+          "SNOW": 0.02930647846289087,
+          "NU": 0.026411254049981164,
+          "MELI": 0.02944222378500565,
+          "KEY": 0.02925371895014442,
+          "FSLR": 0.03064560793670727,
+          "LOW": 0.029618912972497802,
+          "NVDA": 0.030107939218887356,
+          "FXI": 0.029497890242370973,
+          "IONQ": -0.018131357528569633
         },
         "btc_allocation": 0.0
       },
       "orders_attempted": [
         {
-          "symbol": "LNG",
+          "symbol": "XYZ",
           "side": "sell",
-          "qty": 0.2434,
-          "notional": 60.8613,
+          "qty": 0.9673,
+          "notional": 59.7225,
           "limit_price": null
         },
         {
-          "symbol": "FXI",
-          "side": "buy",
-          "qty": 1.6565,
-          "notional": 60.8613,
-          "limit_price": null
-        },
-        {
-          "symbol": "IONQ",
+          "symbol": "DELL",
           "side": "sell",
-          "qty": 1.0,
-          "notional": 60.8613,
+          "qty": 0.4149,
+          "notional": 59.7225,
           "limit_price": null
         },
         {
-          "symbol": "NVDA",
+          "symbol": "SATS",
+          "side": "sell",
+          "qty": 0.522,
+          "notional": 59.7225,
+          "limit_price": null
+        },
+        {
+          "symbol": "APO",
           "side": "buy",
-          "qty": 0.3365,
-          "notional": 60.8613,
+          "qty": 0.5861,
+          "notional": 59.7225,
+          "limit_price": null
+        },
+        {
+          "symbol": "CRWV",
+          "side": "buy",
+          "qty": 0.8409,
+          "notional": 59.7225,
+          "limit_price": null
+        },
+        {
+          "symbol": "CFG",
+          "side": "buy",
+          "qty": 1.0155,
+          "notional": 59.7225,
+          "limit_price": null
+        },
+        {
+          "symbol": "UAL",
+          "side": "buy",
+          "qty": 0.6132,
+          "notional": 59.7225,
+          "limit_price": null
+        },
+        {
+          "symbol": "GS",
+          "side": "buy",
+          "qty": 0.0718,
+          "notional": 59.7225,
+          "limit_price": null
+        },
+        {
+          "symbol": "DAL",
+          "side": "buy",
+          "qty": 0.972,
+          "notional": 59.7225,
+          "limit_price": null
+        },
+        {
+          "symbol": "WFC",
+          "side": "buy",
+          "qty": 0.7379,
+          "notional": 59.7225,
+          "limit_price": null
+        },
+        {
+          "symbol": "AAL",
+          "side": "buy",
+          "qty": 5.0612,
+          "notional": 59.7225,
+          "limit_price": null
+        },
+        {
+          "symbol": "SOFI",
+          "side": "buy",
+          "qty": 3.3327,
+          "notional": 59.7225,
           "limit_price": null
         }
       ],
       "order_results": [
         {
-          "symbol": "LNG",
+          "symbol": "XYZ",
           "side": "sell",
-          "qty": 0.2434,
-          "notional": 60.8613,
-          "price": 250.045,
+          "qty": 0.9673,
+          "notional": 59.7225,
+          "price": 61.74,
           "status": "skipped_infeasible_short_qty",
           "error": "fractional short not supported"
         },
         {
-          "symbol": "FXI",
-          "side": "buy",
-          "qty": 1.6565,
-          "notional": 60.8613,
-          "price": 36.74,
-          "status": "new",
-          "order_id": "bf3c2188-3dd7-454d-aac3-3bad87bf85a1",
-          "alpaca_status": "new",
-          "client_order_id": "rebal-20260227T000000-FXI-buy-6086",
-          "order_type": "market"
-        },
-        {
-          "symbol": "IONQ",
+          "symbol": "DELL",
           "side": "sell",
-          "qty": 1.0,
-          "notional": 60.8613,
-          "price": 37.71,
-          "status": "new",
-          "order_id": "ccbc76c8-a8dc-4d6a-a97b-e2dda27f2116",
-          "alpaca_status": "new",
-          "client_order_id": "rebal-20260227T000000-IONQ-sell-6086",
+          "qty": 0.4149,
+          "notional": 59.7225,
+          "price": 143.95,
+          "status": "skipped_infeasible_short_qty",
+          "error": "fractional short not supported"
+        },
+        {
+          "symbol": "SATS",
+          "side": "sell",
+          "qty": 0.522,
+          "notional": 59.7225,
+          "price": 114.41,
+          "status": "skipped_infeasible_short_qty",
+          "error": "fractional short not supported"
+        },
+        {
+          "symbol": "APO",
+          "side": "buy",
+          "qty": 0.5861,
+          "notional": 59.7225,
+          "price": 101.9,
+          "status": "filled",
+          "order_id": "ecfd37e3-54eb-4656-a10b-4555bffcf962",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260302T000000-APO-buy-5972",
           "order_type": "market"
         },
         {
-          "symbol": "NVDA",
+          "symbol": "CRWV",
           "side": "buy",
-          "qty": 0.3365,
-          "notional": 60.8613,
-          "price": 180.89,
+          "qty": 0.8409,
+          "notional": 59.7225,
+          "price": 71.02,
           "status": "filled",
-          "order_id": "44c261a2-bfc5-455c-a6a2-e6346ef384c6",
+          "order_id": "9e29e2e6-474a-4010-9271-964e2ed88cc2",
           "alpaca_status": "filled",
-          "client_order_id": "rebal-20260227T000000-NVDA-buy-6086",
+          "client_order_id": "rebal-20260302T000000-CRWV-buy-5972",
+          "order_type": "market"
+        },
+        {
+          "symbol": "CFG",
+          "side": "buy",
+          "qty": 1.0155,
+          "notional": 59.7225,
+          "price": 58.81,
+          "status": "filled",
+          "order_id": "1a891a5b-178e-4d07-acc9-7a27da1da8eb",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260302T000000-CFG-buy-5972",
+          "order_type": "market"
+        },
+        {
+          "symbol": "UAL",
+          "side": "buy",
+          "qty": 0.6132,
+          "notional": 59.7225,
+          "price": 97.4,
+          "status": "filled",
+          "order_id": "424c3c17-96ec-468b-af4a-e1260d7edfd1",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260302T000000-UAL-buy-5972",
+          "order_type": "market"
+        },
+        {
+          "symbol": "GS",
+          "side": "buy",
+          "qty": 0.0718,
+          "notional": 59.7225,
+          "price": 832.18,
+          "status": "filled",
+          "order_id": "85b8ba59-75cd-4f91-902e-709badb28690",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260302T000000-GS-buy-5972",
+          "order_type": "market"
+        },
+        {
+          "symbol": "DAL",
+          "side": "buy",
+          "qty": 0.972,
+          "notional": 59.7225,
+          "price": 61.44,
+          "status": "filled",
+          "order_id": "9bc387f4-da25-47ec-a003-2442cf157143",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260302T000000-DAL-buy-5972",
+          "order_type": "market"
+        },
+        {
+          "symbol": "WFC",
+          "side": "buy",
+          "qty": 0.7379,
+          "notional": 59.7225,
+          "price": 80.94,
+          "status": "filled",
+          "order_id": "9510db2c-0072-4251-a64a-ec78c33c575a",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260302T000000-WFC-buy-5972",
+          "order_type": "market"
+        },
+        {
+          "symbol": "AAL",
+          "side": "buy",
+          "qty": 5.0612,
+          "notional": 59.7225,
+          "price": 11.8,
+          "status": "new",
+          "order_id": "177be1a1-5304-44a8-a3cc-a7c227b4619b",
+          "alpaca_status": "new",
+          "client_order_id": "rebal-20260302T000000-AAL-buy-5972",
+          "order_type": "market"
+        },
+        {
+          "symbol": "SOFI",
+          "side": "buy",
+          "qty": 3.3327,
+          "notional": 59.7225,
+          "price": 17.92,
+          "status": "new",
+          "order_id": "7a6fdd03-8a25-4300-b76f-c36a50e6d82f",
+          "alpaca_status": "new",
+          "client_order_id": "rebal-20260302T000000-SOFI-buy-5972",
           "order_type": "market"
         }
       ]
     },
-    "last_successful_trade_date": "2026-02-27T00:00:00"
+    "last_successful_trade_date": "2026-03-02T00:00:00"
   },
   "lc_reversal": {
     "open_positions": {
@@ -700,27 +857,108 @@
         "entry_price": 232.5,
         "entry_atr": 5.442142857142855,
         "side": "short"
+      },
+      "CRWV": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 79.55,
+        "entry_atr": 8.57607142857143,
+        "side": "long"
+      },
+      "UAL": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 106.34,
+        "entry_atr": 6.011428571428574,
+        "side": "long"
+      },
+      "APO": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 104.575,
+        "entry_atr": 5.735357142857142,
+        "side": "long"
+      },
+      "GS": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 855.45,
+        "entry_atr": 33.11357142857141,
+        "side": "long"
+      },
+      "SOFI": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 17.76,
+        "entry_atr": 0.9635714285714282,
+        "side": "long"
+      },
+      "DAL": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 65.7,
+        "entry_atr": 3.043214285714285,
+        "side": "long"
+      },
+      "AAL": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 13.085,
+        "entry_atr": 0.6514285714285714,
+        "side": "long"
+      },
+      "CFG": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 60.185,
+        "entry_atr": 2.0275,
+        "side": "long"
+      },
+      "WFC": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 81.44,
+        "entry_atr": 3.493928571428573,
+        "side": "long"
+      },
+      "DELL": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 148.02,
+        "entry_atr": 7.355714285714284,
+        "side": "short"
+      },
+      "XYZ": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 63.735,
+        "entry_atr": 3.2139285714285712,
+        "side": "short"
+      },
+      "SATS": {
+        "entry_date": "2026-03-02T00:00:00",
+        "entry_price": 115.52,
+        "entry_atr": 5.1032142857142855,
+        "side": "short"
       }
     },
-    "last_trade_date": "2026-02-27T00:00:00",
+    "last_trade_date": "2026-03-02T00:00:00",
     "last_metadata": {
       "universe_size": 500,
-      "long_pool": 2,
-      "short_pool": 2,
-      "long_selected": 2,
-      "short_selected": 2,
-      "ret_tail_low_cut": -0.02489516895791033,
-      "ret_tail_high_cut": 0.03792352925335283,
+      "long_pool": 12,
+      "short_pool": 3,
+      "long_selected": 10,
+      "short_selected": 3,
+      "ret_tail_low_cut": -0.04178431756986254,
+      "ret_tail_high_cut": 0.02475160813705233,
       "bearish_regime": false,
       "gross_exposure_target": 1.0,
       "strategy": "lc_reversal",
       "long_symbols": [
-        "NVDA",
-        "FXI"
+        "CRWV",
+        "UAL",
+        "APO",
+        "AXP",
+        "GS",
+        "SOFI",
+        "DAL",
+        "AAL",
+        "CFG",
+        "WFC"
       ],
       "short_symbols": [
-        "IONQ",
-        "LNG"
+        "DELL",
+        "XYZ",
+        "SATS"
       ]
     }
   }
