@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-03-03T22:01:47.357689Z",
+  "last_updated_utc": "2026-03-04T15:14:37.102699Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -337,284 +337,156 @@
   },
   "execution": {
     "last_run": {
-      "trade_date": "2026-03-02T00:00:00",
-      "run_timestamp_utc": "2026-03-03T15:33:59.292520+00:00",
+      "trade_date": "2026-03-03T00:00:00",
+      "run_timestamp_utc": "2026-03-04T15:14:37.102647+00:00",
       "status": "success",
       "dry_run": false,
       "smoke_test": false,
       "open_orders_action": "leave",
       "target_portfolio_snapshot": {
         "target_weights": {
-          "CRWV": 0.03,
-          "UAL": 0.03,
-          "APO": 0.03,
-          "AXP": 0.03,
-          "GS": 0.03,
-          "SOFI": 0.03,
-          "DAL": 0.03,
-          "AAL": 0.03,
-          "CFG": 0.03,
-          "WFC": 0.03,
-          "DELL": -0.03,
-          "XYZ": -0.03,
-          "SATS": -0.03,
-          "MSCI": 0.032576500313952025,
-          "SCHW": 0.03009591862363431,
-          "BP": 0.031612534471932685,
-          "DDOG": 0.029987111892502825,
-          "U": 0.027775280170789902,
-          "ALAB": 0.025479765917367826,
-          "ICE": 0.0327205123697099,
-          "EBAY": 0.03240398141403994,
-          "GIS": 0.030020852442546778,
-          "MDT": 0.02979721838503077,
-          "GPN": -0.07607685545648624,
-          "POOL": 0.10089669923395705,
-          "OMC": -0.08367700615345976,
-          "OXY": -0.0815572020595253,
-          "INSM": -0.07283938214240863,
-          "EXR": -0.07439156096948386,
-          "NVO": 0.029258571643852815,
-          "IBM": 0.030812403616727362,
-          "MDB": 0.024096935828205452,
-          "ZS": 0.029611862865754117,
-          "SNOW": 0.02930647846289087,
-          "NU": 0.026411254049981164,
-          "MELI": 0.02944222378500565,
-          "KEY": 0.02925371895014442,
-          "FSLR": 0.03064560793670727,
-          "LOW": 0.029618912972497802,
-          "NVDA": 0.030107939218887356,
-          "FXI": 0.029497890242370973,
-          "IONQ": -0.018131357528569633
+          "ELV": 0.03,
+          "CCL": 0.03,
+          "F": 0.03,
+          "NOC": -0.03,
+          "VLO": -0.03,
+          "MSCI": 0.031735409729593496,
+          "SCHW": 0.02942152685889327,
+          "BP": 0.03019733616390153,
+          "DDOG": 0.03212522016876778,
+          "U": 0.02928854565018248,
+          "ALAB": 0.025860900838022675,
+          "ICE": 0.031206649411833126,
+          "EBAY": 0.03227346196908671,
+          "GIS": 0.028396025572051047,
+          "MDT": 0.028639146176551847,
+          "GPN": -0.07453506463292281,
+          "POOL": 0.09834005787154841,
+          "OMC": -0.0828959039157809,
+          "OXY": -0.07737774998909457,
+          "INSM": -0.07119072891977957,
+          "EXR": -0.0714451892457796,
+          "NVO": 0.02970561412182106,
+          "IBM": 0.031093301150160672,
+          "MDB": 0.02391200034897416,
+          "ZS": 0.03054792626951468,
+          "SNOW": 0.02983851608431604,
+          "NU": 0.02682705712997833,
+          "AXP": 0.028547049714277403,
+          "MELI": 0.029808925983549745,
+          "KEY": 0.028758386285315463,
+          "FSLR": 0.030779521032963515,
+          "LOW": 0.02918492552794459,
+          "NVDA": 0.029726050436460042,
+          "FXI": 0.028783352478443578,
+          "IONQ": -0.017977016173983007,
+          "CRWV": 0.03223085222398325,
+          "UAL": 0.030729992875110867,
+          "APO": 0.030998227017385697,
+          "GS": 0.030434062786267868,
+          "SOFI": 0.030755581405493435,
+          "DAL": 0.030558882119436404,
+          "AAL": 0.031166565367222603,
+          "CFG": 0.02957623631366961,
+          "WFC": 0.029693895133264512
         },
         "btc_allocation": 0.0
       },
       "orders_attempted": [
         {
-          "symbol": "XYZ",
+          "symbol": "VLO",
           "side": "sell",
-          "qty": 0.9673,
-          "notional": 59.7225,
+          "qty": 0.2813,
+          "notional": 61.8957,
           "limit_price": null
         },
         {
-          "symbol": "DELL",
+          "symbol": "NOC",
           "side": "sell",
-          "qty": 0.4149,
-          "notional": 59.7225,
+          "qty": 0.083,
+          "notional": 61.8957,
           "limit_price": null
         },
         {
-          "symbol": "SATS",
-          "side": "sell",
-          "qty": 0.522,
-          "notional": 59.7225,
-          "limit_price": null
-        },
-        {
-          "symbol": "APO",
+          "symbol": "F",
           "side": "buy",
-          "qty": 0.5861,
-          "notional": 59.7225,
+          "qty": 4.7484,
+          "notional": 61.8957,
           "limit_price": null
         },
         {
-          "symbol": "CRWV",
+          "symbol": "ELV",
           "side": "buy",
-          "qty": 0.8409,
-          "notional": 59.7225,
+          "qty": 0.2143,
+          "notional": 61.8957,
           "limit_price": null
         },
         {
-          "symbol": "CFG",
+          "symbol": "CCL",
           "side": "buy",
-          "qty": 1.0155,
-          "notional": 59.7225,
-          "limit_price": null
-        },
-        {
-          "symbol": "UAL",
-          "side": "buy",
-          "qty": 0.6132,
-          "notional": 59.7225,
-          "limit_price": null
-        },
-        {
-          "symbol": "GS",
-          "side": "buy",
-          "qty": 0.0718,
-          "notional": 59.7225,
-          "limit_price": null
-        },
-        {
-          "symbol": "DAL",
-          "side": "buy",
-          "qty": 0.972,
-          "notional": 59.7225,
-          "limit_price": null
-        },
-        {
-          "symbol": "WFC",
-          "side": "buy",
-          "qty": 0.7379,
-          "notional": 59.7225,
-          "limit_price": null
-        },
-        {
-          "symbol": "AAL",
-          "side": "buy",
-          "qty": 5.0612,
-          "notional": 59.7225,
-          "limit_price": null
-        },
-        {
-          "symbol": "SOFI",
-          "side": "buy",
-          "qty": 3.3327,
-          "notional": 59.7225,
+          "qty": 2.181,
+          "notional": 61.8957,
           "limit_price": null
         }
       ],
       "order_results": [
         {
-          "symbol": "XYZ",
+          "symbol": "VLO",
           "side": "sell",
-          "qty": 0.9673,
-          "notional": 59.7225,
-          "price": 61.74,
+          "qty": 0.2813,
+          "notional": 61.8957,
+          "price": 220.0,
           "status": "skipped_infeasible_short_qty",
           "error": "fractional short not supported"
         },
         {
-          "symbol": "DELL",
+          "symbol": "NOC",
           "side": "sell",
-          "qty": 0.4149,
-          "notional": 59.7225,
-          "price": 143.95,
+          "qty": 0.083,
+          "notional": 61.8957,
+          "price": 745.535,
           "status": "skipped_infeasible_short_qty",
           "error": "fractional short not supported"
         },
         {
-          "symbol": "SATS",
-          "side": "sell",
-          "qty": 0.522,
-          "notional": 59.7225,
-          "price": 114.41,
-          "status": "skipped_infeasible_short_qty",
-          "error": "fractional short not supported"
-        },
-        {
-          "symbol": "APO",
+          "symbol": "F",
           "side": "buy",
-          "qty": 0.5861,
-          "notional": 59.7225,
-          "price": 101.9,
-          "status": "filled",
-          "order_id": "ecfd37e3-54eb-4656-a10b-4555bffcf962",
-          "alpaca_status": "filled",
-          "client_order_id": "rebal-20260302T000000-APO-buy-5972",
-          "order_type": "market"
-        },
-        {
-          "symbol": "CRWV",
-          "side": "buy",
-          "qty": 0.8409,
-          "notional": 59.7225,
-          "price": 71.02,
-          "status": "filled",
-          "order_id": "9e29e2e6-474a-4010-9271-964e2ed88cc2",
-          "alpaca_status": "filled",
-          "client_order_id": "rebal-20260302T000000-CRWV-buy-5972",
-          "order_type": "market"
-        },
-        {
-          "symbol": "CFG",
-          "side": "buy",
-          "qty": 1.0155,
-          "notional": 59.7225,
-          "price": 58.81,
-          "status": "filled",
-          "order_id": "1a891a5b-178e-4d07-acc9-7a27da1da8eb",
-          "alpaca_status": "filled",
-          "client_order_id": "rebal-20260302T000000-CFG-buy-5972",
-          "order_type": "market"
-        },
-        {
-          "symbol": "UAL",
-          "side": "buy",
-          "qty": 0.6132,
-          "notional": 59.7225,
-          "price": 97.4,
-          "status": "filled",
-          "order_id": "424c3c17-96ec-468b-af4a-e1260d7edfd1",
-          "alpaca_status": "filled",
-          "client_order_id": "rebal-20260302T000000-UAL-buy-5972",
-          "order_type": "market"
-        },
-        {
-          "symbol": "GS",
-          "side": "buy",
-          "qty": 0.0718,
-          "notional": 59.7225,
-          "price": 832.18,
-          "status": "filled",
-          "order_id": "85b8ba59-75cd-4f91-902e-709badb28690",
-          "alpaca_status": "filled",
-          "client_order_id": "rebal-20260302T000000-GS-buy-5972",
-          "order_type": "market"
-        },
-        {
-          "symbol": "DAL",
-          "side": "buy",
-          "qty": 0.972,
-          "notional": 59.7225,
-          "price": 61.44,
-          "status": "filled",
-          "order_id": "9bc387f4-da25-47ec-a003-2442cf157143",
-          "alpaca_status": "filled",
-          "client_order_id": "rebal-20260302T000000-DAL-buy-5972",
-          "order_type": "market"
-        },
-        {
-          "symbol": "WFC",
-          "side": "buy",
-          "qty": 0.7379,
-          "notional": 59.7225,
-          "price": 80.94,
-          "status": "filled",
-          "order_id": "9510db2c-0072-4251-a64a-ec78c33c575a",
-          "alpaca_status": "filled",
-          "client_order_id": "rebal-20260302T000000-WFC-buy-5972",
-          "order_type": "market"
-        },
-        {
-          "symbol": "AAL",
-          "side": "buy",
-          "qty": 5.0612,
-          "notional": 59.7225,
-          "price": 11.8,
+          "qty": 4.7484,
+          "notional": 61.8957,
+          "price": 13.035,
           "status": "new",
-          "order_id": "177be1a1-5304-44a8-a3cc-a7c227b4619b",
+          "order_id": "db17aa6b-f4db-46c9-91ed-009e6b26ddbb",
           "alpaca_status": "new",
-          "client_order_id": "rebal-20260302T000000-AAL-buy-5972",
+          "client_order_id": "rebal-20260303T000000-F-buy-6190",
           "order_type": "market"
         },
         {
-          "symbol": "SOFI",
+          "symbol": "ELV",
           "side": "buy",
-          "qty": 3.3327,
-          "notional": 59.7225,
-          "price": 17.92,
+          "qty": 0.2143,
+          "notional": 61.8957,
+          "price": 288.87,
+          "status": "filled",
+          "order_id": "f80f23bd-6ea8-47d5-ba20-4f66eb1ac8da",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260303T000000-ELV-buy-6190",
+          "order_type": "market"
+        },
+        {
+          "symbol": "CCL",
+          "side": "buy",
+          "qty": 2.181,
+          "notional": 61.8957,
+          "price": 28.38,
           "status": "new",
-          "order_id": "7a6fdd03-8a25-4300-b76f-c36a50e6d82f",
+          "order_id": "92733523-8423-49fa-b12c-9510d40617ee",
           "alpaca_status": "new",
-          "client_order_id": "rebal-20260302T000000-SOFI-buy-5972",
+          "client_order_id": "rebal-20260303T000000-CCL-buy-6190",
           "order_type": "market"
         }
       ]
     },
-    "last_successful_trade_date": "2026-03-02T00:00:00"
+    "last_successful_trade_date": "2026-03-03T00:00:00"
   },
   "lc_reversal": {
     "open_positions": {
@@ -935,36 +807,58 @@
         "entry_price": 115.52,
         "entry_atr": 5.1032142857142855,
         "side": "short"
+      },
+      "ELV": {
+        "entry_date": "2026-03-03T00:00:00",
+        "entry_price": 294.06,
+        "entry_atr": 11.585714285714289,
+        "side": "long"
+      },
+      "CCL": {
+        "entry_date": "2026-03-03T00:00:00",
+        "entry_price": 29.135,
+        "entry_atr": 1.4807142857142868,
+        "side": "long"
+      },
+      "F": {
+        "entry_date": "2026-03-03T00:00:00",
+        "entry_price": 13.37,
+        "entry_atr": 0.43071428571428577,
+        "side": "long"
+      },
+      "NOC": {
+        "entry_date": "2026-03-03T00:00:00",
+        "entry_price": 767.32,
+        "entry_atr": 19.38250000000001,
+        "side": "short"
+      },
+      "VLO": {
+        "entry_date": "2026-03-03T00:00:00",
+        "entry_price": 214.92,
+        "entry_atr": 6.030357142857143,
+        "side": "short"
       }
     },
-    "last_trade_date": "2026-03-02T00:00:00",
+    "last_trade_date": "2026-03-03T00:00:00",
     "last_metadata": {
       "universe_size": 500,
-      "long_pool": 12,
-      "short_pool": 3,
-      "long_selected": 10,
-      "short_selected": 3,
-      "ret_tail_low_cut": -0.04178431756986254,
-      "ret_tail_high_cut": 0.02475160813705233,
+      "long_pool": 3,
+      "short_pool": 2,
+      "long_selected": 3,
+      "short_selected": 2,
+      "ret_tail_low_cut": -0.02250794623055,
+      "ret_tail_high_cut": 0.026525556931576856,
       "bearish_regime": false,
       "gross_exposure_target": 1.0,
       "strategy": "lc_reversal",
       "long_symbols": [
-        "CRWV",
-        "UAL",
-        "APO",
-        "AXP",
-        "GS",
-        "SOFI",
-        "DAL",
-        "AAL",
-        "CFG",
-        "WFC"
+        "ELV",
+        "CCL",
+        "F"
       ],
       "short_symbols": [
-        "DELL",
-        "XYZ",
-        "SATS"
+        "NOC",
+        "VLO"
       ]
     }
   }
