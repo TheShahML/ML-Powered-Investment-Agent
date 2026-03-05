@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-03-04T22:03:27.987214Z",
+  "last_updated_utc": "2026-03-05T15:39:19.728365Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -343,156 +343,145 @@
   },
   "execution": {
     "last_run": {
-      "trade_date": "2026-03-03T00:00:00",
-      "run_timestamp_utc": "2026-03-04T15:14:37.102647+00:00",
+      "trade_date": "2026-03-04T00:00:00",
+      "run_timestamp_utc": "2026-03-05T15:39:19.728307+00:00",
       "status": "success",
       "dry_run": false,
       "smoke_test": false,
       "open_orders_action": "leave",
       "target_portfolio_snapshot": {
         "target_weights": {
-          "ELV": 0.03,
-          "CCL": 0.03,
-          "F": 0.03,
-          "NOC": -0.03,
-          "VLO": -0.03,
-          "MSCI": 0.031735409729593496,
-          "SCHW": 0.02942152685889327,
-          "BP": 0.03019733616390153,
-          "DDOG": 0.03212522016876778,
-          "U": 0.02928854565018248,
-          "ALAB": 0.025860900838022675,
-          "ICE": 0.031206649411833126,
-          "EBAY": 0.03227346196908671,
-          "GIS": 0.028396025572051047,
-          "MDT": 0.028639146176551847,
-          "GPN": -0.07453506463292281,
-          "POOL": 0.09834005787154841,
-          "OMC": -0.0828959039157809,
-          "OXY": -0.07737774998909457,
-          "INSM": -0.07119072891977957,
-          "EXR": -0.0714451892457796,
-          "NVO": 0.02970561412182106,
-          "IBM": 0.031093301150160672,
-          "MDB": 0.02391200034897416,
-          "ZS": 0.03054792626951468,
-          "SNOW": 0.02983851608431604,
-          "NU": 0.02682705712997833,
-          "AXP": 0.028547049714277403,
-          "MELI": 0.029808925983549745,
-          "KEY": 0.028758386285315463,
-          "FSLR": 0.030779521032963515,
-          "LOW": 0.02918492552794459,
-          "NVDA": 0.029726050436460042,
-          "FXI": 0.028783352478443578,
-          "IONQ": -0.017977016173983007,
-          "CRWV": 0.03223085222398325,
-          "UAL": 0.030729992875110867,
-          "APO": 0.030998227017385697,
-          "GS": 0.030434062786267868,
-          "SOFI": 0.030755581405493435,
-          "DAL": 0.030558882119436404,
-          "AAL": 0.031166565367222603,
-          "CFG": 0.02957623631366961,
-          "WFC": 0.029693895133264512
+          "MDB": 0.03,
+          "B": 0.03,
+          "ALB": 0.03,
+          "AZO": 0.03,
+          "PINS": -0.03,
+          "MSCI": 0.03205517006206218,
+          "SCHW": 0.029364778495503653,
+          "BP": 0.03081068526583462,
+          "DDOG": 0.033691606991494455,
+          "U": 0.03058188846344956,
+          "ALAB": 0.027247954481240073,
+          "ICE": 0.031695282982102314,
+          "EBAY": 0.033374055183702095,
+          "GIS": 0.028455280156665593,
+          "MDT": 0.02782789923908066,
+          "GPN": -0.07512738822474888,
+          "POOL": 0.09858652558968811,
+          "OMC": -0.08445620085932247,
+          "OXY": -0.07910735685265835,
+          "INSM": -0.07064566100605033,
+          "EXR": -0.07190736464696655,
+          "NVO": 0.030343641305936336,
+          "IBM": 0.03204370560897904,
+          "ZS": 0.03152074357700289,
+          "SNOW": 0.031171433860423422,
+          "NU": 0.02628813608862128,
+          "AXP": 0.028164172244468474,
+          "MELI": 0.030299948849852393,
+          "KEY": 0.028693245257650598,
+          "FSLR": 0.029791373649392525,
+          "LOW": 0.028897664873975777,
+          "NVDA": 0.029849748877132473,
+          "FXI": 0.028650918510507703,
+          "IONQ": -0.01727657128381999,
+          "CRWV": 0.031067068073539296,
+          "UAL": 0.0282556279776693,
+          "APO": 0.03144522233264158,
+          "GS": 0.02982607634524888,
+          "SOFI": 0.030903430713471486,
+          "DAL": 0.028559407242860897,
+          "AAL": 0.029302878048305225,
+          "CFG": 0.02945908718908017,
+          "WFC": 0.029529947193561903,
+          "ELV": 0.030277686357037766,
+          "CCL": 0.029063638090784202,
+          "F": 0.02915732908543536
         },
         "btc_allocation": 0.0
       },
       "orders_attempted": [
         {
-          "symbol": "VLO",
+          "symbol": "AZO",
+          "side": "buy",
+          "qty": 0.0168,
+          "notional": 61.583400000000005,
+          "limit_price": null
+        },
+        {
+          "symbol": "PINS",
           "side": "sell",
-          "qty": 0.2813,
-          "notional": 61.8957,
+          "qty": 3.0,
+          "notional": 61.583400000000005,
           "limit_price": null
         },
         {
-          "symbol": "NOC",
-          "side": "sell",
-          "qty": 0.083,
-          "notional": 61.8957,
-          "limit_price": null
-        },
-        {
-          "symbol": "F",
+          "symbol": "ALB",
           "side": "buy",
-          "qty": 4.7484,
-          "notional": 61.8957,
+          "qty": 0.3667,
+          "notional": 61.583400000000005,
           "limit_price": null
         },
         {
-          "symbol": "ELV",
+          "symbol": "B",
           "side": "buy",
-          "qty": 0.2143,
-          "notional": 61.8957,
-          "limit_price": null
-        },
-        {
-          "symbol": "CCL",
-          "side": "buy",
-          "qty": 2.181,
-          "notional": 61.8957,
+          "qty": 1.3604,
+          "notional": 61.583400000000005,
           "limit_price": null
         }
       ],
       "order_results": [
         {
-          "symbol": "VLO",
-          "side": "sell",
-          "qty": 0.2813,
-          "notional": 61.8957,
-          "price": 220.0,
-          "status": "skipped_infeasible_short_qty",
-          "error": "fractional short not supported"
-        },
-        {
-          "symbol": "NOC",
-          "side": "sell",
-          "qty": 0.083,
-          "notional": 61.8957,
-          "price": 745.535,
-          "status": "skipped_infeasible_short_qty",
-          "error": "fractional short not supported"
-        },
-        {
-          "symbol": "F",
+          "symbol": "AZO",
           "side": "buy",
-          "qty": 4.7484,
-          "notional": 61.8957,
-          "price": 13.035,
-          "status": "new",
-          "order_id": "db17aa6b-f4db-46c9-91ed-009e6b26ddbb",
-          "alpaca_status": "new",
-          "client_order_id": "rebal-20260303T000000-F-buy-6190",
-          "order_type": "market"
-        },
-        {
-          "symbol": "ELV",
-          "side": "buy",
-          "qty": 0.2143,
-          "notional": 61.8957,
-          "price": 288.87,
+          "qty": 0.0168,
+          "notional": 61.583400000000005,
+          "price": 3675.16,
           "status": "filled",
-          "order_id": "f80f23bd-6ea8-47d5-ba20-4f66eb1ac8da",
+          "order_id": "d9c2d7e8-fb14-4990-a902-6a93a5ec20d1",
           "alpaca_status": "filled",
-          "client_order_id": "rebal-20260303T000000-ELV-buy-6190",
+          "client_order_id": "rebal-20260304T000000-AZO-buy-6158",
           "order_type": "market"
         },
         {
-          "symbol": "CCL",
-          "side": "buy",
-          "qty": 2.181,
-          "notional": 61.8957,
-          "price": 28.38,
+          "symbol": "PINS",
+          "side": "sell",
+          "qty": 3.0,
+          "notional": 61.583400000000005,
+          "price": 19.27,
           "status": "new",
-          "order_id": "92733523-8423-49fa-b12c-9510d40617ee",
+          "order_id": "d27c89e0-0247-4a36-b6f7-c6fa69b754af",
           "alpaca_status": "new",
-          "client_order_id": "rebal-20260303T000000-CCL-buy-6190",
+          "client_order_id": "rebal-20260304T000000-PINS-sell-6158",
+          "order_type": "market"
+        },
+        {
+          "symbol": "ALB",
+          "side": "buy",
+          "qty": 0.3667,
+          "notional": 61.583400000000005,
+          "price": 167.92,
+          "status": "filled",
+          "order_id": "d4bb3f03-9778-45e6-9c10-cd791ae325b6",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260304T000000-ALB-buy-6158",
+          "order_type": "market"
+        },
+        {
+          "symbol": "B",
+          "side": "buy",
+          "qty": 1.3604,
+          "notional": 61.583400000000005,
+          "price": 45.27,
+          "status": "new",
+          "order_id": "ebafe614-00e9-45ad-a52a-2f619602f441",
+          "alpaca_status": "new",
+          "client_order_id": "rebal-20260304T000000-B-buy-6158",
           "order_type": "market"
         }
       ]
     },
-    "last_successful_trade_date": "2026-03-03T00:00:00"
+    "last_successful_trade_date": "2026-03-04T00:00:00"
   },
   "lc_reversal": {
     "open_positions": {
@@ -843,28 +832,52 @@
         "entry_price": 214.92,
         "entry_atr": 6.030357142857143,
         "side": "short"
+      },
+      "B": {
+        "entry_date": "2026-03-04T00:00:00",
+        "entry_price": 46.34,
+        "entry_atr": 2.230714285714286,
+        "side": "long"
+      },
+      "ALB": {
+        "entry_date": "2026-03-04T00:00:00",
+        "entry_price": 164.64,
+        "entry_atr": 11.18785714285714,
+        "side": "long"
+      },
+      "AZO": {
+        "entry_date": "2026-03-04T00:00:00",
+        "entry_price": 3638.15,
+        "entry_atr": 118.70500000000006,
+        "side": "long"
+      },
+      "PINS": {
+        "entry_date": "2026-03-04T00:00:00",
+        "entry_price": 19.09,
+        "entry_atr": 1.2703571428571432,
+        "side": "short"
       }
     },
-    "last_trade_date": "2026-03-03T00:00:00",
+    "last_trade_date": "2026-03-04T00:00:00",
     "last_metadata": {
       "universe_size": 500,
-      "long_pool": 3,
-      "short_pool": 2,
-      "long_selected": 3,
-      "short_selected": 2,
-      "ret_tail_low_cut": -0.02250794623055,
-      "ret_tail_high_cut": 0.026525556931576856,
+      "long_pool": 4,
+      "short_pool": 1,
+      "long_selected": 4,
+      "short_selected": 1,
+      "ret_tail_low_cut": -0.054282396833970646,
+      "ret_tail_high_cut": 0.0146562504118366,
       "bearish_regime": false,
       "gross_exposure_target": 1.0,
       "strategy": "lc_reversal",
       "long_symbols": [
-        "ELV",
-        "CCL",
-        "F"
+        "MDB",
+        "B",
+        "ALB",
+        "AZO"
       ],
       "short_symbols": [
-        "NOC",
-        "VLO"
+        "PINS"
       ]
     }
   }
