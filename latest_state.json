@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-03-06T22:01:54.827858Z",
+  "last_updated_utc": "2026-03-08T21:29:46.964160Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -10,25 +10,25 @@
   "models": {
     "active_model": null,
     "candidate_model": {
-      "version": "multi_strategy_20260227",
+      "version": "multi_strategy_20260306",
       "strategy_type": "pure_momentum",
-      "trained_date": "2026-02-27T00:00:00",
-      "backtest_sharpe": 2.533605486852783,
-      "backtest_cagr": 1.970222954921736,
-      "backtest_maxdd": -0.23269387037661235,
-      "approved_for_next_rebalance": false,
+      "trained_date": "2026-03-06T00:00:00",
+      "backtest_sharpe": 3.203325961729768,
+      "backtest_cagr": 3.2597729405633427,
+      "backtest_maxdd": -0.17345193844554013,
+      "approved_for_next_rebalance": true,
       "promotion_gate": {
         "sharpe_margin_required": 0.2,
         "maxdd_tolerance": 0.05,
-        "best_baseline_sharpe": 1.0757852048125058,
-        "candidate_sharpe": 2.533605486852783,
-        "sharpe_margin_achieved": 1.4578202820402772,
+        "best_baseline_sharpe": 1.281424465050671,
+        "candidate_sharpe": 3.203325961729768,
+        "sharpe_margin_achieved": 1.9219014966790968,
         "sharpe_pass": true,
-        "best_baseline_maxdd": -0.14700786583041686,
-        "candidate_maxdd": -0.23269387037661235,
-        "maxdd_diff": 0.08568600454619549,
-        "maxdd_pass": false,
-        "overall_pass": false
+        "best_baseline_maxdd": -0.13695964660098892,
+        "candidate_maxdd": -0.17345193844554013,
+        "maxdd_diff": 0.03649229184455122,
+        "maxdd_pass": true,
+        "overall_pass": true
       }
     }
   },
@@ -54,17 +54,17 @@
     "best": "pure_momentum",
     "results": {
       "simple": {
-        "sharpe": 1.6964899393422763,
-        "cagr": 0.44063649238046465,
-        "maxdd": -0.1580778662224461
+        "sharpe": 1.474166763783947,
+        "cagr": 0.27962921706214083,
+        "maxdd": -0.09161886130203822
       },
       "pure_momentum": {
-        "sharpe": 2.533605486852783,
-        "cagr": 1.970222954921736,
-        "maxdd": -0.23269387037661235
+        "sharpe": 3.203325961729768,
+        "cagr": 3.2597729405633427,
+        "maxdd": -0.17345193844554013
       }
     },
-    "last_comparison_date": "2026-02-27T00:00:00"
+    "last_comparison_date": "2026-03-06T00:00:00"
   },
   "shadow_portfolios": {
     "ml": {
