@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-03-08T21:29:46.964160Z",
+  "last_updated_utc": "2026-03-09T15:39:50.836369Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -355,86 +355,186 @@
   },
   "execution": {
     "last_run": {
-      "trade_date": "2026-03-05T00:00:00",
-      "run_timestamp_utc": "2026-03-06T15:14:05.374105+00:00",
+      "trade_date": "2026-03-06T00:00:00",
+      "run_timestamp_utc": "2026-03-09T15:39:50.836300+00:00",
       "status": "success",
       "dry_run": false,
       "smoke_test": false,
       "open_orders_action": "leave",
       "target_portfolio_snapshot": {
         "target_weights": {
-          "ROST": -0.03,
-          "MSCI": 0.03173347739494124,
-          "SCHW": 0.029303609838677552,
-          "BP": 0.03188551060545708,
-          "DDOG": 0.034486528082055365,
-          "U": 0.029744713951404097,
-          "ALAB": 0.028311848237402907,
-          "ICE": 0.03196767028480382,
-          "EBAY": 0.03353181189006174,
-          "GIS": 0.028820872834096792,
-          "MDT": 0.02772875921131249,
-          "GPN": -0.07507468631746664,
-          "POOL": 0.09788772057359091,
-          "OMC": -0.08285700059749053,
-          "OXY": -0.07992182832105159,
-          "INSM": -0.07092710615415256,
-          "EXR": -0.07234365664210315,
-          "NVO": 0.030897646634136623,
-          "IBM": 0.032974276538538135,
-          "MDB": 0.025988672575184227,
-          "ZS": 0.03232577972515435,
-          "SNOW": 0.032593618801035645,
-          "NU": 0.026197304321848237,
-          "AXP": 0.02810299591714798,
-          "MELI": 0.030368595399322844,
-          "KEY": 0.028062186815375426,
-          "FSLR": 0.02990942043417646,
-          "LOW": 0.029036022704640507,
-          "NVDA": 0.03052442367058355,
-          "FXI": 0.029601565923122884,
-          "IONQ": -0.018323043218482372,
-          "CRWV": 0.03118623605855407,
-          "UAL": 0.02781749253136825,
-          "APO": 0.031188726100378407,
-          "GS": 0.029153288189603666,
-          "SOFI": 0.03092255750846445,
-          "DAL": 0.028604889464250143,
-          "AAL": 0.028413179645488947,
-          "CFG": 0.028931940848436567,
-          "WFC": 0.029128018323043216,
-          "ELV": 0.03026864792869946,
-          "CCL": 0.0277240240987851,
-          "F": 0.02857220374427405,
-          "B": 0.030467432782314275,
-          "ALB": 0.02956386377215694,
-          "AZO": 0.030829053973312086,
-          "PINS": -0.029060446126269665
+          "UPS": 0.03,
+          "PM": 0.03,
+          "PCG": 0.03,
+          "CSX": 0.03,
+          "TTD": -0.03,
+          "EXPE": -0.03,
+          "MSCI": 0.031982487261369666,
+          "SCHW": 0.029298707116614777,
+          "BP": 0.03295499834823261,
+          "DDOG": 0.035617631866096726,
+          "U": 0.030073958635740243,
+          "ALAB": 0.02676296437187791,
+          "ICE": 0.03235144404512828,
+          "EBAY": 0.0340628047010301,
+          "GIS": 0.02938485879891484,
+          "MDT": 0.02790585426406255,
+          "GPN": -0.07377894346951239,
+          "POOL": 0.09601611824652379,
+          "OMC": -0.08382969777662098,
+          "OXY": -0.08336920504940287,
+          "INSM": -0.07145645841049923,
+          "EXR": -0.07191194578198672,
+          "NVO": 0.03184413447388706,
+          "IBM": 0.03270348522919523,
+          "MDB": 0.026109186829908003,
+          "ZS": 0.03290944210305027,
+          "SNOW": 0.03281508814431442,
+          "NU": 0.02672789835123582,
+          "AXP": 0.02803213088004165,
+          "MELI": 0.030881851581191874,
+          "KEY": 0.02761770244161253,
+          "FSLR": 0.030403123341975914,
+          "LOW": 0.028719734616039164,
+          "NVDA": 0.030173431822049596,
+          "FXI": 0.03002305717117316,
+          "IONQ": -0.01716837015606699,
+          "CRWV": 0.030344811698517413,
+          "UAL": 0.027129402460632876,
+          "APO": 0.03112297608441032,
+          "GS": 0.029050490024326033,
+          "SOFI": 0.03039341795721422,
+          "DAL": 0.028043046059283434,
+          "AAL": 0.02708109076712082,
+          "CFG": 0.028611862192546026,
+          "WFC": 0.02857808480073679,
+          "ELV": 0.030183770884846785,
+          "CCL": 0.02697511837666303,
+          "F": 0.028509033666022643,
+          "B": 0.030291108486080107,
+          "ALB": 0.029639071806833315,
+          "AZO": 0.030989174416625787,
+          "PINS": -0.029521588099266218
         },
         "btc_allocation": 0.0
       },
       "orders_attempted": [
         {
-          "symbol": "ROST",
+          "symbol": "EXPE",
           "side": "sell",
-          "qty": 0.2857,
-          "notional": 60.252,
+          "qty": 0.2547,
+          "notional": 59.93579999999999,
+          "limit_price": null
+        },
+        {
+          "symbol": "PM",
+          "side": "buy",
+          "qty": 0.3498,
+          "notional": 59.93579999999999,
+          "limit_price": null
+        },
+        {
+          "symbol": "UPS",
+          "side": "buy",
+          "qty": 0.6158,
+          "notional": 59.93579999999999,
+          "limit_price": null
+        },
+        {
+          "symbol": "TTD",
+          "side": "sell",
+          "qty": 2.0,
+          "notional": 59.93579999999999,
+          "limit_price": null
+        },
+        {
+          "symbol": "CSX",
+          "side": "buy",
+          "qty": 1.4997,
+          "notional": 59.93579999999999,
+          "limit_price": null
+        },
+        {
+          "symbol": "PCG",
+          "side": "buy",
+          "qty": 3.2986,
+          "notional": 59.93579999999999,
           "limit_price": null
         }
       ],
       "order_results": [
         {
-          "symbol": "ROST",
+          "symbol": "EXPE",
           "side": "sell",
-          "qty": 0.2857,
-          "notional": 60.252,
-          "price": 210.86,
+          "qty": 0.2547,
+          "notional": 59.93579999999999,
+          "price": 235.3,
           "status": "skipped_infeasible_short_qty",
           "error": "fractional short not supported"
+        },
+        {
+          "symbol": "PM",
+          "side": "buy",
+          "qty": 0.3498,
+          "notional": 59.93579999999999,
+          "price": 171.34,
+          "status": "filled",
+          "order_id": "93936b2c-10ed-4c61-a34a-9359d8f01a4e",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260306T000000-PM-buy-5994",
+          "order_type": "market"
+        },
+        {
+          "symbol": "UPS",
+          "side": "buy",
+          "qty": 0.6158,
+          "notional": 59.93579999999999,
+          "price": 97.325,
+          "status": "filled",
+          "order_id": "535c0089-ed46-437a-8184-2e6465fd9add",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260306T000000-UPS-buy-5994",
+          "order_type": "market"
+        },
+        {
+          "symbol": "TTD",
+          "side": "sell",
+          "qty": 2.0,
+          "notional": 59.93579999999999,
+          "price": 28.42,
+          "status": "new",
+          "order_id": "ad353e46-a0bf-48a6-b725-9f7fd7134499",
+          "alpaca_status": "new",
+          "client_order_id": "rebal-20260306T000000-TTD-sell-5994",
+          "order_type": "market"
+        },
+        {
+          "symbol": "CSX",
+          "side": "buy",
+          "qty": 1.4997,
+          "notional": 59.93579999999999,
+          "price": 39.965,
+          "status": "filled",
+          "order_id": "d7940005-dc15-4440-996b-a15a9c2675dc",
+          "alpaca_status": "filled",
+          "client_order_id": "rebal-20260306T000000-CSX-buy-5994",
+          "order_type": "market"
+        },
+        {
+          "symbol": "PCG",
+          "side": "buy",
+          "qty": 3.2986,
+          "notional": 59.93579999999999,
+          "price": 18.17,
+          "status": "partially_filled",
+          "order_id": "e92b5a09-a912-45a6-a8a5-e37e3bd236b0",
+          "alpaca_status": "partially_filled",
+          "client_order_id": "rebal-20260306T000000-PCG-buy-5994",
+          "order_type": "market"
         }
       ]
     },
-    "last_successful_trade_date": "2026-03-05T00:00:00"
+    "last_successful_trade_date": "2026-03-06T00:00:00"
   },
   "lc_reversal": {
     "open_positions": {
@@ -815,23 +915,65 @@
         "entry_price": 213.48,
         "entry_atr": 5.096785714285717,
         "side": "short"
+      },
+      "UPS": {
+        "entry_date": "2026-03-06T00:00:00",
+        "entry_price": 104.09,
+        "entry_atr": 3.0171428571428587,
+        "side": "long"
+      },
+      "PM": {
+        "entry_date": "2026-03-06T00:00:00",
+        "entry_price": 169.66,
+        "entry_atr": 4.428214285714288,
+        "side": "long"
+      },
+      "PCG": {
+        "entry_date": "2026-03-06T00:00:00",
+        "entry_price": 18.11,
+        "entry_atr": 0.4053571428571429,
+        "side": "long"
+      },
+      "CSX": {
+        "entry_date": "2026-03-06T00:00:00",
+        "entry_price": 41.15,
+        "entry_atr": 0.8467857142857161,
+        "side": "long"
+      },
+      "TTD": {
+        "entry_date": "2026-03-06T00:00:00",
+        "entry_price": 29.8,
+        "entry_atr": 1.8685714285714279,
+        "side": "short"
+      },
+      "EXPE": {
+        "entry_date": "2026-03-06T00:00:00",
+        "entry_price": 251.56,
+        "entry_atr": 13.607142857142856,
+        "side": "short"
       }
     },
-    "last_trade_date": "2026-03-05T00:00:00",
+    "last_trade_date": "2026-03-06T00:00:00",
     "last_metadata": {
       "universe_size": 500,
-      "long_pool": 0,
-      "short_pool": 1,
-      "long_selected": 0,
-      "short_selected": 1,
-      "ret_tail_low_cut": -0.012320381649370259,
-      "ret_tail_high_cut": 0.03634506576946355,
+      "long_pool": 4,
+      "short_pool": 2,
+      "long_selected": 4,
+      "short_selected": 2,
+      "ret_tail_low_cut": -0.03672112661736352,
+      "ret_tail_high_cut": 0.021825626693294443,
       "bearish_regime": false,
       "gross_exposure_target": 1.0,
       "strategy": "lc_reversal",
-      "long_symbols": [],
+      "long_symbols": [
+        "UPS",
+        "PM",
+        "PCG",
+        "CSX"
+      ],
       "short_symbols": [
-        "ROST"
+        "TTD",
+        "EXPE"
       ]
     }
   }
