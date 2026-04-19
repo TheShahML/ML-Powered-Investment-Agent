@@ -1,6 +1,6 @@
 {
   "as_of_date": "2026-01-27",
-  "last_updated_utc": "2026-04-17T22:09:50.842191Z",
+  "last_updated_utc": "2026-04-19T21:38:47.326037Z",
   "rebalance": {
     "last_rebalance_date": "2026-01-28T00:00:00",
     "next_rebalance_date": "2026-02-17T00:00:00",
@@ -10,23 +10,23 @@
   "models": {
     "active_model": null,
     "candidate_model": {
-      "version": "multi_strategy_20260410",
+      "version": "multi_strategy_20260417",
       "strategy_type": "pure_momentum",
-      "trained_date": "2026-04-10T00:00:00",
-      "backtest_sharpe": 2.07542548151938,
-      "backtest_cagr": 0.7957633519487219,
-      "backtest_maxdd": -0.11100013931801968,
+      "trained_date": "2026-04-17T00:00:00",
+      "backtest_sharpe": 2.3138596977758534,
+      "backtest_cagr": 0.9451383102243234,
+      "backtest_maxdd": -0.11614707884149286,
       "approved_for_next_rebalance": false,
       "promotion_gate": {
         "sharpe_margin_required": 0.2,
         "maxdd_tolerance": 0.05,
-        "best_baseline_sharpe": 2.025399183298245,
-        "candidate_sharpe": 2.07542548151938,
-        "sharpe_margin_achieved": 0.0500262982211348,
+        "best_baseline_sharpe": 2.624618931615334,
+        "candidate_sharpe": 2.3138596977758534,
+        "sharpe_margin_achieved": -0.3107592338394807,
         "sharpe_pass": false,
         "best_baseline_maxdd": -0.08879629763123376,
-        "candidate_maxdd": -0.11100013931801968,
-        "maxdd_diff": 0.022203841686785922,
+        "candidate_maxdd": -0.11614707884149286,
+        "maxdd_diff": 0.027350781210259106,
         "maxdd_pass": true,
         "overall_pass": false
       }
@@ -54,17 +54,17 @@
     "best": "pure_momentum",
     "results": {
       "simple": {
-        "sharpe": 1.0267117933592909,
-        "cagr": 0.17230672693748406,
-        "maxdd": -0.08023857306037295
+        "sharpe": 1.1002267376319474,
+        "cagr": 0.1640353593576449,
+        "maxdd": -0.1069718686207868
       },
       "pure_momentum": {
-        "sharpe": 2.07542548151938,
-        "cagr": 0.7957633519487219,
-        "maxdd": -0.11100013931801968
+        "sharpe": 2.3138596977758534,
+        "cagr": 0.9451383102243234,
+        "maxdd": -0.11614707884149286
       }
     },
-    "last_comparison_date": "2026-04-10T00:00:00"
+    "last_comparison_date": "2026-04-17T00:00:00"
   },
   "shadow_portfolios": {
     "ml": {
