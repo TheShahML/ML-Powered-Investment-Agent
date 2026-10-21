@@ -1,0 +1,15 @@
+{
+  "run_timestamp_utc": "2026-10-21T00:05:52.277317+00:00",
+  "status": "success",
+  "as_of_date": "2026-10-20 00:00:00",
+  "strategy_name": "lc_reversal",
+  "universe_size": 498,
+  "signals_count": {
+    "1d": 5,
+    "5d": 5,
+    "20d": 5
+  },
+  "canary_count": 496,
+  "data_fresh": true,
+  "dashboard_path": "reports/dashboard_20261020.png"
+}
