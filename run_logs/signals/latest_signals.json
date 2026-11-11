@@ -1,15 +1,15 @@
 {
-  "run_timestamp_utc": "2026-11-10T03:49:58.850145+00:00",
+  "run_timestamp_utc": "2026-11-11T01:30:14.718553+00:00",
   "status": "success",
-  "as_of_date": "2026-11-09 00:00:00",
+  "as_of_date": "2026-11-10 00:00:00",
   "strategy_name": "lc_reversal",
-  "universe_size": 1332,
+  "universe_size": 1340,
   "signals_count": {
-    "1d": 10,
-    "5d": 10,
-    "20d": 10
+    "1d": 2,
+    "5d": 2,
+    "20d": 2
   },
-  "canary_count": 1315,
+  "canary_count": 1322,
   "data_fresh": true,
-  "dashboard_path": "reports/dashboard_20261109.png"
+  "dashboard_path": "reports/dashboard_20261110.png"
 }
