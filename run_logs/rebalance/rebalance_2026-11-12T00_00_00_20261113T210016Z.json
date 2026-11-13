@@ -1,0 +1,259 @@
+{
+  "run_timestamp_utc": "2026-11-13T21:00:16.342979+00:00",
+  "broker_mode": "paper",
+  "dry_run": false,
+  "smoke_test": false,
+  "strategy_name": "lc_reversal",
+  "universe_size": 507,
+  "portfolio": {
+    "cash": -590.2,
+    "equity": 2003.57,
+    "gross_exposure": 7617.67,
+    "net_exposure": 2593.77
+  },
+  "positions_top10": [
+    {
+      "symbol": "CBOE",
+      "qty": 1.0121,
+      "notional": 379.780404
+    },
+    {
+      "symbol": "BAX",
+      "qty": -11.0,
+      "notional": 283.525
+    },
+    {
+      "symbol": "VZ",
+      "qty": 5.2917,
+      "notional": 245.455505
+    },
+    {
+      "symbol": "DHR",
+      "qty": -1.0,
+      "notional": 233.16
+    },
+    {
+      "symbol": "TMUS",
+      "qty": 1.3419,
+      "notional": 228.055905
+    },
+    {
+      "symbol": "NEM",
+      "qty": 1.8714,
+      "notional": 211.74891
+    },
+    {
+      "symbol": "POOL",
+      "qty": 0.9246,
+      "notional": 199.732092
+    },
+    {
+      "symbol": "GPN",
+      "qty": -2.0,
+      "notional": 184.06
+    },
+    {
+      "symbol": "OMC",
+      "qty": -2.0,
+      "notional": 175.96
+    },
+    {
+      "symbol": "EPAM",
+      "qty": -1.0,
+      "notional": 163.67
+    }
+  ],
+  "target_trades": [
+    {
+      "symbol": "ZM",
+      "side": "sell",
+      "qty": 0.6024,
+      "notional": 60.107099999999996,
+      "limit_price": null
+    }
+  ],
+  "execution_results": [
+    {
+      "symbol": "ZM",
+      "side": "sell",
+      "qty": 0.6024,
+      "notional": 60.107099999999996,
+      "price": 99.78,
+      "status": "skipped_infeasible_short_qty",
+      "error": "fractional short not supported"
+    }
+  ],
+  "target_diff": {
+    "added_symbols": [
+      "ZM"
+    ],
+    "removed_symbols": [],
+    "increased_symbols": [
+      "AAL",
+      "ADBE",
+      "APO",
+      "AXP",
+      "AZO",
+      "BAX",
+      "BLK",
+      "BP",
+      "CBOE",
+      "CCL",
+      "CFG",
+      "CL",
+      "CPRT",
+      "CRH",
+      "CSX",
+      "CTSH",
+      "DAL",
+      "DHR",
+      "EBAY",
+      "ELV",
+      "EPAM",
+      "EXR",
+      "F",
+      "FXI",
+      "GIS",
+      "GPN",
+      "GS",
+      "IBM",
+      "ICE",
+      "INSM",
+      "KEY",
+      "KIM",
+      "KMB",
+      "KR",
+      "KVUE",
+      "LOW",
+      "MCD",
+      "MDT",
+      "META",
+      "MPWR",
+      "MRK",
+      "MSCI",
+      "NEM",
+      "NU",
+      "NVO",
+      "OMC",
+      "OXY",
+      "PM",
+      "POOL",
+      "SCHW",
+      "SYY",
+      "TMUS",
+      "TTD",
+      "U",
+      "UAL",
+      "ULTA",
+      "UPS",
+      "VZ",
+      "WFC",
+      "ZM",
+      "ZS"
+    ],
+    "decreased_symbols": [
+      "ALAB",
+      "ALB",
+      "B",
+      "BX",
+      "CRWV",
+      "DDOG",
+      "FCX",
+      "FICO",
+      "FSLR",
+      "IONQ",
+      "KLAC",
+      "KO",
+      "LRCX",
+      "MDB",
+      "MELI",
+      "NFLX",
+      "NVDA",
+      "ORCL",
+      "PCG",
+      "PINS",
+      "SNOW",
+      "SOFI",
+      "TER"
+    ],
+    "changed_weights_top": [
+      {
+        "symbol": "NVDA",
+        "prev_weight": 0.08506621473650255,
+        "new_weight": 0.025130206581252465,
+        "delta_weight": -0.05993600815525009,
+        "abs_delta_weight": 0.05993600815525009
+      },
+      {
+        "symbol": "CBOE",
+        "prev_weight": 0.13300567611270736,
+        "new_weight": 0.18983473499802855,
+        "delta_weight": 0.05682905888532119,
+        "abs_delta_weight": 0.05682905888532119
+      },
+      {
+        "symbol": "EPAM",
+        "prev_weight": -0.04573060746374443,
+        "new_weight": -0.08137474607825032,
+        "delta_weight": -0.03564413861450589,
+        "abs_delta_weight": 0.03564413861450589
+      },
+      {
+        "symbol": "DDOG",
+        "prev_weight": 0.054802703729325726,
+        "new_weight": 0.024738393966769318,
+        "delta_weight": -0.030064309762556408,
+        "abs_delta_weight": 0.030064309762556408
+      },
+      {
+        "symbol": "ZM",
+        "prev_weight": 0.0,
+        "new_weight": -0.03,
+        "delta_weight": -0.03,
+        "abs_delta_weight": 0.03
+      },
+      {
+        "symbol": "POOL",
+        "prev_weight": 0.07388355268463069,
+        "new_weight": 0.09980577918415628,
+        "delta_weight": 0.025922226499525594,
+        "abs_delta_weight": 0.025922226499525594
+      },
+      {
+        "symbol": "DHR",
+        "prev_weight": -0.09172435160152619,
+        "new_weight": -0.11628742694290692,
+        "delta_weight": -0.024563075341380733,
+        "abs_delta_weight": 0.024563075341380733
+      },
+      {
+        "symbol": "TER",
+        "prev_weight": 0.051977965698861296,
+        "new_weight": 0.027904424602085278,
+        "delta_weight": -0.024073541096776018,
+        "abs_delta_weight": 0.024073541096776018
+      },
+      {
+        "symbol": "U",
+        "prev_weight": 0.05641322643759628,
+        "new_weight": 0.07892273990926198,
+        "delta_weight": 0.022509513471665694,
+        "abs_delta_weight": 0.022509513471665694
+      },
+      {
+        "symbol": "SNOW",
+        "prev_weight": 0.04905725259847466,
+        "new_weight": 0.028522152956971806,
+        "delta_weight": -0.020535099641502855,
+        "abs_delta_weight": 0.020535099641502855
+      }
+    ],
+    "num_added": 1,
+    "num_removed": 0,
+    "num_increased": 61,
+    "num_decreased": 23
+  },
+  "status": "success",
+  "errors": [],
+  "stack_snippet": null
+}
